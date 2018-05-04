@@ -1,0 +1,21 @@
+# use a whitelist
+*
+!.gitignore
+
+
+# thesis whitelist
+!*.tex
+
+!thesis
+thesis/*
+!sections
+sections/*
+
+
+# code whitelist
+!*.cc
+!*.h
+!CMakeLists.txt
+
+!code
+code/*
