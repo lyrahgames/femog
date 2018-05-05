@@ -1,43 +1,38 @@
-\documentclass[crop=false,9pt]{standalone}
+\documentclass[crop=false,10pt]{standalone}
 \usepackage{standard}
+
 \begin{document}
-  \newcommand{\vrulefill}{\par\leaders\hbox{$\cdot$}\vfill}
 
   \begin{titlepage}
-    \newgeometry{left=40mm,right=45mm,top=0cm,bottom=0cm}
-    \thispagestyle{empty}
-    \noindent
+    \newgeometry{top=0mm,bottom=0mm,right=20mm,left=50mm}
 
-    \begin{minipage}{\textwidth}
-      \rule{1.5pt}{0.3\textheight}% Vertical line
+    \hbox{
+      % \hspace*{0.2\textwidth}
+      \rule{1pt}{\textheight}
+      \hspace*{0.1\textwidth}
+      \parbox[b]{0.75\textwidth}{
+        {Friedrich-Schiller-Universität Jena}\\
+        {Fakultät für Mathematik und Informatik}\\[2\baselineskip]
+        {\noindent\LARGE\bfseries Implementierung einer Finite-Elemente-Methode auf der Grafikkarte}\\[2\baselineskip]
+        {\large \textit{Bachelorarbeit zur Erlangung des akademischen Grades \\Bachelor of Science (B.Sc.)}}\\[4\baselineskip]
+        % {\large \textit{durchgeführt im Zeitraum vom 26.November 2011 bis zum 30.Juni 2017}}\\[4\baselineskip]
+        {\large \textrm{vorgelegt von Markus Pawellek}}\\[2\baselineskip]
+        {geboren am 7.Mai 1995 in Meiningen}\\
+        {Matrikelnummer: 144645}\\[4\baselineskip]
+        \noindent
+        \begin{tabular}{ll}
+          \large Erstgutachter: & \large Gerhard Zumbusch \\
+          \\
+          \large Zweitgutachter: & \large
+        \end{tabular}
 
-      \vspace{5mm}
-      \noindent
-      {\Large Friedrich-Schiller-Universität Jena \\ Fakultät für Mathematik und Informatik \\ Numerische Mathematik \\[2\baselineskip]}
-      {\LARGE\bfseries Implementierung einer Finite-Elemente-Methode auf der Grafikkarte}\\[2\baselineskip]
-      {\large Bachelorarbeit zur Erlangung des akademischen Grades Bachelor of Science (B.Sc.)\\}
-      {\large \textit{betreut durch Prof. Dr. Gerhard Zumbusch\footnote{Friedrich-Schiller-Universität Jena}}}\\[4\baselineskip]
-      {\Large vorgelegt von Markus Pawellek}\footnote{E-Mail: markuspawellek@gmail.com} \\[\baselineskip]
-      {\large geboren am 7.Mai 1995 in Meiningen}\\
-      {\large Matrikelnummer: 144645}
-
-      \vspace{0.1\textheight} % Whitespace between the title block and the publisher
-      \noindent
-      \begin{tabular}{ll}
-        \Large Erstgutachter: & \Large Gerhard Zumbusch \\
-        \Large Zweitgutachter: & \Large
-      \end{tabular}
-      \\[\baselineskip] % Publisher and logo
-      \hspace{\textwidth} Jena, \today
-      % \makebox[0pt][l]{\rule{1.5pt}{0.35\textheight}}% Vertical line
-      \vspace{5mm} \\
-      \rule{1.5pt}{0.15\textheight}
-      % \vrulefill
-      % \leaders\vbox{\vrule\vfill}
-      % \clearpage
-    \end{minipage}
-
-    \setcounter{page}{1}
+        \vspace{0.1\textheight}
+        {Jena, \today}
+        \vspace{0.2\textheight}
+        % {\noindent The Publisher}\\[\baselineskip]
+      }
+    }
+    \restoregeometry
   \end{titlepage}
 
 \end{document}
