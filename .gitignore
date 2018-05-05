@@ -4,18 +4,19 @@
 
 
 # thesis whitelist
-!*.tex
-
 !thesis
 thesis/*
 !sections
 sections/*
 
+!*.tex
+!*.bib
+
 
 # code whitelist
+!code
+code/*
+
 !*.cc
 !*.h
 !CMakeLists.txt
-
-!code
-code/*

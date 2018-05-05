@@ -16,5 +16,17 @@
   \import{sections/}{conclusion.tex}
 
   \cleardoublepage
+  \nocite{*}
+  \phantomsection
+  \addcontentsline{toc}{section}{Literatur}
+  \bibliographystyle{babplain}
+  \bibliography{references}
+
+  \appendix
+  \cleardoublepage
+  % \pagestyle{contentstyle}
+  \pagenumbering{roman}
+
+  \cleardoublepage
   \import{sections/}{statutory_declaration.tex}
 \end{document}
