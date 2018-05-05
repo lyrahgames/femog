@@ -1,0 +1,43 @@
+\documentclass[crop=false,9pt]{standalone}
+\usepackage{standard}
+\begin{document}
+  \newcommand{\vrulefill}{\par\leaders\hbox{$\cdot$}\vfill}
+
+  \begin{titlepage}
+    \newgeometry{left=40mm,right=45mm,top=0cm,bottom=0cm}
+    \thispagestyle{empty}
+    \noindent
+
+    \begin{minipage}{\textwidth}
+      \rule{1.5pt}{0.3\textheight}% Vertical line
+
+      \vspace{5mm}
+      \noindent
+      {\Large Friedrich-Schiller-Universität Jena \\ Fakultät für Mathematik und Informatik \\ Numerische Mathematik \\[2\baselineskip]}
+      {\LARGE\bfseries Implementierung einer Finite-Elemente-Methode auf der Grafikkarte}\\[2\baselineskip]
+      {\large Bachelorarbeit zur Erlangung des akademischen Grades Bachelor of Science (B.Sc.)\\}
+      {\large \textit{betreut durch Prof. Dr. Gerhard Zumbusch\footnote{Friedrich-Schiller-Universität Jena}}}\\[4\baselineskip]
+      {\Large vorgelegt von Markus Pawellek}\footnote{E-Mail: markuspawellek@gmail.com} \\[\baselineskip]
+      {\large geboren am 7.Mai 1995 in Meiningen}\\
+      {\large Matrikelnummer: 144645}
+
+      \vspace{0.1\textheight} % Whitespace between the title block and the publisher
+      \noindent
+      \begin{tabular}{ll}
+        \Large Erstgutachter: & \Large Gerhard Zumbusch \\
+        \Large Zweitgutachter: & \Large
+      \end{tabular}
+      \\[\baselineskip] % Publisher and logo
+      \hspace{\textwidth} Jena, \today
+      % \makebox[0pt][l]{\rule{1.5pt}{0.35\textheight}}% Vertical line
+      \vspace{5mm} \\
+      \rule{1.5pt}{0.15\textheight}
+      % \vrulefill
+      % \leaders\vbox{\vrule\vfill}
+      % \clearpage
+    \end{minipage}
+
+    \setcounter{page}{1}
+  \end{titlepage}
+
+\end{document}
