@@ -1,4 +1,4 @@
-\documentclass[crop=false,9pt]{standalone}
+\documentclass[crop=false,10pt,ngerman]{standalone}
 \usepackage{standard}
 \usepackage{tabularx}
 
@@ -14,22 +14,21 @@
 			\hline
 			\hline \\
 
-			$\exists!\ldots :\ldots$ & Es existiert genau ein $\ldots$, sodass $\ldots$ gilt. \\
-
 			$x\in A$ & $x$ ist ein Element der Menge $A$. \\
 
 			$A\subset B$ & $A$ ist eine Teilmenge von $B$. \\
 
-			$A\cap B$ & $\set[x\in B]{x\in A}$ für Mengen $A,B$ --- Mengenschnitt \\
+			$A\cap B$ & $\set{x}{x\in A \text{ und } x\in B}$ für Mengen $A,B$ --- Mengenschnitt \\
 
-			$A\cup B$ & $\set[x\in A \text{ oder } x\in B]{x}$ für Mengen $A,B$ --- Mengenvereinigung \\
+			$A\cup B$ & $\set{x}{x\in A \text{ oder } x\in B}$ für Mengen $A,B$ --- Mengenvereinigung \\
 
-			$A\setminus B$ & $\set[x\not\in B]{x\in A}$ für Mengen $A,B$ --- Differenzmenge \\
+			$A\setminus B$ & $\set{x\in A}{x\not\in B}$ für Mengen $A,B$ --- Differenzmenge \\
 
-			$A\times B$ & $\set[x\in A,y\in B]{(x,y)}$ für Mengen $A$ und $B$ --- kartesisches Produkt \\
+			$A\times B$ & $\set{(x,y)}{x\in A,y\in B}$ für Mengen $A$ und $B$ --- kartesisches Produkt \\
 
-			$\emptyset$ & leere Menge \\
-
+			$\emptyset$ & $\set{}{}$ --- leere Menge \\
+			\\
+			\hline
 		\end{tabularx}
 	\end{table}
 

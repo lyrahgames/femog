@@ -1,29 +1,40 @@
-\documentclass[9pt,fleqn,a4paper]{article}
+\documentclass[10pt,fleqn,twoside,ngerman]{article}
 \usepackage{standard}
 
-\title{Bachelorarbeit: FEM auf der GPU}
-\author{Markus Pawellek}
+\geometry{a4paper, lmargin=45mm, rmargin=35mm, tmargin=40mm, bmargin=35mm}
+\pagestyle{mainstyle}
+
+\let\stdsection\section
+\renewcommand*\section{\cleardoublepage\thispagestyle{sectionstyle}\stdsection}
+% \renewcommand*\section{\thispagestyle{sectionstyle}\stdsection}
 
 \begin{document}
   \import{sections/}{titlepage.tex}
+  % \cleardoublepage
+
+  \pagenumbering{roman}
+  \setcounter{page}{0}
   \import{sections/}{symbol_table.tex}
-  \cleardoublepage
+  % \cleardoublepage
   \tableofcontents
 
   \cleardoublepage
+  \pagenumbering{arabic}
+  % \setcounter{page}{0}
   \import{sections/}{introduction.tex}
   \import{sections/}{background.tex}
   \import{sections/}{conclusion.tex}
 
-  \cleardoublepage
+  % \cleardoublepage
   \nocite{*}
   \phantomsection
   \addcontentsline{toc}{section}{Literatur}
   \bibliographystyle{babplain}
   \bibliography{references}
 
-  \appendix
   \cleardoublepage
+  \appendix
+  % \cleardoublepage
   % \pagestyle{contentstyle}
   \pagenumbering{roman}
 
