@@ -16,6 +16,8 @@ sections/*
 # code whitelist
 !code
 code/*
+!code/tests
+code/tests/*
 
 !*.cc
 !*.h
