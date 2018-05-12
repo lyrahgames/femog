@@ -15,9 +15,9 @@ target_link_libraries(viewer PRIVATE
   OpenGL::GLU
 )
 
-add_library(femog INTERFACE)
-target_include_directories(femog INTERFACE .)
-target_link_libraries(femog INTERFACE Eigen3::Eigen)
+add_library(femog camera.cc)
+target_include_directories(femog PUBLIC .)
+target_link_libraries(femog PUBLIC Eigen3::Eigen)
 add_library(femog::femog ALIAS femog)
 
 add_subdirectory(tests)

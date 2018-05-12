@@ -1,5 +1,5 @@
-#ifndef ISOMETRY_H_
-#define ISOMETRY_H_
+#ifndef FEMOG_ISOMETRY_H_
+#define FEMOG_ISOMETRY_H_
 
 #include <Eigen/Geometry>
 
@@ -25,8 +25,8 @@ class Isometry : public Isometry_base {
   Isometry() : Isometry_base{Isometry_base::Identity()} {}
 
   template <class System = Positive_zy_construction>
-  Isometry(const Eigen::Vector3f& v0, const Eigen::Vector3f& v1,
-           System s = Positive_zy_construction{}) {
+  Isometry(const Eigen::Vector3f& origin, const Eigen::Vector3f& v0,
+           const Eigen::Vector3f& v1, System s = Positive_zy_construction{}) {
     // use Gram-Schmidt process to orthonormalize given vectors
     matrix().col(System::i) = v0;
     matrix().col(System::i).normalize();
@@ -40,9 +40,16 @@ class Isometry : public Isometry_base {
         signum(Permutation<System::i + 1, System::j + 1, System::k + 1>{}) *
         matrix().col(System::i).cross(matrix().col(System::j));
     matrix().col(System::k).normalize();
+
+    matrix().col(3) = origin;
   }
+
+  Eigen::Vector3f origin() const { return matrix().col(3); }
+  Eigen::Vector3f basis_x() const { return matrix().col(0); }
+  Eigen::Vector3f basis_z() const { return matrix().col(2); }
+  Eigen::Vector3f basis_y() const { return matrix().col(1); }
 };
 
 }  // namespace Femog
 
-#endif  // ISOMETRY_H_
+#endif  // FEMOG_ISOMETRY_H_
