@@ -8,16 +8,19 @@ find_package(OpenGL REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Eigen3 REQUIRED)
 
-add_executable(viewer viewer.cc)
-target_link_libraries(viewer PRIVATE
-  Qt5::Widgets
+add_library(femog
+  camera.cc
+  viewer.cc
+)
+target_include_directories(femog PUBLIC .)
+target_link_libraries(femog PUBLIC
   Eigen3::Eigen
+  Qt5::Widgets
   OpenGL::GLU
 )
-
-add_library(femog camera.cc)
-target_include_directories(femog PUBLIC .)
-target_link_libraries(femog PUBLIC Eigen3::Eigen)
 add_library(femog::femog ALIAS femog)
 
 add_subdirectory(tests)
+
+add_executable(viewer main.cc)
+target_link_libraries(viewer PRIVATE femog::femog)
