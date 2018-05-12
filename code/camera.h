@@ -9,6 +9,11 @@ class Camera {
   using Vector3f = Eigen::Vector3f;
 
  public:
+  Camera()
+      : vertical_field_of_view_{M_PI / 4.0f},
+        screen_width_{640},
+        screen_height_{360} {}
+
   Vector3f position() const { return frame_.origin(); }
   Vector3f direction() const { return -frame_.basis_z(); }
   Vector3f right() const { return frame_.basis_x(); }

@@ -1,5 +1,6 @@
 #include "camera.h"
 #include <cmath>
+#include <stdexcept>
 
 namespace Femog {
 
@@ -35,23 +36,26 @@ Camera& Camera::look_at(const Eigen::Vector3f& eye,
 }
 
 Camera& Camera::screen_resolution(int width, int height) {
+  if (width <= 0 || height <= 0)
+    throw std::invalid_argument(
+        "Width and height of the camera screen have to be bigger than zero.");
   screen_height_ = height;
   screen_width_ = width;
   return *this;
 }
 
 Camera& Camera::field_of_view(float fov) {
-  if (fov > 0.0f || fov < static_cast<float>(M_PI))
-    vertical_field_of_view_ = fov;
+  if (fov <= 0.0f || fov >= static_cast<float>(M_PI))
+    throw std::invalid_argument(
+        "Camera field of view has to be in the range (0,π/2)!");
+  vertical_field_of_view_ = fov;
   return *this;
 }
 
 Camera& Camera::vertical_field_of_view(float fov) { return field_of_view(fov); }
 
 Camera& Camera::horizontal_field_of_view(float fov) {
-  if (fov > 0.0f || fov < static_cast<float>(M_PI))
-    field_of_view(2.0 * std::atan(std::tan(fov * 0.5f) / aspect_ratio()));
-  return *this;
+  return field_of_view(2.0 * std::atan(std::tan(fov * 0.5f) / aspect_ratio()));
 }
 
 }  // namespace Femog

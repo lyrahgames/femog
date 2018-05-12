@@ -61,4 +61,13 @@ TEST_CASE("The isometry") {
     Eigen::Vector3f v(2, 1, 6);
     REQUIRE(isometry * v == Eigen::Vector3f{3, 8, 4});
   }
+
+  SUBCASE("throws an exception if given vectors are linear dependent.") {
+    CHECK_THROWS_AS((Isometry{{}, {1, 0, 0}, {1, 0, 0}}),
+                    std::invalid_argument);
+    CHECK_THROWS_AS((Isometry{{}, {1, 0, 1}, {1, 0, 1.000001}}),
+                    std::invalid_argument);
+    CHECK_THROWS_AS((Isometry{{}, {1, 2, 3}, {2, 4, 6}}),
+                    std::invalid_argument);
+  }
 }

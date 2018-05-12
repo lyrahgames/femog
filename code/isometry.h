@@ -1,6 +1,8 @@
 #ifndef FEMOG_ISOMETRY_H_
 #define FEMOG_ISOMETRY_H_
 
+#include <stdexcept>
+
 #include <Eigen/Geometry>
 
 #include <permutation.h>
@@ -33,6 +35,12 @@ class Isometry : public Isometry_base {
 
     matrix().col(System::j) =
         v1 - matrix().col(System::i).dot(v1) * matrix().col(System::i);
+
+    constexpr float epsilon = 1e-6f;
+    if (matrix().col(System::j).norm() <= epsilon)
+      throw std::invalid_argument(
+          "Cannot constuct isometry! Given vectors are linear dependent!");
+
     matrix().col(System::j).normalize();
 
     matrix().col(System::k) =
