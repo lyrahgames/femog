@@ -1,0 +1,18 @@
+\documentclass[crop=false,10pt,ngerman]{standalone}
+\usepackage{standard}
+\begin{document}
+  \section{Implementierung} % (fold)
+  \label{sec:implementierung}
+
+    \subsection{Repräsentation der Daten} % (fold)
+    \label{sub:repräsentation_der_daten}
+      Das Gebiet $\Omega$ kann nur in Dreiecke unterteilt werden.
+      Wir trennen Eckpunkte und Primitive, wie im OBJ-Dateiformat.
+      Weiterhin werden Kanten für Neumann- und Dirichlet-Randbedingungen extra aufgeführt.
+      Dies ist möglich, da die Randbedingungen unabhängig von den Primitiven betrachtet werden können.
+      Die Primitive müssen demnach nicht auf die Ränder verweisen.
+      \cite{Alberty1998}
+    % subsection repräsentation_der_daten (end)
+
+  % section implementierung (end)
+\end{document}
