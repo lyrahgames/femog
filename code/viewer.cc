@@ -27,11 +27,31 @@ void Viewer::load(const std::string& file_path) {
     file.ignore(2);
   }
 
-  compute_bounding_box();
-  const float scene_radius =
-      0.5f * (bounding_box_max - bounding_box_min).norm();
-  eye_distance = scene_radius / std::sin(0.5f * camera.field_of_view());
-  world.translation() = 0.5f * (bounding_box_min + bounding_box_max);
+  compute_automatic_view();
+}
+
+void Viewer::generate() {
+  constexpr int count = 10;
+  for (int i = 0; i < count; ++i) {
+    for (int j = 0; j < count; ++j) {
+      const float x = static_cast<float>(i);
+      const float y = static_cast<float>(j);
+
+      auto f = [](float x, float y) {
+        return std::sin(0.5f * x) * std::cos(0.7f * y);
+      };
+
+      stl_data.push_back({x - 0.5f, y - 0.5f, f(x - 0.5f, y - 0.5f)});
+      stl_data.push_back({x + 0.5f, y - 0.5f, f(x + 0.5f, y - 0.5f)});
+      stl_data.push_back({x + 0.5f, y + 0.5f, f(x + 0.5f, y + 0.5f)});
+
+      stl_data.push_back({x + 0.5f, y + 0.5f, f(x + 0.5f, y + 0.5f)});
+      stl_data.push_back({x - 0.5f, y + 0.5f, f(x - 0.5f, y + 0.5f)});
+      stl_data.push_back({x - 0.5f, y - 0.5f, f(x - 0.5f, y - 0.5f)});
+    }
+  }
+
+  compute_automatic_view();
 }
 
 void Viewer::initializeGL() {
@@ -145,6 +165,14 @@ void Viewer::compute_bounding_box() {
     bounding_box_min =
         bounding_box_min.array().min(stl_data[i].array()).matrix();
   }
+}
+
+void Viewer::compute_automatic_view() {
+  compute_bounding_box();
+  const float scene_radius =
+      0.5f * (bounding_box_max - bounding_box_min).norm();
+  eye_distance = scene_radius / std::sin(0.5f * camera.field_of_view());
+  world.translation() = 0.5f * (bounding_box_min + bounding_box_max);
 }
 
 }  // namespace Femog

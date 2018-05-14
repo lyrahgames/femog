@@ -23,6 +23,8 @@ class Viewer : public QOpenGLWidget {
 
   void load(const std::string& file_path);
 
+  void generate();
+
  protected:
   void initializeGL() override;
   void resizeGL(int width, int height) override;
@@ -48,6 +50,7 @@ class Viewer : public QOpenGLWidget {
 
   void compute_look_at();
   void compute_bounding_box();
+  void compute_automatic_view();
 };
 
 }  // namespace Femog

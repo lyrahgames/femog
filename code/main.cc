@@ -13,7 +13,8 @@ int main(int argc, char* argv[]) {
 
   QApplication application(argc, argv);
   Femog::Viewer viewer;
-  viewer.load(argv[1]);
+  // viewer.load(argv[1]);
+  viewer.generate();
   viewer.show();
   return application.exec();
 }
