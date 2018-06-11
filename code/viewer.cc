@@ -7,6 +7,7 @@ namespace Femog {
 
 Viewer::Viewer(QWidget* parent) : QOpenGLWidget(parent) {
   setMouseTracking(true);
+  world = Isometry{{}, {0, -1, 0}, {0, 0, 1}};
 }
 
 void Viewer::load(const std::string& file_path) {
