@@ -1,6 +1,8 @@
 #include "viewer.h"
+#include <QApplication>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <stdexcept>
 
 namespace Femog {
@@ -11,44 +13,51 @@ Viewer::Viewer(QWidget* parent) : QOpenGLWidget(parent) {
 }
 
 void Viewer::load(const std::string& file_path) {
-  std::fstream file(file_path, std::ios::binary | std::ios::in);
-  if (!file.is_open())
-    throw std::runtime_error(std::string{"The file '"} + file_path +
-                             "' could not be opened! Does it exist?");
+  // std::fstream file(file_path, std::ios::binary | std::ios::in);
+  // if (!file.is_open())
+  //   throw std::runtime_error(std::string{"The file '"} + file_path +
+  //                            "' could not be opened! Does it exist?");
 
-  file.ignore(80);
-  std::uint32_t primitive_count;
-  file.read(reinterpret_cast<char*>(&primitive_count), 4);
+  // file.ignore(80);
+  // std::uint32_t primitive_count;
+  // file.read(reinterpret_cast<char*>(&primitive_count), 4);
 
-  stl_data.resize(3 * primitive_count);
+  // stl_data.resize(3 * primitive_count);
 
-  for (auto i = 0; i < primitive_count; ++i) {
-    file.ignore(12);
-    file.read(reinterpret_cast<char*>(&stl_data[3 * i]), 36);
-    file.ignore(2);
-  }
+  // for (auto i = 0; i < primitive_count; ++i) {
+  //   file.ignore(12);
+  //   file.read(reinterpret_cast<char*>(&stl_data[3 * i]), 36);
+  //   file.ignore(2);
+  // }
 
-  compute_automatic_view();
+  // compute_automatic_view();
 }
 
 void Viewer::generate() {
-  constexpr int count = 10;
+  constexpr int count = 100;
+  std::mt19937 rng{std::random_device{}()};
+  std::normal_distribution<float> distribution(0, 0.2);
+
+  auto f = [](float x, float y) {
+    return 0.001f * x * y * std::sin(0.5f * x) * std::cos(0.7f * y);
+    // return 2.0 * std::sin(0.5 * x) + y;
+  };
+
+  for (int i = 0; i <= count; ++i) {
+    for (int j = 0; j <= count; ++j) {
+      const float x = static_cast<float>(i) + distribution(rng);
+      const float y = static_cast<float>(j) + distribution(rng);
+      domain.vertex_data.push_back({x, y});
+      potential.push_back(f(x, y));
+    }
+  }
+
   for (int i = 0; i < count; ++i) {
     for (int j = 0; j < count; ++j) {
-      const float x = static_cast<float>(i);
-      const float y = static_cast<float>(j);
-
-      auto f = [](float x, float y) {
-        return std::sin(0.5f * x) * std::cos(0.7f * y);
-      };
-
-      stl_data.push_back({x - 0.5f, y - 0.5f, f(x - 0.5f, y - 0.5f)});
-      stl_data.push_back({x + 0.5f, y - 0.5f, f(x + 0.5f, y - 0.5f)});
-      stl_data.push_back({x + 0.5f, y + 0.5f, f(x + 0.5f, y + 0.5f)});
-
-      stl_data.push_back({x + 0.5f, y + 0.5f, f(x + 0.5f, y + 0.5f)});
-      stl_data.push_back({x - 0.5f, y + 0.5f, f(x - 0.5f, y + 0.5f)});
-      stl_data.push_back({x - 0.5f, y - 0.5f, f(x - 0.5f, y - 0.5f)});
+      const int index_00 = i * (count + 1) + j;
+      const int index_10 = (i + 1) * (count + 1) + j;
+      domain.primitive_data.push_back({index_00, index_10, index_10 + 1});
+      domain.primitive_data.push_back({index_00, index_10 + 1, index_00 + 1});
     }
   }
 
@@ -80,7 +89,12 @@ void Viewer::paintGL() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glBegin(GL_TRIANGLES);
   glColor3f(0, 0, 0);
-  for (const auto& vertex : stl_data) glVertex3fv(vertex.data());
+  // for (const auto& vertex : stl_data) glVertex3fv(vertex.data());
+  for (const auto& primitive : domain.primitive_data) {
+    for (int i = 0; i < 3; ++i)
+      glVertex3f(domain.vertex_data[primitive[i]].x(),
+                 domain.vertex_data[primitive[i]].y(), potential[primitive[i]]);
+  }
   glEnd();
 }
 
@@ -122,7 +136,9 @@ void Viewer::wheelEvent(QWheelEvent* event) {
 }
 
 void Viewer::keyPressEvent(QKeyEvent* event) {
-  if (event->text() == 'b') {
+  if (event->key() == Qt::Key_Escape) {
+    QCoreApplication::quit();
+  } else if (event->text() == 'b') {
     eye_azimuth = eye_altitude = 0.0f;
     world = Isometry{
         0.5f * (bounding_box_min + bounding_box_max), {0, -1, 0}, {0, 0, 1}};
@@ -156,15 +172,21 @@ void Viewer::compute_look_at() {
 }
 
 void Viewer::compute_bounding_box() {
-  if (stl_data.size() == 0) return;
-  bounding_box_min = stl_data[0];
-  bounding_box_max = stl_data[0];
+  if (domain.vertex_data.size() == 0) return;
+  bounding_box_min =
+      Eigen::Vector3f(domain.vertex_data[0].x(), domain.vertex_data[0].y(), 0);
+  bounding_box_max =
+      Eigen::Vector3f(domain.vertex_data[0].x(), domain.vertex_data[0].y(), 0);
 
-  for (int i = 1; i < stl_data.size(); ++i) {
-    bounding_box_max =
-        bounding_box_max.array().max(stl_data[i].array()).matrix();
-    bounding_box_min =
-        bounding_box_min.array().min(stl_data[i].array()).matrix();
+  for (int i = 1; i < domain.vertex_data.size(); ++i) {
+    bounding_box_max = bounding_box_max.array()
+                           .max(Eigen::Array3f(domain.vertex_data[i].x(),
+                                               domain.vertex_data[i].y(), 0))
+                           .matrix();
+    bounding_box_min = bounding_box_min.array()
+                           .min(Eigen::Array3f(domain.vertex_data[i].x(),
+                                               domain.vertex_data[i].y(), 0))
+                           .matrix();
   }
 }
 

@@ -10,7 +10,8 @@ class Fem_domain {
  public:
   Fem_domain() = default;
 
- private:
+  std::vector<Eigen::Vector2f> vertex_data;
+  std::vector<Eigen::Vector3i> primitive_data;
 };
 
 }  // namespace Femog

@@ -13,6 +13,7 @@
 #include <QWheelEvent>
 
 #include <camera.h>
+#include <fem_domain.h>
 #include <isometry.h>
 
 namespace Femog {
@@ -44,7 +45,8 @@ class Viewer : public QOpenGLWidget {
   float eye_altitude = 0.0f;
   Camera camera;
   Isometry world;
-  std::vector<Eigen::Vector3f> stl_data;
+  Fem_domain domain;
+  std::vector<float> potential;
   Eigen::Vector3f bounding_box_min;
   Eigen::Vector3f bounding_box_max;
 
