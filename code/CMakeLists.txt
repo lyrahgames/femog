@@ -11,6 +11,8 @@ find_package(Eigen3 REQUIRED)
 add_library(femog
   camera.cc
   viewer.cc
+  fem_field.cc
+  fem_field_loader.cc
 )
 target_include_directories(femog PUBLIC .)
 target_link_libraries(femog PUBLIC

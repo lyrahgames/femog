@@ -4,12 +4,14 @@
 #include <iostream>
 #include <random>
 #include <stdexcept>
+#include "fem_field_loader.h"
 
 namespace Femog {
 
 Viewer::Viewer(QWidget* parent) : QOpenGLWidget(parent) {
   setMouseTracking(true);
   world = Isometry{{}, {0, -1, 0}, {0, 0, 1}};
+  eye_azimuth = eye_altitude = M_PI_4;
 }
 
 void Viewer::load(const std::string& file_path) {
@@ -30,39 +32,47 @@ void Viewer::load(const std::string& file_path) {
   //   file.ignore(2);
   // }
 
-  // compute_automatic_view();
-}
-
-void Viewer::generate() {
-  constexpr int count = 100;
-  std::mt19937 rng{std::random_device{}()};
-  std::normal_distribution<float> distribution(0, 0.2);
-
-  auto f = [](float x, float y) {
-    // return 0.001f * x * y * std::sin(0.5f * x) * std::cos(0.7f * y);
-    return 2.0 * std::sin(0.5 * x) + y;
-  };
-
-  for (int i = 0; i <= count; ++i) {
-    for (int j = 0; j <= count; ++j) {
-      const float x = static_cast<float>(i) + distribution(rng);
-      const float y = static_cast<float>(j) + distribution(rng);
-      field.vertex_data.push_back({x, y});
-      field.values.push_back(f(x, y));
-    }
-  }
-
-  for (int i = 0; i < count; ++i) {
-    for (int j = 0; j < count; ++j) {
-      const int index_00 = i * (count + 1) + j;
-      const int index_10 = (i + 1) * (count + 1) + j;
-      field.primitive_data.push_back({index_00, index_10, index_10 + 1});
-      field.primitive_data.push_back({index_00, index_10 + 1, index_00 + 1});
-    }
-  }
+  field = fem_field_file(file_path);
+  // field.subdivide();
+  // field.subdivide();
+  // field.subdivide();
+  // field.subdivide();
+  // field.subdivide();
 
   compute_automatic_view();
 }
+
+// void Viewer::generate() {
+//   constexpr int count = 100;
+//   std::mt19937 rng{std::random_device{}()};
+//   std::normal_distribution<float> distribution(0, 0.2);
+
+//   auto f = [](float x, float y) {
+//     // return 0.001f * x * y * std::sin(0.5f * x) * std::cos(0.7f * y);
+//     return 2.0 * std::sin(0.5 * x) + y;
+//   };
+
+//   for (int i = 0; i <= count; ++i) {
+//     for (int j = 0; j <= count; ++j) {
+//       const float x = static_cast<float>(i) + distribution(rng);
+//       const float y = static_cast<float>(j) + distribution(rng);
+//       field.vertex_data().push_back({x, y});
+//       field.values().push_back(f(x, y));
+//     }
+//   }
+
+//   for (int i = 0; i < count; ++i) {
+//     for (int j = 0; j < count; ++j) {
+//       const int index_00 = i * (count + 1) + j;
+//       const int index_10 = (i + 1) * (count + 1) + j;
+//       field.primitive_data().push_back({index_00, index_10, index_10 + 1});
+//       field.primitive_data().push_back({index_00, index_10 + 1, index_00 +
+//       1});
+//     }
+//   }
+
+//   compute_automatic_view();
+// }
 
 void Viewer::initializeGL() {
   glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -85,11 +95,11 @@ void Viewer::paintGL() {
   glBegin(GL_TRIANGLES);
   glColor3f(0, 0, 0);
 
-  for (const auto& primitive : field.primitive_data) {
+  for (const auto& primitive : field.primitive_data()) {
     for (int i = 0; i < 3; ++i)
-      glVertex3f(field.vertex_data[primitive[i]].x(),
-                 field.vertex_data[primitive[i]].y(),
-                 field.values[primitive[i]]);
+      glVertex3f(field.vertex_data()[primitive[i]].x(),
+                 field.vertex_data()[primitive[i]].y(),
+                 field.values()[primitive[i]]);
   }
   glEnd();
 }
@@ -168,22 +178,24 @@ void Viewer::compute_look_at() {
 }
 
 void Viewer::compute_bounding_box() {
-  if (field.vertex_data.size() == 0) return;
-  bounding_box_min = Eigen::Vector3f(field.vertex_data[0].x(),
-                                     field.vertex_data[0].y(), field.values[0]);
-  bounding_box_max = Eigen::Vector3f(field.vertex_data[0].x(),
-                                     field.vertex_data[0].y(), field.values[0]);
+  if (field.vertex_data().size() == 0) return;
+  bounding_box_min =
+      Eigen::Vector3f(field.vertex_data()[0].x(), field.vertex_data()[0].y(),
+                      field.values()[0]);
+  bounding_box_max =
+      Eigen::Vector3f(field.vertex_data()[0].x(), field.vertex_data()[0].y(),
+                      field.values()[0]);
 
-  for (int i = 1; i < field.vertex_data.size(); ++i) {
+  for (int i = 1; i < field.vertex_data().size(); ++i) {
     bounding_box_max =
         bounding_box_max.array()
-            .max(Eigen::Array3f(field.vertex_data[i].x(),
-                                field.vertex_data[i].y(), field.values[i]))
+            .max(Eigen::Array3f(field.vertex_data()[i].x(),
+                                field.vertex_data()[i].y(), field.values()[i]))
             .matrix();
     bounding_box_min =
         bounding_box_min.array()
-            .min(Eigen::Array3f(field.vertex_data[i].x(),
-                                field.vertex_data[i].y(), field.values[i]))
+            .min(Eigen::Array3f(field.vertex_data()[i].x(),
+                                field.vertex_data()[i].y(), field.values()[i]))
             .matrix();
   }
 }

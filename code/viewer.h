@@ -24,8 +24,6 @@ class Viewer : public QOpenGLWidget {
 
   void load(const std::string& file_path);
 
-  void generate();
-
  protected:
   void initializeGL() override;
   void resizeGL(int width, int height) override;
