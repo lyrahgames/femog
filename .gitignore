@@ -22,3 +22,7 @@ code/tests/*
 !*.cc
 !*.h
 !CMakeLists.txt
+
+# data whitelist
+!data
+!data/*.txt

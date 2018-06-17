@@ -33,11 +33,19 @@ void Viewer::load(const std::string& file_path) {
   // }
 
   field = fem_field_file(file_path);
+  field.subdivide();
+  field.subdivide();
+  field.subdivide();
+  field.subdivide();
   // field.subdivide();
-  // field.subdivide();
-  // field.subdivide();
-  // field.subdivide();
-  // field.subdivide();
+
+  auto f = [](const Fem_field::vertex_type& vertex) {
+    return std::sin(3.0f * vertex.x()) * std::cos(vertex.y());
+  };
+
+  for (auto i = 0; i < field.vertex_data().size(); ++i) {
+    field.values()[i] = f(field.vertex_data()[i]);
+  }
 
   compute_automatic_view();
 }

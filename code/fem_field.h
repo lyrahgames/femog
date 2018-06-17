@@ -37,6 +37,7 @@ class Fem_field {
 
   const std::vector<vertex_type>& vertex_data() const { return vertex_data_; }
   const std::vector<float>& values() const { return values_; }
+  std::vector<float>& values() { return values_; }
   const std::vector<primitive_type>& primitive_data() const {
     return primitive_data_;
   }

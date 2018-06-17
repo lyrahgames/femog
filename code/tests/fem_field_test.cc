@@ -95,4 +95,18 @@ TEST_CASE("The FEM field") {
     CHECK(field.edge_data().at({5, 3}) == 1);
     CHECK(field.edge_data().at({4, 5}) == 1);
   }
+
+  SUBCASE("can be subdivided.") {
+    field.add_vertex(Fem_field::vertex_type{0, 0});
+    field.add_vertex(Fem_field::vertex_type{0, 1});
+    field.add_vertex(Fem_field::vertex_type{1, 0});
+    field.add_vertex(Fem_field::vertex_type{1, 1});
+    field.add_quad(Fem_field::quad_type{0, 1, 2, 3});
+    field.subdivide();
+
+    CHECK(field.vertex_data().size() == 9);
+    CHECK(field.values().size() == 9);
+    CHECK(field.primitive_data().size() == 8);
+    CHECK(field.edge_data().size() == 16);
+  }
 }
