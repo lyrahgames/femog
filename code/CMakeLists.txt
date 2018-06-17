@@ -20,6 +20,7 @@ target_link_libraries(femog PUBLIC
   Qt5::Widgets
   OpenGL::GLU
 )
+target_compile_features(femog PRIVATE cxx_std_17)
 add_library(femog::femog ALIAS femog)
 
 add_subdirectory(tests)

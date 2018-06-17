@@ -14,6 +14,14 @@ Fem_field& Fem_field::add_primitive(const primitive_type& primitive) {
     throw std::invalid_argument(
         "Primitive is referencing one or more vertices that do not exist!");
 
+  // edge_data_.try_emplace(edge_type{primitive[0], primitive[1]}, false);
+  // edge_data_.try_emplace(edge_type{primitive[2], primitive[1]}, false);
+  // edge_data_.try_emplace(edge_type{primitive[0], primitive[2]}, false);
+
+  ++edge_data_[edge_type{primitive[0], primitive[1]}];
+  ++edge_data_[edge_type{primitive[0], primitive[2]}];
+  ++edge_data_[edge_type{primitive[1], primitive[2]}];
+
   primitive_data_.push_back(primitive);
   return *this;
 }
@@ -26,8 +34,17 @@ Fem_field& Fem_field::add_quad(const quad_type& quad) {
     throw std::invalid_argument(
         "Quad is referencing one or more vertices that do not exist!");
 
-  primitive_data_.push_back(primitive_1);
-  primitive_data_.push_back(primitive_2);
+  add_primitive(primitive_1);
+  add_primitive(primitive_2);
+
+  // ++edge_data_[edge_type{quad[0], quad[1]}];
+  // ++edge_data_[edge_type{quad[1], quad[2]}];
+  // ++edge_data_[edge_type{quad[2], quad[3]}];
+  // ++edge_data_[edge_type{quad[3], quad[0]}];
+  // ++edge_data_[edge_type{quad[0], quad[2]}];
+
+  // primitive_data_.push_back(primitive_1);
+  // primitive_data_.push_back(primitive_2);
 
   return *this;
 }

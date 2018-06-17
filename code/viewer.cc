@@ -92,16 +92,33 @@ void Viewer::resizeGL(int width, int height) {
 
 void Viewer::paintGL() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glBegin(GL_TRIANGLES);
-  glColor3f(0, 0, 0);
 
-  for (const auto& primitive : field.primitive_data()) {
-    for (int i = 0; i < 3; ++i)
-      glVertex3f(field.vertex_data()[primitive[i]].x(),
-                 field.vertex_data()[primitive[i]].y(),
-                 field.values()[primitive[i]]);
+  glBegin(GL_LINES);
+  for (const auto& pair : field.edge_data()) {
+    if (pair.second == 1)
+      glColor3f(1, 0, 0);
+    else
+      glColor3f(0, 0, 0);
+
+    glVertex3f(field.vertex_data()[pair.first[0]].x(),
+               field.vertex_data()[pair.first[0]].y(),
+               field.values()[pair.first[0]]);
+    glVertex3f(field.vertex_data()[pair.first[1]].x(),
+               field.vertex_data()[pair.first[1]].y(),
+               field.values()[pair.first[1]]);
   }
   glEnd();
+
+  // glBegin(GL_TRIANGLES);
+  // glColor3f(0, 0, 0);
+
+  // for (const auto& primitive : field.primitive_data()) {
+  //   for (int i = 0; i < 3; ++i)
+  //     glVertex3f(field.vertex_data()[primitive[i]].x(),
+  //                field.vertex_data()[primitive[i]].y(),
+  //                field.values()[primitive[i]]);
+  // }
+  // glEnd();
 }
 
 void Viewer::mousePressEvent(QMouseEvent* event) {}

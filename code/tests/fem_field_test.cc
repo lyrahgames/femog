@@ -65,4 +65,34 @@ TEST_CASE("The FEM field") {
       }
     }
   }
+
+  SUBCASE("will add edges for every primitive if they do not exist already.") {
+    field.add_vertex(Fem_field::vertex_type{0, 0});
+    field.add_vertex(Fem_field::vertex_type{0, 1});
+    field.add_vertex(Fem_field::vertex_type{1, 0});
+    field.add_vertex(Fem_field::vertex_type{1, 1});
+    CHECK(field.edge_data().size() == 0);
+
+    field.add_primitive(Fem_field::primitive_type{0, 1, 2});
+    CHECK(field.edge_data().size() == 3);
+    for (const auto& pair : field.edge_data()) CHECK(pair.second == 1);
+
+    field.add_primitive(Fem_field::primitive_type{0, 2, 3});
+    CHECK(field.edge_data().size() == 5);
+    CHECK(field.edge_data().at({0, 2}) == 2);
+    CHECK(field.edge_data().at({0, 1}) == 1);
+    CHECK(field.edge_data().at({2, 1}) == 1);
+    CHECK(field.edge_data().at({2, 3}) == 1);
+    CHECK(field.edge_data().at({0, 3}) == 1);
+
+    field.add_vertex(Fem_field::vertex_type{2, 0});
+    field.add_vertex(Fem_field::vertex_type{2, 1});
+    field.add_quad(Fem_field::quad_type{2, 4, 5, 3});
+    CHECK(field.edge_data().size() == 9);
+    CHECK(field.edge_data().at({2, 3}) == 2);
+    CHECK(field.edge_data().at({2, 4}) == 1);
+    CHECK(field.edge_data().at({2, 5}) == 2);
+    CHECK(field.edge_data().at({5, 3}) == 1);
+    CHECK(field.edge_data().at({4, 5}) == 1);
+  }
 }
