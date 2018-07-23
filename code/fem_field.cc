@@ -36,6 +36,60 @@ Fem_field& Fem_field::add_quad(const quad_type& quad) {
   return *this;
 }
 
+int Fem_field::boundary_size() const {
+  int size{0};
+  for (const auto& pair : edge_data_) {
+    if (std::abs(pair.second) == 1) ++size;
+  }
+  return size;
+}
+
+int Fem_field::dirichlet_boundary_size() const {
+  int size{0};
+  for (const auto& pair : edge_data_) {
+    if (pair.second == 1) ++size;
+  }
+  return size;
+}
+
+int Fem_field::neumann_boundary_size() const {
+  int size{0};
+  for (const auto& pair : edge_data_) {
+    if (pair.second == -1) ++size;
+  }
+  return size;
+}
+
+Fem_field& Fem_field::set_neumann_boundary(const edge_type& edge) {
+  auto& value = edge_data_.at(edge);
+  if (std::abs(value) != 1)
+    throw std::invalid_argument(
+        "Could not set Neumann boundary! Given edge is an inner edge.");
+  value = -1;
+  return *this;
+}
+
+Fem_field& Fem_field::set_dirichlet_boundary(const edge_type& edge) {
+  auto& value = edge_data_.at(edge);
+  if (std::abs(value) != 1)
+    throw std::invalid_argument(
+        "Could not set Dirichlet boundary! Given edge is an inner edge.");
+  value = 1;
+  return *this;
+}
+
+bool Fem_field::is_neumann_boundary(const edge_type& edge) const {
+  auto search = edge_data_.find(edge);
+  if (search == edge_data_.end()) return false;
+  return (search->second == -1);
+}
+
+bool Fem_field::is_dirichlet_boundary(const edge_type& edge) const {
+  auto search = edge_data_.find(edge);
+  if (search == edge_data_.end()) return false;
+  return (search->second == 1);
+}
+
 bool Fem_field::is_valid(const primitive_type& primitive) const {
   bool invalid = false;
 

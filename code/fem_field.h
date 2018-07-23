@@ -46,9 +46,18 @@ class Fem_field {
     return edge_data_;
   }
 
+  int boundary_size() const;
+  int dirichlet_boundary_size() const;
+  int neumann_boundary_size() const;
+
   Fem_field& add_vertex(const vertex_type& vertex);
   Fem_field& add_primitive(const primitive_type& primitive);
   Fem_field& add_quad(const quad_type& quad);
+
+  Fem_field& set_neumann_boundary(const edge_type& edge);
+  bool is_neumann_boundary(const edge_type& edge) const;
+  Fem_field& set_dirichlet_boundary(const edge_type& edge);
+  bool is_dirichlet_boundary(const edge_type& edge) const;
 
   bool is_valid(const primitive_type& primitive) const;
 

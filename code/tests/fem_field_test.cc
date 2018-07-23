@@ -110,3 +110,71 @@ TEST_CASE("The FEM field") {
     CHECK(field.edge_data().size() == 16);
   }
 }
+
+SCENARIO("The FEM field can define Neumann and Dirichlet boundaries.") {
+  using Femog::Fem_field;
+
+  GIVEN("an FEM field with a domain built from primitives") {
+    Fem_field field;
+    field.add_vertex({0, 0});
+    field.add_vertex({0, 1});
+    field.add_vertex({1, 0});
+    field.add_vertex({1, 1});
+    field.add_quad({0, 1, 2, 3});
+
+    WHEN("no boundary is specified") {
+      THEN("every boundary is assumed to be a Dirichlet boundary.") {
+        CHECK(field.edge_data().size() == 5);
+        CHECK(field.boundary_size() == 4);
+        CHECK(field.dirichlet_boundary_size() == field.boundary_size());
+        CHECK(field.neumann_boundary_size() == 0);
+
+        CHECK(field.is_dirichlet_boundary({0, 1}));
+        CHECK(field.is_dirichlet_boundary({1, 2}));
+        CHECK(field.is_dirichlet_boundary({2, 3}));
+        CHECK(field.is_dirichlet_boundary({3, 0}));
+        CHECK_FALSE(field.is_dirichlet_boundary({0, 2}));
+        CHECK_FALSE(field.is_dirichlet_boundary({1, 3}));
+      }
+    }
+
+    WHEN("an existing non-inner edge is specified as Neumann boundary") {
+      field.set_neumann_boundary({0, 1});
+      THEN("the edge will be marked as Neumann boundary.") {
+        CHECK(field.is_neumann_boundary({0, 1}));
+        CHECK(field.boundary_size() == 4);
+        CHECK(field.dirichlet_boundary_size() == 3);
+        CHECK(field.neumann_boundary_size() == 1);
+      }
+    }
+    AND_WHEN("a new primitive is added and connected by this boundary") {
+      field.add_vertex({-1, 1});
+      field.add_primitive({0, 1, 4});
+      THEN("the edge will be marked as an inner edge.") {
+        CHECK_FALSE(field.is_neumann_boundary({0, 1}));
+        CHECK_FALSE(field.is_dirichlet_boundary({0, 1}));
+
+        CHECK(field.edge_data().size() == 7);
+        CHECK(field.boundary_size() == 5);
+        CHECK(field.dirichlet_boundary_size() == field.boundary_size());
+        CHECK(field.neumann_boundary_size() == 0);
+      }
+    }
+
+    WHEN(
+        "an inner or non-existing edge is specified as Neumann or Dirichlet "
+        "boundary") {
+      THEN(
+          "the function throws an 'invalid_argument' or 'out_of_range' "
+          "exception.") {
+        CHECK_THROWS_AS(field.set_neumann_boundary({1, 3}), std::out_of_range);
+        CHECK_THROWS_AS(field.set_neumann_boundary({0, 2}),
+                        std::invalid_argument);
+        CHECK_THROWS_AS(field.set_dirichlet_boundary({1, 3}),
+                        std::out_of_range);
+        CHECK_THROWS_AS(field.set_dirichlet_boundary({0, 2}),
+                        std::invalid_argument);
+      }
+    }
+  }
+}
