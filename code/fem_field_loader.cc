@@ -38,6 +38,20 @@ Fem_field fem_field_file(const std::string& file_path) {
         quad[i] -= 1;
       }
       field.add_quad(quad);
+    } else if (command == "n") {
+      Fem_field::edge_type edge;
+      for (int i = 0; i < 2; ++i) {
+        arguments >> edge[i];
+        edge[i] -= 1;
+      }
+      field.set_neumann_boundary(edge);
+    } else if (command == "d") {
+      Fem_field::edge_type edge;
+      for (int i = 0; i < 2; ++i) {
+        arguments >> edge[i];
+        edge[i] -= 1;
+      }
+      field.set_dirichlet_boundary(edge);
     }
   }
 

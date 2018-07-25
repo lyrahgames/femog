@@ -34,9 +34,9 @@ void Viewer::load(const std::string& file_path) {
 
   field = fem_field_file(file_path);
   field.subdivide();
-  field.subdivide();
-  field.subdivide();
-  field.subdivide();
+  // field.subdivide();
+  // field.subdivide();
+  // field.subdivide();
   // field.subdivide();
 
   auto f = [](const Fem_field::vertex_type& vertex) {
@@ -105,6 +105,8 @@ void Viewer::paintGL() {
   for (const auto& pair : field.edge_data()) {
     if (pair.second == 1)
       glColor3f(1, 0, 0);
+    else if (pair.second == -1)
+      glColor3f(0, 0, 1);
     else
       glColor3f(0, 0, 0);
 
