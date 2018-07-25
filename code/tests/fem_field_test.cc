@@ -1,6 +1,7 @@
 #include <doctest/doctest.h>
 
 #include <fem_field.h>
+#include <Eigen/Sparse>
 #include <stdexcept>
 
 TEST_CASE("The FEM field") {
@@ -177,4 +178,46 @@ SCENARIO("The FEM field can define Neumann and Dirichlet boundaries.") {
       }
     }
   }
+}
+
+TEST_CASE("The FEM Field can construct a stiffness matrix.") {
+  using Femog::Fem_field;
+  Fem_field field;
+  field.add_vertex({0, 0});
+  field.add_vertex({0, 1});
+  field.add_vertex({1, 0});
+  field.add_vertex({1, 1});
+  field.add_quad({0, 1, 2, 3});
+  field.add_vertex({-1, 1});
+  field.add_primitive({0, 1, 4});
+
+  std::vector<Eigen::Triplet<float>> triplets;
+
+  for (const auto& primitive : field.primitive_data()) {
+    Fem_field::vertex_type edge[3];
+
+    for (auto i = 0; i < 3; ++i) {
+      edge[i] = field.vertex_data()[primitive[(i + 1) % 3]] -
+                field.vertex_data()[primitive[i]];
+    }
+
+    const float area =
+        0.5f * std::abs(-edge[0].x() * edge[2].y() + edge[0].y() * edge[2].x());
+    const float inverse_area_4 = 0.25f / area;
+
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j) {
+        const float value =
+            inverse_area_4 * edge[(i + 1) % 3].dot(edge[(j + 1) % 3]);
+        triplets.push_back({primitive[i], primitive[j], value});
+      }
+    }
+  }
+
+  Eigen::SparseMatrix<float> matrix(field.vertex_data().size(),
+                                    field.vertex_data().size());
+
+  matrix.setFromTriplets(triplets.begin(), triplets.end());
+
+  MESSAGE("Matrix:\n" << matrix);
 }
