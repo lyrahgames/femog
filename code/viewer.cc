@@ -217,15 +217,15 @@ void Viewer::wheelEvent(QWheelEvent* event) {
 void Viewer::keyPressEvent(QKeyEvent* event) {
   if (event->key() == Qt::Key_Escape) {
     QCoreApplication::quit();
-  } else if (event->text() == 'b') {
+  } else if (event->text() == "b") {
     eye_azimuth = eye_altitude = 0.0f;
     world = Isometry{
         0.5f * (bounding_box_min + bounding_box_max), {0, -1, 0}, {0, 0, 1}};
-  } else if (event->text() == 'g') {
+  } else if (event->text() == "g") {
     eye_azimuth = eye_altitude = 0.0f;
     world = Isometry{
         0.5f * (bounding_box_min + bounding_box_max), {0, 0, 1}, {0, 1, 0}};
-  } else if (event->text() == 'f') {
+  } else if (event->text() == "f") {
     render_volume_force = !render_volume_force;
   }
 
