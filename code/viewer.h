@@ -23,6 +23,10 @@ class Viewer : public QOpenGLWidget {
   Viewer(QWidget* parent = nullptr);
 
   void load(const std::string& file_path);
+  void subdivide(int count);
+  void set_analytic_volume_force();
+  void compute_automatic_view();
+  void solve();
 
  protected:
   void initializeGL() override;
@@ -46,10 +50,10 @@ class Viewer : public QOpenGLWidget {
   Fem_field field;
   Eigen::Vector3f bounding_box_min;
   Eigen::Vector3f bounding_box_max;
+  bool render_volume_force = false;
 
   void compute_look_at();
   void compute_bounding_box();
-  void compute_automatic_view();
 };
 
 }  // namespace Femog

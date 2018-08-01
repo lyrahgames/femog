@@ -38,6 +38,8 @@ class Fem_field {
   const std::vector<vertex_type>& vertex_data() const { return vertex_data_; }
   const std::vector<float>& values() const { return values_; }
   std::vector<float>& values() { return values_; }
+  const std::vector<float>& volume_force() const { return volume_force_; }
+  std::vector<float>& volume_force() { return volume_force_; }
   const std::vector<primitive_type>& primitive_data() const {
     return primitive_data_;
   }
@@ -63,10 +65,14 @@ class Fem_field {
 
   Fem_field& subdivide();
 
+  Fem_field& solve_poisson_equation();
+  Fem_field& solve_heat_equation();
+
  private:
   std::vector<vertex_type> vertex_data_;
   std::vector<primitive_type> primitive_data_;
   std::vector<float> values_;
+  std::vector<float> volume_force_;
   std::unordered_map<edge_type, int, edge_hash, edge_equal> edge_data_;
 };
 

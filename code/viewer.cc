@@ -15,72 +15,85 @@ Viewer::Viewer(QWidget* parent) : QOpenGLWidget(parent) {
 }
 
 void Viewer::load(const std::string& file_path) {
-  // std::fstream file(file_path, std::ios::binary | std::ios::in);
-  // if (!file.is_open())
-  //   throw std::runtime_error(std::string{"The file '"} + file_path +
-  //                            "' could not be opened! Does it exist?");
+  field = fem_field_file(file_path);
 
-  // file.ignore(80);
-  // std::uint32_t primitive_count;
-  // file.read(reinterpret_cast<char*>(&primitive_count), 4);
+  std::cout << "domain:" << std::endl
+            << "vertex count = " << field.vertex_data().size() << std::endl
+            << "primitive count = " << field.primitive_data().size()
+            << std::endl
+            << "edge_count = " << field.edge_data().size() << std::endl
+            << std::endl;
 
-  // stl_data.resize(3 * primitive_count);
+  // const int max = 20;
 
-  // for (auto i = 0; i < primitive_count; ++i) {
-  //   file.ignore(12);
-  //   file.read(reinterpret_cast<char*>(&stl_data[3 * i]), 36);
-  //   file.ignore(2);
+  // for (int i = 0; i < max; ++i) {
+  //   for (int j = 0; j < max; ++j) {
+  //     field.add_vertex(
+  //         {static_cast<float>(i) / max, static_cast<float>(j) / max});
+  //   }
   // }
 
-  field = fem_field_file(file_path);
-  field.subdivide();
-  // field.subdivide();
-  // field.subdivide();
-  // field.subdivide();
-  // field.subdivide();
+  // for (int i = 0; i < max - 1; ++i) {
+  //   for (int j = 0; j < max - 1; ++j) {
+  //     const int index = max * i + j;
+  //     const int index1 = max * (i + 1) + j;
+  //     field.add_quad({index, index + 1, index1 + 1, index1});
+  //   }
+  // }
 
-  auto f = [](const Fem_field::vertex_type& vertex) {
-    return std::sin(3.0f * vertex.x()) * std::cos(vertex.y());
-  };
+  compute_automatic_view();
+}
 
-  for (auto i = 0; i < field.vertex_data().size(); ++i) {
-    field.values()[i] = f(field.vertex_data()[i]);
+void Viewer::subdivide(int count) {
+  for (auto i = 0; i < count; ++i) {
+    field.subdivide();
+
+    std::cout << "subdivision " << i + 1 << ":" << std::endl
+              << "vertex count = " << field.vertex_data().size() << std::endl
+              << "primitive count = " << field.primitive_data().size()
+              << std::endl
+              << "edge_count = " << field.edge_data().size() << std::endl
+              << std::endl;
   }
 
   compute_automatic_view();
 }
 
-// void Viewer::generate() {
-//   constexpr int count = 100;
-//   std::mt19937 rng{std::random_device{}()};
-//   std::normal_distribution<float> distribution(0, 0.2);
+void Viewer::set_analytic_volume_force() {
+  auto f = [](const Fem_field::vertex_type& vertex) {
+    // return std::sin(3.0f * vertex.x()) * std::cos(vertex.y());
+    return 0;
+  };
 
-//   auto f = [](float x, float y) {
-//     // return 0.001f * x * y * std::sin(0.5f * x) * std::cos(0.7f * y);
-//     return 2.0 * std::sin(0.5 * x) + y;
-//   };
+  auto g = [](const Fem_field::vertex_type& vertex) {
+    const float sigma2 = 0.05;
+    // return std::exp(-(vertex - Fem_field::vertex_type{0.5,
+    // 0.5}).squaredNorm() /
+    //                 sigma2) /
+    //        std::sqrt(sigma2);
 
-//   for (int i = 0; i <= count; ++i) {
-//     for (int j = 0; j <= count; ++j) {
-//       const float x = static_cast<float>(i) + distribution(rng);
-//       const float y = static_cast<float>(j) + distribution(rng);
-//       field.vertex_data().push_back({x, y});
-//       field.values().push_back(f(x, y));
-//     }
-//   }
+    return std::exp(
+               -(vertex - Fem_field::vertex_type{0.25, 0.25}).squaredNorm() /
+               sigma2) /
+               std::sqrt(sigma2) -
+           std::exp(
+               -(vertex - Fem_field::vertex_type{0.75, 0.75}).squaredNorm() /
+               sigma2) /
+               std::sqrt(sigma2);
+  };
 
-//   for (int i = 0; i < count; ++i) {
-//     for (int j = 0; j < count; ++j) {
-//       const int index_00 = i * (count + 1) + j;
-//       const int index_10 = (i + 1) * (count + 1) + j;
-//       field.primitive_data().push_back({index_00, index_10, index_10 + 1});
-//       field.primitive_data().push_back({index_00, index_10 + 1, index_00 +
-//       1});
-//     }
-//   }
+  for (auto i = 0; i < field.vertex_data().size(); ++i) {
+    field.values()[i] = f(field.vertex_data()[i]);
+    field.volume_force()[i] = g(field.vertex_data()[i]);
+  }
 
-//   compute_automatic_view();
-// }
+  compute_automatic_view();
+}
+
+void Viewer::solve() {
+  field.solve_poisson_equation();
+  compute_automatic_view();
+}
 
 void Viewer::initializeGL() {
   glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -101,23 +114,56 @@ void Viewer::resizeGL(int width, int height) {
 void Viewer::paintGL() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glBegin(GL_LINES);
-  for (const auto& pair : field.edge_data()) {
-    if (pair.second == 1)
-      glColor3f(1, 0, 0);
-    else if (pair.second == -1)
-      glColor3f(0, 0, 1);
-    else
-      glColor3f(0, 0, 0);
+  if (render_volume_force) {
+    glBegin(GL_LINES);
+    for (const auto& pair : field.edge_data()) {
+      if (pair.second == 1)
+        glColor3f(1, 0, 0);
+      else if (pair.second == -1)
+        glColor3f(0, 0, 1);
+      else
+        glColor3f(0, 0, 0);
 
-    glVertex3f(field.vertex_data()[pair.first[0]].x(),
-               field.vertex_data()[pair.first[0]].y(),
-               field.values()[pair.first[0]]);
-    glVertex3f(field.vertex_data()[pair.first[1]].x(),
-               field.vertex_data()[pair.first[1]].y(),
-               field.values()[pair.first[1]]);
+      glVertex3f(field.vertex_data()[pair.first[0]].x(),
+                 field.vertex_data()[pair.first[0]].y(),
+                 field.volume_force()[pair.first[0]]);
+      glVertex3f(field.vertex_data()[pair.first[1]].x(),
+                 field.vertex_data()[pair.first[1]].y(),
+                 field.volume_force()[pair.first[1]]);
+    }
+    glEnd();
+    // glBegin(GL_TRIANGLES);
+    // for (const auto& primitive : field.primitive_data()) {
+    //   const double mean_force = (field.volume_force()[primitive[0]] +
+    //                              field.volume_force()[primitive[1]] +
+    //                              field.volume_force()[primitive[2]]) /
+    //                             3.0f;
+    //   for (int i = 0; i < 3; ++i)
+    //     glVertex3f(field.vertex_data()[primitive[i]].x(),
+    //                field.vertex_data()[primitive[i]].y(), mean_force);
+    // }
+    // glEnd();
+  } else {
+    glBegin(GL_LINES);
+    for (const auto& pair : field.edge_data()) {
+      if (pair.second == 1)
+        glColor3f(1, 0, 0);
+      else if (pair.second == -1)
+        glColor3f(0, 0, 1);
+      else
+        glColor3f(0, 0, 0);
+
+      constexpr float scale = 1.0f;
+
+      glVertex3f(field.vertex_data()[pair.first[0]].x(),
+                 field.vertex_data()[pair.first[0]].y(),
+                 scale * field.values()[pair.first[0]]);
+      glVertex3f(field.vertex_data()[pair.first[1]].x(),
+                 field.vertex_data()[pair.first[1]].y(),
+                 scale * field.values()[pair.first[1]]);
+    }
+    glEnd();
   }
-  glEnd();
 
   // glBegin(GL_TRIANGLES);
   // glColor3f(0, 0, 0);
@@ -179,6 +225,8 @@ void Viewer::keyPressEvent(QKeyEvent* event) {
     eye_azimuth = eye_altitude = 0.0f;
     world = Isometry{
         0.5f * (bounding_box_min + bounding_box_max), {0, 0, 1}, {0, 1, 0}};
+  } else if (event->text() == 'f') {
+    render_volume_force = !render_volume_force;
   }
 
   compute_look_at();

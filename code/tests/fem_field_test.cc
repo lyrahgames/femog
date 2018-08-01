@@ -190,8 +190,10 @@ TEST_CASE("The FEM Field can construct a stiffness matrix.") {
   field.add_quad({0, 1, 2, 3});
   field.add_vertex({-1, 1});
   field.add_primitive({0, 1, 4});
+  field.volume_force()[3] = 1.0;
 
   std::vector<Eigen::Triplet<float>> triplets;
+  Eigen::VectorXf rhs(field.vertex_data().size());
 
   for (const auto& primitive : field.primitive_data()) {
     Fem_field::vertex_type edge[3];
@@ -211,6 +213,12 @@ TEST_CASE("The FEM Field can construct a stiffness matrix.") {
             inverse_area_4 * edge[(i + 1) % 3].dot(edge[(j + 1) % 3]);
         triplets.push_back({primitive[i], primitive[j], value});
       }
+
+      const float mean_force = (field.volume_force()[primitive[0]] +
+                                field.volume_force()[primitive[1]] +
+                                field.volume_force()[primitive[2]]) /
+                               3.0f;
+      rhs[primitive[i]] += (area * mean_force);
     }
   }
 
@@ -220,4 +228,5 @@ TEST_CASE("The FEM Field can construct a stiffness matrix.") {
   matrix.setFromTriplets(triplets.begin(), triplets.end());
 
   MESSAGE("Matrix:\n" << matrix);
+  MESSAGE("force:\n" << rhs);
 }
