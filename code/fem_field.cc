@@ -1,6 +1,6 @@
 #include <fem_field.h>
 #include <Eigen/Eigen>
-// #include <Eigen/Sparse>
+#include <chrono>
 #include <iostream>
 #include <stdexcept>
 
@@ -132,6 +132,8 @@ Fem_field& Fem_field::subdivide() {
 }
 
 Fem_field& Fem_field::solve_poisson_equation() {
+  using real_type = float;
+
   std::vector<int> is_boundary(vertex_data_.size(), 0);
   for (const auto& pair : edge_data_) {
     if (pair.second != 1 && pair.second != -1) continue;
@@ -144,9 +146,10 @@ Fem_field& Fem_field::solve_poisson_equation() {
     if (is_boundary[i] == 0) inner_vertices.push_back(i);
   }
 
-  std::vector<Eigen::Triplet<double>> stiffness_triplets;
-  std::vector<Eigen::Triplet<double>> mass_triplets;
-  Eigen::VectorXd approx_rhs = Eigen::VectorXd::Zero(vertex_data_.size());
+  std::vector<Eigen::Triplet<real_type>> stiffness_triplets;
+  std::vector<Eigen::Triplet<real_type>> mass_triplets;
+  Eigen::Matrix<real_type, Eigen::Dynamic, 1> approx_rhs =
+      Eigen::Matrix<real_type, Eigen::Dynamic, 1>::Zero(vertex_data_.size());
 
   for (const auto& primitive : primitive_data_) {
     Fem_field::vertex_type edge[3];
@@ -156,22 +159,22 @@ Fem_field& Fem_field::solve_poisson_equation() {
           vertex_data()[primitive[(i + 1) % 3]] - vertex_data()[primitive[i]];
     }
 
-    const double area =
+    const real_type area =
         0.5 * std::abs(-edge[0].x() * edge[2].y() + edge[0].y() * edge[2].x());
-    const double inverse_area_4 = 0.25 / area;
+    const real_type inverse_area_4 = 0.25 / area;
 
     for (unsigned int i = 0; i < 3; ++i) {
       for (unsigned int j = 0; j < 3; ++j) {
-        const double stiffness_value =
+        const real_type stiffness_value =
             inverse_area_4 * edge[(i + 1) % 3].dot(edge[(j + 1) % 3]);
         stiffness_triplets.push_back(
             {primitive[i], primitive[j], stiffness_value});
 
-        const double mass_value = ((i == j) ? (2.0) : (1.0)) * area / 12.0;
+        const real_type mass_value = ((i == j) ? (2.0) : (1.0)) * area / 12.0;
         mass_triplets.push_back({primitive[i], primitive[j], mass_value});
       }
 
-      const double mean_force =
+      const real_type mean_force =
           (volume_force()[primitive[0]] + volume_force()[primitive[1]] +
            volume_force()[primitive[2]]) /
           3.0f;
@@ -179,28 +182,29 @@ Fem_field& Fem_field::solve_poisson_equation() {
     }
   }
 
-  Eigen::SparseMatrix<double> stiffness_matrix(vertex_data().size(),
-                                               vertex_data().size());
+  Eigen::SparseMatrix<real_type> stiffness_matrix(vertex_data().size(),
+                                                  vertex_data().size());
   stiffness_matrix.setFromTriplets(stiffness_triplets.begin(),
                                    stiffness_triplets.end());
 
-  Eigen::SparseMatrix<double> mass_matrix(vertex_data_.size(),
-                                          vertex_data_.size());
+  Eigen::SparseMatrix<real_type> mass_matrix(vertex_data_.size(),
+                                             vertex_data_.size());
   mass_matrix.setFromTriplets(mass_triplets.begin(), mass_triplets.end());
 
   Eigen::Map<Eigen::VectorXf> force(volume_force_.data(), volume_force_.size());
-  Eigen::VectorXd rhs = 3.0 * mass_matrix * force.cast<double>();
-  // Eigen::VectorXd rhs = approx_rhs;
+  Eigen::Matrix<real_type, Eigen::Dynamic, 1> rhs = 3.0 * mass_matrix * force;
+  // Eigen::Matrix<real_type, Eigen::Dynamic,1> rhs = approx_rhs;
 
-  Eigen::VectorXd inner_rhs = Eigen::VectorXd::Zero(inner_vertices.size());
+  Eigen::Matrix<real_type, Eigen::Dynamic, 1> inner_rhs =
+      Eigen::Matrix<real_type, Eigen::Dynamic, 1>::Zero(inner_vertices.size());
   for (auto i = 0; i < inner_vertices.size(); ++i) {
     inner_rhs[i] = rhs[inner_vertices[i]];
   }
 
-  Eigen::SparseMatrix<double> inner_stiffness_matrix(inner_vertices.size(),
-                                                     inner_vertices.size());
-  Eigen::SparseMatrix<double> inner_mass_matrix(inner_vertices.size(),
-                                                inner_vertices.size());
+  Eigen::SparseMatrix<real_type> inner_stiffness_matrix(inner_vertices.size(),
+                                                        inner_vertices.size());
+  Eigen::SparseMatrix<real_type> inner_mass_matrix(inner_vertices.size(),
+                                                   inner_vertices.size());
 
   for (auto i = 0; i < inner_vertices.size(); ++i) {
     for (auto j = 0; j < inner_vertices.size(); ++j) {
@@ -211,10 +215,18 @@ Fem_field& Fem_field::solve_poisson_equation() {
     }
   }
 
-  Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>, Eigen::Upper> solver;
+  const auto start = std::chrono::system_clock::now();
+  // Eigen::SimplicialLDLT<Eigen::SparseMatrix<real_type>, Eigen::Upper> solver;
+  Eigen::ConjugateGradient<Eigen::SparseMatrix<real_type>> solver;
   solver.compute(inner_stiffness_matrix);
+  const auto end = std::chrono::system_clock::now();
 
-  Eigen::VectorXd x = Eigen::VectorXd::Zero(inner_vertices.size());
+  std::cout << "sparse solver time = "
+            << std::chrono::duration<float>(end - start).count() << " s"
+            << std::endl;
+
+  Eigen::Matrix<real_type, Eigen::Dynamic, 1> x =
+      Eigen::Matrix<real_type, Eigen::Dynamic, 1>::Zero(inner_vertices.size());
   x = solver.solve(inner_rhs);
 
   for (auto i = 0; i < values_.size(); ++i) {

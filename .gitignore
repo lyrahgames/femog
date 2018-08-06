@@ -18,6 +18,8 @@ sections/*
 code/*
 !code/tests
 code/tests/*
+!code/glsxx
+code/glsxx/*
 
 !*.cc
 !*.h

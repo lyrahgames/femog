@@ -2,6 +2,7 @@
 #include <sstream>
 
 #include <QApplication>
+#include <QSurfaceFormat>
 
 #include <viewer.h>
 
@@ -16,6 +17,11 @@ int main(int argc, char* argv[]) {
   std::string file_path{argv[1]};
   int subdivision_count{0};
   if (argc == 3) std::stringstream{argv[2]} >> subdivision_count;
+
+  QSurfaceFormat surface_format;
+  surface_format.setVersion(3, 3);
+  surface_format.setProfile(QSurfaceFormat::CoreProfile);
+  QSurfaceFormat::setDefaultFormat(surface_format);
 
   QApplication application(argc, argv);
   Femog::Viewer viewer;

@@ -1,10 +1,15 @@
 #ifndef FEMOG_VIEWER_H_
 #define FEMOG_VIEWER_H_
 
+#include <memory>
 #include <string>
 #include <vector>
 
+#include <GL/glew.h>
 #include <GL/glu.h>
+
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <Eigen/Dense>
 
 #include <QKeyEvent>
@@ -15,6 +20,10 @@
 #include <camera.h>
 #include <fem_field.h>
 #include <isometry.h>
+
+#include "glsxx/element_array_buffer.h"
+#include "glsxx/program.h"
+#include "glsxx/vertex_array.h"
 
 namespace Femog {
 
@@ -40,6 +49,15 @@ class Viewer : public QOpenGLWidget {
   void keyReleaseEvent(QKeyEvent* event) override;
 
  private:
+  glm::mat4 model_view_projection;
+  GLuint matrix_id;
+
+  std::unique_ptr<Vertex_array> vertex_array;
+  std::unique_ptr<Program> program;
+  std::unique_ptr<Array_buffer> vertex_buffer;
+  std::unique_ptr<Array_buffer> color_buffer;
+  std::unique_ptr<Element_array_buffer> element_buffer;
+
   int old_mouse_x = 0;
   int old_mouse_y = 0;
   float eye_distance = 10.0f;
