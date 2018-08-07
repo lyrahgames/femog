@@ -51,10 +51,12 @@ class Viewer : public QOpenGLWidget {
  private:
   glm::mat4 model_view_projection;
   GLuint matrix_id;
+  GLuint light_id;
 
   std::unique_ptr<Vertex_array> vertex_array;
   std::unique_ptr<Program> program;
   std::unique_ptr<Array_buffer> vertex_buffer;
+  std::unique_ptr<Array_buffer> normal_buffer;
   std::unique_ptr<Array_buffer> color_buffer;
   std::unique_ptr<Element_array_buffer> element_buffer;
 

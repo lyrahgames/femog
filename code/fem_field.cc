@@ -134,6 +134,7 @@ Fem_field& Fem_field::subdivide() {
 Fem_field& Fem_field::solve_poisson_equation() {
   using real_type = float;
 
+  const auto inner_start = std::chrono::system_clock::now();
   std::vector<int> is_boundary(vertex_data_.size(), 0);
   for (const auto& pair : edge_data_) {
     if (pair.second != 1 && pair.second != -1) continue;
@@ -145,7 +146,12 @@ Fem_field& Fem_field::solve_poisson_equation() {
   for (auto i = 0; i < vertex_data_.size(); ++i) {
     if (is_boundary[i] == 0) inner_vertices.push_back(i);
   }
+  const auto inner_end = std::chrono::system_clock::now();
+  std::cout << "inner vertices time = "
+            << std::chrono::duration<float>(inner_end - inner_start).count()
+            << " s" << std::endl;
 
+  const auto primitive_start = std::chrono::system_clock::now();
   std::vector<Eigen::Triplet<real_type>> stiffness_triplets;
   std::vector<Eigen::Triplet<real_type>> mass_triplets;
   Eigen::Matrix<real_type, Eigen::Dynamic, 1> approx_rhs =
@@ -181,7 +187,13 @@ Fem_field& Fem_field::solve_poisson_equation() {
       approx_rhs[primitive[i]] += (area * mean_force);
     }
   }
+  const auto primitive_end = std::chrono::system_clock::now();
+  std::cout
+      << "primitive time = "
+      << std::chrono::duration<float>(primitive_end - primitive_start).count()
+      << " s" << std::endl;
 
+  const auto assemble_start = std::chrono::system_clock::now();
   Eigen::SparseMatrix<real_type> stiffness_matrix(vertex_data().size(),
                                                   vertex_data().size());
   stiffness_matrix.setFromTriplets(stiffness_triplets.begin(),
@@ -190,6 +202,11 @@ Fem_field& Fem_field::solve_poisson_equation() {
   Eigen::SparseMatrix<real_type> mass_matrix(vertex_data_.size(),
                                              vertex_data_.size());
   mass_matrix.setFromTriplets(mass_triplets.begin(), mass_triplets.end());
+  const auto assemble_end = std::chrono::system_clock::now();
+  std::cout
+      << "direct assemble time = "
+      << std::chrono::duration<float>(assemble_end - assemble_start).count()
+      << " s" << std::endl;
 
   Eigen::Map<Eigen::VectorXf> force(volume_force_.data(), volume_force_.size());
   Eigen::Matrix<real_type, Eigen::Dynamic, 1> rhs = 3.0 * mass_matrix * force;
@@ -206,6 +223,7 @@ Fem_field& Fem_field::solve_poisson_equation() {
   Eigen::SparseMatrix<real_type> inner_mass_matrix(inner_vertices.size(),
                                                    inner_vertices.size());
 
+  const auto misc_start = std::chrono::system_clock::now();
   for (auto i = 0; i < inner_vertices.size(); ++i) {
     for (auto j = 0; j < inner_vertices.size(); ++j) {
       inner_stiffness_matrix.insert(i, j) =
@@ -214,20 +232,23 @@ Fem_field& Fem_field::solve_poisson_equation() {
           mass_matrix.coeffRef(inner_vertices[i], inner_vertices[j]);
     }
   }
+  const auto misc_end = std::chrono::system_clock::now();
+  std::cout << "misc time = "
+            << std::chrono::duration<float>(misc_end - misc_start).count()
+            << " s" << std::endl;
 
   const auto start = std::chrono::system_clock::now();
   // Eigen::SimplicialLDLT<Eigen::SparseMatrix<real_type>, Eigen::Upper> solver;
   Eigen::ConjugateGradient<Eigen::SparseMatrix<real_type>> solver;
   solver.compute(inner_stiffness_matrix);
-  const auto end = std::chrono::system_clock::now();
-
-  std::cout << "sparse solver time = "
-            << std::chrono::duration<float>(end - start).count() << " s"
-            << std::endl;
 
   Eigen::Matrix<real_type, Eigen::Dynamic, 1> x =
       Eigen::Matrix<real_type, Eigen::Dynamic, 1>::Zero(inner_vertices.size());
   x = solver.solve(inner_rhs);
+  const auto end = std::chrono::system_clock::now();
+  std::cout << "sparse solver time = "
+            << std::chrono::duration<float>(end - start).count() << " s"
+            << std::endl;
 
   for (auto i = 0; i < values_.size(); ++i) {
     values_[i] = 0;

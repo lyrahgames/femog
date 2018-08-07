@@ -23,6 +23,7 @@ code/glsxx/*
 
 !*.cc
 !*.h
+!*.glsl
 !CMakeLists.txt
 
 # data whitelist
