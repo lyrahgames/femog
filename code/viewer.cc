@@ -274,7 +274,7 @@ void Viewer::keyPressEvent(QKeyEvent* event) {
         0.5f * (bounding_box_min + bounding_box_max), {0, 0, 1}, {0, 1, 0}};
   } else if (event->text() == "f") {
     render_volume_force = !render_volume_force;
-  } else if (event->text() == 'v') {
+  } else if (event->text() == "v") {
     render_vertices_switch = !render_vertices_switch;
   }
 
