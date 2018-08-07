@@ -146,6 +146,11 @@ Fem_field& Fem_field::solve_poisson_equation() {
   for (auto i = 0; i < vertex_data_.size(); ++i) {
     if (is_boundary[i] == 0) inner_vertices.push_back(i);
   }
+  std::vector<int> inverse_inner_vertices(vertex_data_.size(), -1);
+  int inner_index = 0;
+  for (auto i = 0; i < inner_vertices.size(); ++i) {
+    inverse_inner_vertices[inner_vertices[i]] = i;
+  }
   const auto inner_end = std::chrono::system_clock::now();
   std::cout << "inner vertices time = "
             << std::chrono::duration<float>(inner_end - inner_start).count()
@@ -153,7 +158,9 @@ Fem_field& Fem_field::solve_poisson_equation() {
 
   const auto primitive_start = std::chrono::system_clock::now();
   std::vector<Eigen::Triplet<real_type>> stiffness_triplets;
+  std::vector<Eigen::Triplet<real_type>> inner_stiffness_triplets;
   std::vector<Eigen::Triplet<real_type>> mass_triplets;
+  std::vector<Eigen::Triplet<real_type>> inner_mass_triplets;
   Eigen::Matrix<real_type, Eigen::Dynamic, 1> approx_rhs =
       Eigen::Matrix<real_type, Eigen::Dynamic, 1>::Zero(vertex_data_.size());
 
@@ -178,6 +185,15 @@ Fem_field& Fem_field::solve_poisson_equation() {
 
         const real_type mass_value = ((i == j) ? (2.0) : (1.0)) * area / 12.0;
         mass_triplets.push_back({primitive[i], primitive[j], mass_value});
+
+        if (is_boundary[primitive[i]] == 0 && is_boundary[primitive[j]] == 0) {
+          inner_stiffness_triplets.push_back(
+              {inverse_inner_vertices[primitive[i]],
+               inverse_inner_vertices[primitive[j]], stiffness_value});
+          inner_mass_triplets.push_back({inverse_inner_vertices[primitive[i]],
+                                         inverse_inner_vertices[primitive[j]],
+                                         mass_value});
+        }
       }
 
       const real_type mean_force =
@@ -224,14 +240,18 @@ Fem_field& Fem_field::solve_poisson_equation() {
                                                    inner_vertices.size());
 
   const auto misc_start = std::chrono::system_clock::now();
-  for (auto i = 0; i < inner_vertices.size(); ++i) {
-    for (auto j = 0; j < inner_vertices.size(); ++j) {
-      inner_stiffness_matrix.insert(i, j) =
-          stiffness_matrix.coeffRef(inner_vertices[i], inner_vertices[j]);
-      inner_mass_matrix.insert(i, j) =
-          mass_matrix.coeffRef(inner_vertices[i], inner_vertices[j]);
-    }
-  }
+  // for (auto i = 0; i < inner_vertices.size(); ++i) {
+  //   for (auto j = 0; j < inner_vertices.size(); ++j) {
+  //     inner_stiffness_matrix.insert(i, j) =
+  //         stiffness_matrix.coeffRef(inner_vertices[i], inner_vertices[j]);
+  //     inner_mass_matrix.insert(i, j) =
+  //         mass_matrix.coeffRef(inner_vertices[i], inner_vertices[j]);
+  //   }
+  // }
+  inner_stiffness_matrix.setFromTriplets(inner_stiffness_triplets.begin(),
+                                         inner_stiffness_triplets.end());
+  inner_mass_matrix.setFromTriplets(inner_mass_triplets.begin(),
+                                    inner_mass_triplets.end());
   const auto misc_end = std::chrono::system_clock::now();
   std::cout << "misc time = "
             << std::chrono::duration<float>(misc_end - misc_start).count()

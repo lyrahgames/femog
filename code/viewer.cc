@@ -220,7 +220,8 @@ void Viewer::paintGL() {
 
   vertex_buffer->bind();
   glPointSize(3.0f);
-  glDrawArrays(GL_POINTS, 0, vertex_buffer_data.size());
+  if (render_vertices_switch)
+    glDrawArrays(GL_POINTS, 0, vertex_buffer_data.size());
 }
 
 void Viewer::mousePressEvent(QMouseEvent* event) {}
@@ -273,6 +274,8 @@ void Viewer::keyPressEvent(QKeyEvent* event) {
         0.5f * (bounding_box_min + bounding_box_max), {0, 0, 1}, {0, 1, 0}};
   } else if (event->text() == "f") {
     render_volume_force = !render_volume_force;
+  } else if (event->text() == 'v') {
+    render_vertices_switch = !render_vertices_switch;
   }
 
   compute_look_at();
