@@ -177,9 +177,15 @@ TEST_CASE("The FEM domain") {
     //     .add_vertex({1, 1})
     //     .add_quad({0, 1, 2, 3})
     //     .subdivide();
+
     domain << Domain2f::Vertex{0, 0} << Domain2f::Vertex{0, 1}
            << Domain2f::Vertex{1, 0} << Domain2f::Vertex{1, 1}
            << Domain2f::Quad{0, 1, 2, 3};
+
+    CHECK(domain.vertex_data().size() == 4);
+    CHECK(domain.primitive_data().size() == 2);
+    CHECK(domain.edge_map().size() == 5);
+
     domain.subdivide();
 
     CHECK(domain.vertex_data().size() == 9);
