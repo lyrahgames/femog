@@ -1,6 +1,6 @@
 #include <doctest/doctest.h>
 
-#include <domain.h>
+#include <fem/domain.h>
 #include <Eigen/Dense>
 
 TEST_CASE("The FEM domain") {
