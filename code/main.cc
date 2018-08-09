@@ -20,6 +20,7 @@ int main(int argc, char* argv[]) {
 
   QSurfaceFormat surface_format;
   surface_format.setVersion(3, 3);
+  surface_format.setSamples(10);
   surface_format.setProfile(QSurfaceFormat::CoreProfile);
   QSurfaceFormat::setDefaultFormat(surface_format);
 

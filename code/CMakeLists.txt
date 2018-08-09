@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(fem_on_gpu VERSION 0.1.0 LANGUAGES CXX)
+project(femog VERSION 0.1.0 LANGUAGES CXX)
 
 enable_testing()
 find_package(doctest REQUIRED)
@@ -11,6 +11,8 @@ find_package(Eigen3 REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
+
+add_subdirectory(fem)
 
 add_library(femog
   camera.cc

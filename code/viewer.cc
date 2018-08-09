@@ -129,6 +129,11 @@ void Viewer::initializeGL() {
     throw std::runtime_error("Failed to initialize GLEW!");
 
   glEnable(GL_DEPTH_TEST);
+  // glEnable(GL_MULTISAMPLE);
+  // glEnable(GL_POINT_SMOOTH);
+  // glEnable(GL_BLEND);
+  // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glPointSize(5.0f);
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glClearColor(1.0, 1.0, 1.0, 1.0);
 
@@ -240,7 +245,6 @@ void Viewer::paintGL() {
   (*vertex_array).disable_attribute(2).disable_attribute(1);
 
   vertex_buffer->bind();
-  glPointSize(3.0f);
   if (render_vertices_switch)
     glDrawArrays(GL_POINTS, 0, vertex_buffer_data.size());
 }
@@ -314,7 +318,7 @@ void Viewer::compute_look_at() {
   camera.look_at(position, world.origin(), world.basis_y());
 
   glm::mat4 projection = glm::perspective(
-      glm::radians(45.0f), (float)width() / (float)height(), 0.1f, 100.0f);
+      glm::radians(45.0f), (float)width() / (float)height(), 0.001f, 100.0f);
   glm::mat4 view = glm::lookAt(
       glm::vec3(position[0], position[1], position[2]),
       glm::vec3(world.origin()[0], world.origin()[1], world.origin()[2]),
