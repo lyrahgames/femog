@@ -614,7 +614,7 @@ Fem_field& Fem_field::solve_wave_equation(float dt) {
   // }
   // inner_rhs = inner_mass_matrix * y - dt * inner_stiffness_matrix * x;
   const float c = 2.0f;
-  const float gamma = 10.0f;
+  const float gamma = 0.0f;
   Eigen::VectorXf boundary = Eigen::VectorXf::Zero(vertex_data_.size());
   boundary[0] = 1.0f;
   // static float time = 0.0f;
