@@ -66,7 +66,8 @@ class Fem_field {
   Fem_field& subdivide();
 
   Fem_field& solve_poisson_equation();
-  Fem_field& solve_heat_equation();
+  Fem_field& solve_heat_equation(float dt);
+  Fem_field& solve_wave_equation(float dt);
 
  private:
   std::vector<vertex_type> vertex_data_;

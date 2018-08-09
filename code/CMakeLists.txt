@@ -7,8 +7,10 @@ find_package(doctest REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(glm REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(Qt5Widgets REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+
+set(CMAKE_AUTOMOC ON)
 
 add_library(femog
   camera.cc

@@ -28,6 +28,8 @@
 namespace Femog {
 
 class Viewer : public QOpenGLWidget {
+  Q_OBJECT
+
  public:
   Viewer(QWidget* parent = nullptr);
 
@@ -47,6 +49,9 @@ class Viewer : public QOpenGLWidget {
   void wheelEvent(QWheelEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;
   void keyReleaseEvent(QKeyEvent* event) override;
+
+ private slots:
+  void loop_slot();
 
  private:
   glm::mat4 model_view_projection;

@@ -7,6 +7,7 @@
 #include <stdexcept>
 
 #include <QApplication>
+#include <QTimer>
 
 #include "fem_field_loader.h"
 
@@ -16,6 +17,11 @@ Viewer::Viewer(QWidget* parent) : QOpenGLWidget(parent) {
   setMouseTracking(true);
   world = Isometry{{}, {0, -1, 0}, {0, 0, 1}};
   eye_azimuth = eye_altitude = M_PI_4;
+
+  QTimer* timer = new QTimer(this);
+  connect(timer, SIGNAL(timeout()), this, SLOT(repaint()));
+  connect(timer, SIGNAL(timeout()), this, SLOT(loop_slot()));
+  timer->start(1000.0f / 60.0f);
 }
 
 void Viewer::load(const std::string& file_path) {
@@ -76,18 +82,20 @@ void Viewer::set_analytic_volume_force() {
     //                 sigma2) /
     //        std::sqrt(sigma2);
 
-    return std::exp(
-               -(vertex - Fem_field::vertex_type{0.25, 0.25}).squaredNorm() /
-               sigma2) /
+    return 0.1f *
+               std::exp(-(vertex - Fem_field::vertex_type{0.25, 0.25})
+                             .squaredNorm() /
+                        sigma2) /
                std::sqrt(sigma2) -
-           std::exp(
-               -(vertex - Fem_field::vertex_type{0.75, 0.75}).squaredNorm() /
-               sigma2) /
+           0.1f *
+               std::exp(-(vertex - Fem_field::vertex_type{0.75, 0.75})
+                             .squaredNorm() /
+                        sigma2) /
                std::sqrt(sigma2);
   };
 
   for (auto i = 0; i < field.vertex_data().size(); ++i) {
-    field.values()[i] = f(field.vertex_data()[i]);
+    field.values()[i] = g(field.vertex_data()[i]);
     field.volume_force()[i] = g(field.vertex_data()[i]);
   }
 
@@ -96,15 +104,25 @@ void Viewer::set_analytic_volume_force() {
 
 void Viewer::solve() {
   const auto start = std::chrono::system_clock::now();
-  field.solve_poisson_equation();
+  // field.solve_poisson_equation();
   const auto end = std::chrono::system_clock::now();
 
   const auto time = std::chrono::duration<float>(end - start).count();
 
   std::cout << "solving time = " << time << " s" << std::endl;
 
+  // for (auto i = 0; i < field.vertex_data().size(); ++i) {
+  //   field.values()[i] = 0;
+  //   field.volume_force()[i] = 0;
+  //   // field.volume_force()[i] = field.values()[i];
+  // }
+
+  // field.volume_force()[0] = 1;
+
   compute_automatic_view();
 }
+
+void Viewer::loop_slot() {}
 
 void Viewer::initializeGL() {
   if (glewInit() != GLEW_OK)
@@ -154,6 +172,9 @@ void Viewer::paintGL() {
   glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &model_view_projection[0][0]);
   glUniform3f(light_id, camera.position().x(), camera.position().y(),
               camera.position().z());
+
+  // field.solve_heat_equation(0.00001f);
+  field.solve_wave_equation(0.001f);
 
   std::vector<float> vertex_buffer_data(field.vertex_data().size() * 3);
   float max = -INFINITY;
