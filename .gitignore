@@ -29,7 +29,7 @@ code/glsxx/*
 
 # data whitelist
 !data
-!data/*.txt
+!data/**
 
 !README.md
 

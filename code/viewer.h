@@ -76,6 +76,9 @@ class Viewer : public QOpenGLWidget {
   Isometry world;
   Fem_field field;
   Femog::Fem::System system;
+  Femog::Fem::System3 system3;
+  std::vector<Eigen::Vector3f> system_normals;
+  bool obj_switch = false;
   Eigen::Vector3f bounding_box_min;
   Eigen::Vector3f bounding_box_max;
   bool render_volume_force = false;

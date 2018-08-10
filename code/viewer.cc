@@ -26,40 +26,31 @@ Viewer::Viewer(QWidget* parent) : QOpenGLWidget(parent) {
 }
 
 void Viewer::load(const std::string& file_path) {
-  field = fem_field_file(file_path);
-  load_domain_from_file(system.domain(), file_path);
+  obj_switch = (file_path.rfind(".obj") != std::string::npos);
 
-  std::cout << "old domain:" << std::endl
-            << "vertex count = " << field.vertex_data().size() << std::endl
-            << "primitive count = " << field.primitive_data().size()
-            << std::endl
-            << "edge_count = " << field.edge_data().size() << std::endl
-            << std::endl;
-
-  std::cout << "domain:" << std::endl
-            << "vertex count = " << system.domain().vertex_data().size()
-            << std::endl
-            << "primitive count = " << system.domain().primitive_data().size()
-            << std::endl
-            << "edge_count = " << system.domain().edge_map().size() << std::endl
-            << std::endl;
-
-  compute_automatic_view();
-}
-
-void Viewer::subdivide(int count) {
-  for (auto i = 0; i < count; ++i) {
-    field.subdivide();
-    system.domain().subdivide();
-
-    std::cout << "old subdivision " << i + 1 << ":" << std::endl
-              << "vertex count = " << field.vertex_data().size() << std::endl
-              << "primitive count = " << field.primitive_data().size()
+  if (obj_switch) {
+    Femog::Fem::load_domain_from_obj(system3.domain(), system_normals,
+                                     file_path);
+    std::cout << "domain:" << std::endl
+              << "vertex count = " << system3.domain().vertex_data().size()
               << std::endl
-              << "edge_count = " << field.edge_data().size() << std::endl
+              << "primitive count = "
+              << system3.domain().primitive_data().size() << std::endl
+              << "edge_count = " << system3.domain().edge_map().size()
+              << std::endl
               << std::endl;
+  } else {
+    field = fem_field_file(file_path);
+    Femog::Fem::load_domain_from_file(system.domain(), file_path);
 
-    std::cout << "subdivision " << i + 1 << ":" << std::endl
+    // std::cout << "old domain:" << std::endl
+    //           << "vertex count = " << field.vertex_data().size() << std::endl
+    //           << "primitive count = " << field.primitive_data().size()
+    //           << std::endl
+    //           << "edge_count = " << field.edge_data().size() << std::endl
+    //           << std::endl;
+
+    std::cout << "domain:" << std::endl
               << "vertex count = " << system.domain().vertex_data().size()
               << std::endl
               << "primitive count = " << system.domain().primitive_data().size()
@@ -72,38 +63,90 @@ void Viewer::subdivide(int count) {
   compute_automatic_view();
 }
 
+void Viewer::subdivide(int count) {
+  for (auto i = 0; i < count; ++i) {
+    // field.subdivide();
+
+    if (obj_switch) {
+      system3.domain().subdivide();
+      std::cout << "subdivision " << i + 1 << ":" << std::endl
+                << "vertex count = " << system.domain().vertex_data().size()
+                << std::endl
+                << "primitive count = "
+                << system.domain().primitive_data().size() << std::endl
+                << "edge_count = " << system.domain().edge_map().size()
+                << std::endl
+                << std::endl;
+    } else {
+      system.domain().subdivide();
+      std::cout << "subdivision " << i + 1 << ":" << std::endl
+                << "vertex count = " << system.domain().vertex_data().size()
+                << std::endl
+                << "primitive count = "
+                << system.domain().primitive_data().size() << std::endl
+                << "edge_count = " << system.domain().edge_map().size()
+                << std::endl
+                << std::endl;
+    }
+  }
+
+  compute_automatic_view();
+}
+
 void Viewer::set_analytic_volume_force() {
-  auto f = [](const Fem_field::vertex_type& vertex) {
-    // return std::sin(3.0f * vertex.x()) * std::cos(vertex.y());
-    return 0;
-  };
+  if (obj_switch) {
+    auto g = [](const Eigen::Vector3f& vertex) {
+      const float sigma2 = 0.05;
+      return 0.1f * std::exp(-(vertex).squaredNorm() / sigma2) /
+             std::sqrt(sigma2);
+    };
+    const float sigma2 =
+        0.05f * 0.5f * (bounding_box_max - bounding_box_min).norm();
 
-  auto g = [](const Fem_field::vertex_type& vertex) {
-    const float sigma2 = 0.01;
-    return 0.1f *
-           std::exp(-(vertex - Fem_field::vertex_type{0.5, 0.5}).squaredNorm() /
-                    sigma2) /
-           std::sqrt(sigma2);
+    for (auto i = 0; i < system3.domain().vertex_data().size(); ++i) {
+      // system3.wave()[i] = g(system3.domain().vertex_data()[i]);
+      system3.wave()[i] = 0.1f *
+                          std::exp(-(system3.domain().vertex_data()[i] -
+                                     system3.domain().vertex_data()[0])
+                                        .squaredNorm() /
+                                   sigma2) /
+                          std::sqrt(sigma2);
+      system3.evolution()[i] = 0;
+    }
+  } else {
+    auto f = [](const Fem_field::vertex_type& vertex) {
+      // return std::sin(3.0f * vertex.x()) * std::cos(vertex.y());
+      return 0;
+    };
 
-    // return 0.1f *
-    //            std::exp(-(vertex - Fem_field::vertex_type{0.25, 0.25})
-    //                          .squaredNorm() /
-    //                     sigma2) /
-    //            std::sqrt(sigma2) -
-    //        0.1f *
-    //            std::exp(-(vertex - Fem_field::vertex_type{0.75, 0.75})
-    //                          .squaredNorm() /
-    //                     sigma2) /
-    //            std::sqrt(sigma2);
-  };
+    auto g = [](const Fem_field::vertex_type& vertex) {
+      const float sigma2 = 0.01;
+      return 0.1f *
+             std::exp(
+                 -(vertex - Fem_field::vertex_type{0.5, 0.5}).squaredNorm() /
+                 sigma2) /
+             std::sqrt(sigma2);
 
-  for (auto i = 0; i < field.vertex_data().size(); ++i) {
-    field.values()[i] = g(field.vertex_data()[i]);
-    // field.volume_force()[i] = g(field.vertex_data()[i]);
-    field.volume_force()[i] = 0;
+      // return 0.1f *
+      //            std::exp(-(vertex - Fem_field::vertex_type{0.25, 0.25})
+      //                          .squaredNorm() /
+      //                     sigma2) /
+      //            std::sqrt(sigma2) -
+      //        0.1f *
+      //            std::exp(-(vertex - Fem_field::vertex_type{0.75, 0.75})
+      //                          .squaredNorm() /
+      //                     sigma2) /
+      //            std::sqrt(sigma2);
+    };
 
-    system.wave()[i] = g(system.domain().vertex_data()[i]);
-    system.evolution()[i] = -system.wave()[i];
+    for (auto i = 0; i < system.domain().vertex_data().size(); ++i) {
+      // field.values()[i] = g(field.vertex_data()[i]);
+      // field.volume_force()[i] = g(field.vertex_data()[i]);
+      // field.volume_force()[i] = 0;
+
+      system.wave()[i] = g(system.domain().vertex_data()[i]);
+      system.evolution()[i] = -system.wave()[i];
+    }
   }
 
   compute_automatic_view();
@@ -188,132 +231,236 @@ void Viewer::paintGL() {
   // field.solve_heat_equation(0.00001f);
   // field.solve_wave_equation(0.001f);
 
-  system.dt() = 0.001f;
-  system.solve();
+  if (obj_switch) {
+    system3.dt() = 0.001f;
+    system3.solve();
 
-  // std::vector<float> vertex_buffer_data(field.vertex_data().size() * 3);
-  std::vector<float> vertex_buffer_data(system.domain().vertex_data().size() *
-                                        3);
-  float max = -INFINITY;
-  float min = INFINITY;
-  // for (auto i = 0; i < field.vertex_data().size(); ++i) {
-  //   vertex_buffer_data[3 * i + 0] = field.vertex_data()[i].x();
-  //   vertex_buffer_data[3 * i + 1] = field.vertex_data()[i].y();
-  //   vertex_buffer_data[3 * i + 2] = field.values()[i];
+    // std::vector<float> vertex_buffer_data(field.vertex_data().size() * 3);
+    std::vector<float> vertex_buffer_data(
+        system3.domain().vertex_data().size() * 3);
+    float max = -INFINITY;
+    float min = INFINITY;
+    // for (auto i = 0; i < field.vertex_data().size(); ++i) {
+    //   vertex_buffer_data[3 * i + 0] = field.vertex_data()[i].x();
+    //   vertex_buffer_data[3 * i + 1] = field.vertex_data()[i].y();
+    //   vertex_buffer_data[3 * i + 2] = field.values()[i];
 
-  //   max = std::max(max, field.values()[i]);
-  //   min = std::min(min, field.values()[i]);
-  // }
-  for (auto i = 0; i < system.domain().vertex_data().size(); ++i) {
-    vertex_buffer_data[3 * i + 0] = system.domain().vertex_data()[i].x();
-    vertex_buffer_data[3 * i + 1] = system.domain().vertex_data()[i].y();
-    vertex_buffer_data[3 * i + 2] = system.wave()[i];
+    //   max = std::max(max, field.values()[i]);
+    //   min = std::min(min, field.values()[i]);
+    // }
+    for (auto i = 0; i < system3.domain().vertex_data().size(); ++i) {
+      vertex_buffer_data[3 * i + 0] =
+          system3.domain().vertex_data()[i].x() +
+          0.5f * (bounding_box_max - bounding_box_min).norm() *
+              system3.wave()[i] * system_normals[i].x();
+      vertex_buffer_data[3 * i + 1] =
+          system3.domain().vertex_data()[i].y() +
+          0.5f * (bounding_box_max - bounding_box_min).norm() *
+              system3.wave()[i] * system_normals[i].y();
+      vertex_buffer_data[3 * i + 2] =
+          system3.domain().vertex_data()[i].z() +
+          0.5f * (bounding_box_max - bounding_box_min).norm() *
+              system3.wave()[i] * system_normals[i].z();
 
-    max = std::max(max, system.wave()[i]);
-    min = std::min(min, system.wave()[i]);
-  }
-  vertex_buffer->set_data(vertex_buffer_data);
+      max = std::max(max, system3.wave()[i]);
+      min = std::min(min, system3.wave()[i]);
+    }
+    vertex_buffer->set_data(vertex_buffer_data);
 
-  // std::vector<float> normal_buffer_data(field.vertex_data().size() * 3,
-  // 0.0f); std::vector<int> element_buffer_data(field.primitive_data().size() *
-  // 3); for (auto i = 0; i < field.primitive_data().size(); ++i) {
-  //   Eigen::Vector3f vertex[3];
-  //   for (int k = 0; k < 3; ++k) {
-  //     for (int p = 0; p < 3; ++p) {
-  //       vertex[k][p] = vertex_buffer_data[3 * field.primitive_data()[i][k] +
-  //       p];
-  //     }
-  //   }
+    std::vector<float> normal_buffer_data(
+        system3.domain().vertex_data().size() * 3, 0.0f);
+    std::vector<int> element_buffer_data(
+        system3.domain().primitive_data().size() * 3);
+    for (auto i = 0; i < system3.domain().primitive_data().size(); ++i) {
+      Eigen::Vector3f vertex[3];
+      for (int k = 0; k < 3; ++k) {
+        for (int p = 0; p < 3; ++p) {
+          vertex[k][p] =
+              vertex_buffer_data[3 * system3.domain().primitive_data()[i][k] +
+                                 p];
+        }
+      }
 
-  //   Eigen::Vector3f normal =
-  //       (vertex[1] - vertex[0]).cross(vertex[2] - vertex[0]);
-  //   normal.normalize();
-  //   if (normal.z() < 0) normal = -normal;
+      Eigen::Vector3f normal =
+          (vertex[1] - vertex[0]).cross(vertex[2] - vertex[0]);
+      normal.normalize();
+      if (normal.dot(system_normals[system3.domain().primitive_data()[i][0]]) <
+          0)
+        normal = -normal;
 
-  //   for (auto v = 0; v < 3; ++v) {
-  //     element_buffer_data[3 * i + v] = field.primitive_data()[i][v];
-  //     normal_buffer_data[3 * field.primitive_data()[i][v] + 0] += normal.x();
-  //     normal_buffer_data[3 * field.primitive_data()[i][v] + 1] += normal.y();
-  //     normal_buffer_data[3 * field.primitive_data()[i][v] + 2] += normal.z();
-  //   }
-  // }
-  std::vector<float> normal_buffer_data(
-      system.domain().vertex_data().size() * 3, 0.0f);
-  std::vector<int> element_buffer_data(system.domain().primitive_data().size() *
-                                       3);
-  for (auto i = 0; i < system.domain().primitive_data().size(); ++i) {
-    Eigen::Vector3f vertex[3];
-    for (int k = 0; k < 3; ++k) {
-      for (int p = 0; p < 3; ++p) {
-        vertex[k][p] =
-            vertex_buffer_data[3 * system.domain().primitive_data()[i][k] + p];
+      for (auto v = 0; v < 3; ++v) {
+        element_buffer_data[3 * i + v] =
+            system3.domain().primitive_data()[i][v];
+        normal_buffer_data[3 * system3.domain().primitive_data()[i][v] + 0] +=
+            normal.x();
+        normal_buffer_data[3 * system3.domain().primitive_data()[i][v] + 1] +=
+            normal.y();
+        normal_buffer_data[3 * system3.domain().primitive_data()[i][v] + 2] +=
+            normal.z();
       }
     }
+    element_buffer->set_data(element_buffer_data);
 
-    Eigen::Vector3f normal =
-        (vertex[1] - vertex[0]).cross(vertex[2] - vertex[0]);
-    normal.normalize();
-    if (normal.z() < 0) normal = -normal;
-
-    for (auto v = 0; v < 3; ++v) {
-      element_buffer_data[3 * i + v] = system.domain().primitive_data()[i][v];
-      normal_buffer_data[3 * system.domain().primitive_data()[i][v] + 0] +=
-          normal.x();
-      normal_buffer_data[3 * system.domain().primitive_data()[i][v] + 1] +=
-          normal.y();
-      normal_buffer_data[3 * system.domain().primitive_data()[i][v] + 2] +=
-          normal.z();
+    std::vector<float> color_buffer_data(system3.domain().vertex_data().size() *
+                                         3);
+    for (auto i = 0; i < system3.domain().vertex_data().size(); ++i) {
+      color_buffer_data[3 * i + 0] = (system3.wave()[i] - min) / (max - min);
+      color_buffer_data[3 * i + 1] = color_buffer_data[3 * i + 0];
+      color_buffer_data[3 * i + 2] = 1.0f;
     }
+    color_buffer->set_data(color_buffer_data);
+
+    for (auto i = 0; i < system3.domain().vertex_data().size(); ++i) {
+      Eigen::Vector3f normal(normal_buffer_data[3 * i + 0],
+                             normal_buffer_data[3 * i + 1],
+                             normal_buffer_data[3 * i + 2]);
+      normal.normalize();
+      normal_buffer_data[3 * i + 0] = normal.x();
+      normal_buffer_data[3 * i + 1] = normal.y();
+      normal_buffer_data[3 * i + 2] = normal.z();
+    }
+    normal_buffer->set_data(normal_buffer_data);
+
+    (*vertex_array)
+        .enable_attribute(0, *vertex_buffer)
+        .enable_attribute(1, *color_buffer)
+        .enable_attribute(2, *normal_buffer);
+    element_buffer->draw();
+    (*vertex_array).disable_attribute(2).disable_attribute(1);
+
+    vertex_buffer->bind();
+    if (render_vertices_switch)
+      glDrawArrays(GL_POINTS, 0, vertex_buffer_data.size());
+  } else {
+    system.dt() = 0.001f;
+    system.solve();
+
+    // std::vector<float> vertex_buffer_data(field.vertex_data().size() * 3);
+    std::vector<float> vertex_buffer_data(system.domain().vertex_data().size() *
+                                          3);
+    float max = -INFINITY;
+    float min = INFINITY;
+    // for (auto i = 0; i < field.vertex_data().size(); ++i) {
+    //   vertex_buffer_data[3 * i + 0] = field.vertex_data()[i].x();
+    //   vertex_buffer_data[3 * i + 1] = field.vertex_data()[i].y();
+    //   vertex_buffer_data[3 * i + 2] = field.values()[i];
+
+    //   max = std::max(max, field.values()[i]);
+    //   min = std::min(min, field.values()[i]);
+    // }
+    for (auto i = 0; i < system.domain().vertex_data().size(); ++i) {
+      vertex_buffer_data[3 * i + 0] = system.domain().vertex_data()[i].x();
+      vertex_buffer_data[3 * i + 1] = system.domain().vertex_data()[i].y();
+      vertex_buffer_data[3 * i + 2] = system.wave()[i];
+
+      max = std::max(max, system.wave()[i]);
+      min = std::min(min, system.wave()[i]);
+    }
+    vertex_buffer->set_data(vertex_buffer_data);
+
+    // std::vector<float> normal_buffer_data(field.vertex_data().size() * 3,
+    // 0.0f); std::vector<int> element_buffer_data(field.primitive_data().size()
+    // * 3); for (auto i = 0; i < field.primitive_data().size(); ++i) {
+    //   Eigen::Vector3f vertex[3];
+    //   for (int k = 0; k < 3; ++k) {
+    //     for (int p = 0; p < 3; ++p) {
+    //       vertex[k][p] = vertex_buffer_data[3 * field.primitive_data()[i][k]
+    //       + p];
+    //     }
+    //   }
+
+    //   Eigen::Vector3f normal =
+    //       (vertex[1] - vertex[0]).cross(vertex[2] - vertex[0]);
+    //   normal.normalize();
+    //   if (normal.z() < 0) normal = -normal;
+
+    //   for (auto v = 0; v < 3; ++v) {
+    //     element_buffer_data[3 * i + v] = field.primitive_data()[i][v];
+    //     normal_buffer_data[3 * field.primitive_data()[i][v] + 0] +=
+    //     normal.x(); normal_buffer_data[3 * field.primitive_data()[i][v] + 1]
+    //     += normal.y(); normal_buffer_data[3 * field.primitive_data()[i][v] +
+    //     2] += normal.z();
+    //   }
+    // }
+    std::vector<float> normal_buffer_data(
+        system.domain().vertex_data().size() * 3, 0.0f);
+    std::vector<int> element_buffer_data(
+        system.domain().primitive_data().size() * 3);
+    for (auto i = 0; i < system.domain().primitive_data().size(); ++i) {
+      Eigen::Vector3f vertex[3];
+      for (int k = 0; k < 3; ++k) {
+        for (int p = 0; p < 3; ++p) {
+          vertex[k][p] =
+              vertex_buffer_data[3 * system.domain().primitive_data()[i][k] +
+                                 p];
+        }
+      }
+
+      Eigen::Vector3f normal =
+          (vertex[1] - vertex[0]).cross(vertex[2] - vertex[0]);
+      normal.normalize();
+      if (normal.z() < 0) normal = -normal;
+
+      for (auto v = 0; v < 3; ++v) {
+        element_buffer_data[3 * i + v] = system.domain().primitive_data()[i][v];
+        normal_buffer_data[3 * system.domain().primitive_data()[i][v] + 0] +=
+            normal.x();
+        normal_buffer_data[3 * system.domain().primitive_data()[i][v] + 1] +=
+            normal.y();
+        normal_buffer_data[3 * system.domain().primitive_data()[i][v] + 2] +=
+            normal.z();
+      }
+    }
+    element_buffer->set_data(element_buffer_data);
+
+    // std::vector<float> color_buffer_data(field.vertex_data().size() * 3);
+    // for (auto i = 0; i < field.vertex_data().size(); ++i) {
+    //   color_buffer_data[3 * i] = (field.values()[i] - min) / (max - min);
+    //   color_buffer_data[3 * i + 1] = 1.0f;
+    //   color_buffer_data[3 * i + 2] = 0.0f;
+    // }
+    // color_buffer->set_data(color_buffer_data);
+    std::vector<float> color_buffer_data(system.domain().vertex_data().size() *
+                                         3);
+    for (auto i = 0; i < system.domain().vertex_data().size(); ++i) {
+      color_buffer_data[3 * i + 0] = (system.wave()[i] - min) / (max - min);
+      color_buffer_data[3 * i + 1] = color_buffer_data[3 * i + 0];
+      color_buffer_data[3 * i + 2] = 1.0f;
+    }
+    color_buffer->set_data(color_buffer_data);
+
+    // for (auto i = 0; i < field.vertex_data().size(); ++i) {
+    //   Eigen::Vector3f normal(normal_buffer_data[3 * i + 0],
+    //                          normal_buffer_data[3 * i + 1],
+    //                          normal_buffer_data[3 * i + 2]);
+    //   normal.normalize();
+    //   normal_buffer_data[3 * i + 0] = normal.x();
+    //   normal_buffer_data[3 * i + 1] = normal.y();
+    //   normal_buffer_data[3 * i + 2] = normal.z();
+    // }
+    // normal_buffer->set_data(normal_buffer_data);
+    for (auto i = 0; i < system.domain().vertex_data().size(); ++i) {
+      Eigen::Vector3f normal(normal_buffer_data[3 * i + 0],
+                             normal_buffer_data[3 * i + 1],
+                             normal_buffer_data[3 * i + 2]);
+      normal.normalize();
+      normal_buffer_data[3 * i + 0] = normal.x();
+      normal_buffer_data[3 * i + 1] = normal.y();
+      normal_buffer_data[3 * i + 2] = normal.z();
+    }
+    normal_buffer->set_data(normal_buffer_data);
+
+    (*vertex_array)
+        .enable_attribute(0, *vertex_buffer)
+        .enable_attribute(1, *color_buffer)
+        .enable_attribute(2, *normal_buffer);
+    element_buffer->draw();
+    (*vertex_array).disable_attribute(2).disable_attribute(1);
+
+    vertex_buffer->bind();
+    if (render_vertices_switch)
+      glDrawArrays(GL_POINTS, 0, vertex_buffer_data.size());
   }
-  element_buffer->set_data(element_buffer_data);
-
-  // std::vector<float> color_buffer_data(field.vertex_data().size() * 3);
-  // for (auto i = 0; i < field.vertex_data().size(); ++i) {
-  //   color_buffer_data[3 * i] = (field.values()[i] - min) / (max - min);
-  //   color_buffer_data[3 * i + 1] = 1.0f;
-  //   color_buffer_data[3 * i + 2] = 0.0f;
-  // }
-  // color_buffer->set_data(color_buffer_data);
-  std::vector<float> color_buffer_data(system.domain().vertex_data().size() *
-                                       3);
-  for (auto i = 0; i < system.domain().vertex_data().size(); ++i) {
-    color_buffer_data[3 * i + 0] = (system.wave()[i] - min) / (max - min);
-    color_buffer_data[3 * i + 1] = color_buffer_data[3 * i + 0];
-    color_buffer_data[3 * i + 2] = 1.0f;
-  }
-  color_buffer->set_data(color_buffer_data);
-
-  // for (auto i = 0; i < field.vertex_data().size(); ++i) {
-  //   Eigen::Vector3f normal(normal_buffer_data[3 * i + 0],
-  //                          normal_buffer_data[3 * i + 1],
-  //                          normal_buffer_data[3 * i + 2]);
-  //   normal.normalize();
-  //   normal_buffer_data[3 * i + 0] = normal.x();
-  //   normal_buffer_data[3 * i + 1] = normal.y();
-  //   normal_buffer_data[3 * i + 2] = normal.z();
-  // }
-  // normal_buffer->set_data(normal_buffer_data);
-  for (auto i = 0; i < system.domain().vertex_data().size(); ++i) {
-    Eigen::Vector3f normal(normal_buffer_data[3 * i + 0],
-                           normal_buffer_data[3 * i + 1],
-                           normal_buffer_data[3 * i + 2]);
-    normal.normalize();
-    normal_buffer_data[3 * i + 0] = normal.x();
-    normal_buffer_data[3 * i + 1] = normal.y();
-    normal_buffer_data[3 * i + 2] = normal.z();
-  }
-  normal_buffer->set_data(normal_buffer_data);
-
-  (*vertex_array)
-      .enable_attribute(0, *vertex_buffer)
-      .enable_attribute(1, *color_buffer)
-      .enable_attribute(2, *normal_buffer);
-  element_buffer->draw();
-  (*vertex_array).disable_attribute(2).disable_attribute(1);
-
-  vertex_buffer->bind();
-  if (render_vertices_switch)
-    glDrawArrays(GL_POINTS, 0, vertex_buffer_data.size());
 }
 
 void Viewer::mousePressEvent(QMouseEvent* event) {}
@@ -385,7 +532,7 @@ void Viewer::compute_look_at() {
   camera.look_at(position, world.origin(), world.basis_y());
 
   glm::mat4 projection = glm::perspective(
-      glm::radians(45.0f), (float)width() / (float)height(), 0.001f, 100.0f);
+      glm::radians(45.0f), (float)width() / (float)height(), 0.001f, 10000.0f);
   glm::mat4 view = glm::lookAt(
       glm::vec3(position[0], position[1], position[2]),
       glm::vec3(world.origin()[0], world.origin()[1], world.origin()[2]),
@@ -397,6 +544,22 @@ void Viewer::compute_look_at() {
 }
 
 void Viewer::compute_bounding_box() {
+  if (obj_switch) {
+    if (system3.domain().vertex_data().size() == 0) return;
+    bounding_box_min = system3.domain().vertex_data()[0];
+    bounding_box_max = system3.domain().vertex_data()[0];
+
+    for (int i = 1; i < system3.domain().vertex_data().size(); ++i) {
+      bounding_box_max = bounding_box_max.array()
+                             .max(system3.domain().vertex_data()[i].array())
+                             .matrix();
+      bounding_box_min = bounding_box_min.array()
+                             .min(system3.domain().vertex_data()[i].array())
+                             .matrix();
+    }
+    return;
+  }
+
   if (system.domain().vertex_data().size() == 0) return;
   bounding_box_min =
       Eigen::Vector3f(system.domain().vertex_data()[0].x(),

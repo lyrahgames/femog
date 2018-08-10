@@ -14,7 +14,11 @@ namespace Femog::Fem {
 
 Domain<Eigen::Vector2f> domain_from_stream(std::istream& input);
 void load_domain_from_file(Domain<Eigen::Vector2f>& domain,
-                           const std::string file_path);
+                           const std::string& file_path);
+
+void load_domain_from_obj(Domain<Eigen::Vector3f>& domain,
+                          std::vector<Eigen::Vector3f>& normal_data,
+                          const std::string& file_path);
 
 }  // namespace Femog::Fem
 
