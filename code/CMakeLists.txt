@@ -35,4 +35,4 @@ add_library(femog::femog ALIAS femog)
 add_subdirectory(tests)
 
 add_executable(viewer main.cc)
-target_link_libraries(viewer PRIVATE femog::femog)
+target_link_libraries(viewer PRIVATE femog::femog Femog::Fem)
