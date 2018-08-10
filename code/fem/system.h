@@ -18,6 +18,7 @@ class System {
   auto& dt() { return dt_; }
 
   System& solve();
+  System& gpu_solve();
 
  private:
   Domain<Eigen::Vector2f> domain_;

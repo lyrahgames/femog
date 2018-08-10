@@ -225,6 +225,7 @@ void Viewer::paintGL() {
   program->use();
 
   glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &model_view_projection[0][0]);
+  // glUniformMatrix4fv(matrix_id, 1, GL_FALSE, mvp.data());
   glUniform3f(light_id, camera.position().x(), camera.position().y(),
               camera.position().z());
 
@@ -529,7 +530,12 @@ void Viewer::compute_look_at() {
   position[2] = eye_distance * sinf(eye_azimuth) * cosf(eye_altitude);
   position = world * position;
 
-  camera.look_at(position, world.origin(), world.basis_y());
+  camera.look_at(position, world.origin(), world.basis_y())
+      .field_of_view(M_PI_4)
+      .near_and_far_distance(0.001f, 10000.0f);
+  mvp = (camera.projection_matrix().transpose() *
+         camera.view_matrix().transpose())
+            .transpose();
 
   glm::mat4 projection = glm::perspective(
       glm::radians(45.0f), (float)width() / (float)height(), 0.001f, 10000.0f);
@@ -539,6 +545,25 @@ void Viewer::compute_look_at() {
       glm::vec3(world.basis_y()[0], world.basis_y()[1], world.basis_y()[2]));
   glm::mat4 model = glm::mat4(1.0f);
   model_view_projection = projection * view * model;
+
+  // std::cout << world.matrix() << std::endl << std::endl;
+  // std::cout << camera.view_matrix() << std::endl << std::endl;
+  // for (int i = 0; i < 4; ++i) {
+  //   for (int j = 0; j < 4; ++j) {
+  //     std::cout << view[i][j] << "\t";
+  //   }
+  //   std::cout << std::endl;
+  // }
+  // std::cout << std::endl;
+
+  // std::cout << camera.projection_matrix() << std::endl << std::endl;
+  // for (int i = 0; i < 4; ++i) {
+  //   for (int j = 0; j < 4; ++j) {
+  //     std::cout << projection[i][j] << "\t";
+  //   }
+  //   std::cout << std::endl;
+  // }
+  // std::cout << std::endl;
 
   update();
 }

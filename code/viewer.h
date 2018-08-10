@@ -57,6 +57,7 @@ class Viewer : public QOpenGLWidget {
 
  private:
   glm::mat4 model_view_projection;
+  Eigen::Matrix4f mvp;
   GLuint matrix_id;
   GLuint light_id;
 

@@ -65,3 +65,14 @@ TEST_CASE("The camera") {
                     std::invalid_argument);
   }
 }
+
+SCENARIO("View matrix") {
+  GIVEN("A camera") {
+    Femog::Camera camera;
+    camera.frame(Femog::Isometry{{}, {0, -1, 0}, {0, 0, 1}});
+
+    MESSAGE("Isometry matrix = \n" << camera.frame().matrix());
+    MESSAGE("view matrix = \n" << camera.view_matrix());
+    MESSAGE("perspective = \n" << camera.projection_matrix());
+  }
+}
