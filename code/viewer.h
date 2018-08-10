@@ -21,6 +21,8 @@
 #include <fem_field.h>
 #include <isometry.h>
 
+#include <fem/system.h>
+
 #include "glsxx/element_array_buffer.h"
 #include "glsxx/program.h"
 #include "glsxx/vertex_array.h"
@@ -73,6 +75,7 @@ class Viewer : public QOpenGLWidget {
   Camera camera;
   Isometry world;
   Fem_field field;
+  Femog::Fem::System system;
   Eigen::Vector3f bounding_box_min;
   Eigen::Vector3f bounding_box_max;
   bool render_volume_force = false;

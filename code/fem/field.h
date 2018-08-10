@@ -23,6 +23,9 @@ class Field : public Field_base {
   Field& operator=(const Field&) = default;
 
   const auto& values() const { return data_; }
+  auto data() { return data_.data(); }
+  auto& operator[](int index) { return data_[index]; }
+  const auto& operator[](int index) const { return data_[index]; }
 
  protected:
   void add_value() override { data_.push_back(T{}); }

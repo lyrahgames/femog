@@ -1,5 +1,5 @@
-#ifndef FEMOG_FEM_FIELD_H_
-#define FEMOG_FEM_FIELD_H_
+#ifndef FEMOG_FEM_FIELD_H_OLD_
+#define FEMOG_FEM_FIELD_H_OLD_
 
 #include <Eigen/Dense>
 #include <unordered_map>
@@ -79,4 +79,4 @@ class Fem_field {
 
 }  // namespace Femog
 
-#endif  // FEMOG_FEM_FIELD_H_
+#endif  // FEMOG_FEM_FIELD_H_OLD_

@@ -6,8 +6,6 @@
 
 #include <viewer.h>
 
-#include <fem/io.h>
-
 int main(int argc, char* argv[]) {
   if (2 > argc || 3 < argc) {
     std::cout << "usage:" << std::endl
@@ -15,9 +13,6 @@ int main(int argc, char* argv[]) {
               << std::endl;
     return -1;
   }
-
-  auto domain = Femog::Fem::domain_from_stream(std::cin);
-  std::cout << "vertex count = " << domain.vertex_data().size() << std::endl;
 
   std::string file_path{argv[1]};
   int subdivision_count{0};

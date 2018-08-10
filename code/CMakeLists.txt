@@ -28,6 +28,7 @@ target_link_libraries(femog PUBLIC
   OpenGL::GLU
   GLEW::GLEW
   glm
+  Femog::Fem
 )
 target_compile_features(femog PUBLIC cxx_std_17)
 add_library(femog::femog ALIAS femog)
