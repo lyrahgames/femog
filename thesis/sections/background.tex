@@ -4,12 +4,6 @@
   \section{Grundlagen} % (fold)
   \label{sec:background}
 
-
-    \subsection{Finite Elemente Methode} % (fold)
-    \label{sub:finite_elemente_methode}
-
-    % subsection finite_elemente_methode (end)
-
     \subsection{Modelprobleme} % (fold)
     \label{sub:modelprobleme}
       \newcommand{\domain}{\ensuremath{\Omega}}
@@ -17,11 +11,19 @@
       \newcommand{\neumannBoundary}{\ensuremath{\boundary_\mathrm{N}}}
       \newcommand{\dirichletBoundary}{\ensuremath{\boundary_\mathrm{D}}}
 
+      Für die Implementierung einer Finite-Elemente-Methode benötigt man zunächst ein mathematisches Modell, welches durch ein System partieller Differentialgleichungen beschrieben wird.
+      Um sich jedoch nicht auf die Anwendung physikalischer Gesetze und auf das Verstehen in den darin resultierenden Modellen fokussieren zu müssen, werden in dieser Arbeit nur die einfachsten physikalisch basierten partiellen Differentialgleichungen als Grundlage vorausgesetzt.
+      Die Poisson-, Wellen- und Wärmeleitungsgleichung beschreiben grundlegende Phänomene in der Elektrodynamik, Mechanik und Thermodynamik.
+      Bei diesen drei Gleichungen handelt sich um eine elliptische, eine hyperbolische und eine parabolische lineare partielle Differentialgleichung zweiter Ordnung in simpelster Form.
+      Gerade deswegen kann man durch diese Gleichungen Modelprobleme formulieren, an denen das Vorgehen der Finite-Elemente-Methode unkompliziert erläutert werden kann, die aber auch komplex genug sind, um das Verfahren auch auf schwierigere Modelle anwenden zu können.
+
+      Um die Visualisierung und die Konstruktion von Testgebieten zu erleichtern, werden die Gleichungen nur mit zwei Raumdimensionen behaftet.
+      Dies ändert nichts Grundlegendes an der Implementierung und dient zudem dem besseren Verständnis des Lesers.
+
       \subsubsection{Poisson-Gleichung} % (fold)
       \label{ssub:poisson_gleichung}
-        Die Poisson-Gleichung stellt eine wichtige Grundlage dar.
-        Sie ist zeitunabhängig, elliptisch und ein grundlegender Bestandteil typischer zeitabhängiger PDE, wie zum Beispiel der Wärmeleitungs- und Wellengleichung.
-        Sie stellt ein ideales Testproblem dar, um zu überprüfen, ob die implementierten Verfahren funktionieren.
+        Die Poisson-Gleichung stellt eine wichtige Grundlage für die Wellen- und Wärmeleitungsgleichung dar.
+        Sie ist eine zeitunabhängige, elliptische lineare partielle Differentialgleichung zweiter Ordnung und gerade aus diesem Grund als ein Test für die Implementierung geeignet.
 
         Es sei $\domain\subset\setReal^2$ ein beschränktes Lipschitz-Gebiet mit einem polygonalen Rand $\boundary$.
         Die folgende Funktion ν beschreibe fast-überall die äußere Normale von $\domain$.
@@ -96,10 +98,10 @@
 
     % subsection modelprobleme (end)
 
-    \subsection{Galerkin Methode} % (fold)
-    \label{sub:galerkin_methode}
+    \subsection{Finite Elemente Methode} % (fold)
+    \label{sub:finite_elemente_methode}
 
-    % subsection galerkin_methode (end)
+    % subsection finite_elemente_methode (end)
 
     \subsection{Sparse Matrix Methoden} % (fold)
     \label{sub:sparse_matrix_methoden}
