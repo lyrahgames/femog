@@ -100,7 +100,20 @@
 
     \subsection{Finite Elemente Methode} % (fold)
     \label{sub:finite_elemente_methode}
+      Die Finite-Elemente-Methode ist, wie bereits in Abschnitt \ref{sec:introduction} erwähnt, ein allgemeines numerisches Verfahren, um partielle Differentialgleichungen approximativ zu lösen.
+      Genauer gesagt, handelt es sich um eine spezielle Form des Ritz-Galerkin-Verfahrens.
+      Die Finite-Elemente-Formulierung eines Problems resultiert in einem System von algebraischen Gleichungen.
+      Um ein Problem zu lösen, unterteilt es das Berechnungsgebiet in kleinere und einfach zu behandelnde Teile (engl.: \textit{primitives}), die auch finite Elemente genannt werden.
+      Die einfachen Systeme von algebraischen Gleichungen der einzelnen finiten Elemente werden dann in ein großes System von Gleichungen, welches das gesamte Problem modelliert, assembliert.
+      Durch die Minimierung einer Fehlerfunktion mithilfe verschiedener Variationsmethoden ist die Finite-Elemente-Methode dann in der Lage, das Problem zu lösen.
 
+      \begin{itemize}
+        \item schwache formulierung
+        \item diskretisierung des gebiets
+        \item wahl der basisfunktionen (diskretisierung des funktionenraums) mit kleinem träger
+        \item matrixform des problems
+        \item lösen des matrixproblems
+      \end{itemize}
     % subsection finite_elemente_methode (end)
 
     \subsection{Sparse Matrix Methoden} % (fold)
