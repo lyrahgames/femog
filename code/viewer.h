@@ -84,6 +84,7 @@ class Viewer : public QOpenGLWidget {
   Eigen::Vector3f bounding_box_max;
   bool render_volume_force = false;
   bool render_vertices_switch = false;
+  bool loop_switch = true;
 
   void compute_look_at();
   void compute_bounding_box();

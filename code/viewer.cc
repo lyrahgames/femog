@@ -172,7 +172,17 @@ void Viewer::solve() {
   compute_automatic_view();
 }
 
-void Viewer::loop_slot() {}
+void Viewer::loop_slot() {
+  if (!loop_switch) return;
+
+  if (obj_switch) {
+    system3.dt() = 0.001f;
+    system3.solve();
+  } else {
+    system.dt() = 0.001f;
+    system.solve();
+  }
+}
 
 void Viewer::initializeGL() {
   if (glewInit() != GLEW_OK)
@@ -233,8 +243,8 @@ void Viewer::paintGL() {
   // field.solve_wave_equation(0.001f);
 
   if (obj_switch) {
-    system3.dt() = 0.001f;
-    system3.solve();
+    // system3.dt() = 0.001f;
+    // system3.solve();
 
     // std::vector<float> vertex_buffer_data(field.vertex_data().size() * 3);
     std::vector<float> vertex_buffer_data(
@@ -333,8 +343,8 @@ void Viewer::paintGL() {
     if (render_vertices_switch)
       glDrawArrays(GL_POINTS, 0, vertex_buffer_data.size());
   } else {
-    system.dt() = 0.001f;
-    system.solve();
+    // system.dt() = 0.001f;
+    // system.solve();
 
     // std::vector<float> vertex_buffer_data(field.vertex_data().size() * 3);
     std::vector<float> vertex_buffer_data(system.domain().vertex_data().size() *
@@ -516,6 +526,10 @@ void Viewer::keyPressEvent(QKeyEvent* event) {
     render_volume_force = !render_volume_force;
   } else if (event->text() == "v") {
     render_vertices_switch = !render_vertices_switch;
+  } else if (event->key() == Qt::Key_Space) {
+    loop_switch = !loop_switch;
+  } else if (event->text() == "r") {
+    set_analytic_volume_force();
   }
 
   compute_look_at();
@@ -588,23 +602,21 @@ void Viewer::compute_bounding_box() {
   if (system.domain().vertex_data().size() == 0) return;
   bounding_box_min =
       Eigen::Vector3f(system.domain().vertex_data()[0].x(),
-                      system.domain().vertex_data()[0].y(), system.wave()[0]);
+                      system.domain().vertex_data()[0].y(), 0.0f);
   bounding_box_max =
       Eigen::Vector3f(system.domain().vertex_data()[0].x(),
-                      system.domain().vertex_data()[0].y(), system.wave()[0]);
+                      system.domain().vertex_data()[0].y(), 0.0f);
 
   for (int i = 1; i < system.domain().vertex_data().size(); ++i) {
     bounding_box_max =
         bounding_box_max.array()
             .max(Eigen::Array3f(system.domain().vertex_data()[i].x(),
-                                system.domain().vertex_data()[i].y(),
-                                system.wave()[i]))
+                                system.domain().vertex_data()[i].y(), 0.0f))
             .matrix();
     bounding_box_min =
         bounding_box_min.array()
             .min(Eigen::Array3f(system.domain().vertex_data()[i].x(),
-                                system.domain().vertex_data()[i].y(),
-                                system.wave()[i]))
+                                system.domain().vertex_data()[i].y(), 0.0f))
             .matrix();
   }
 }
