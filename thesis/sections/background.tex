@@ -4,24 +4,102 @@
   \section{Grundlagen} % (fold)
   \label{sec:background}
 
+
+    \subsection{Finite Elemente Methode} % (fold)
+    \label{sub:finite_elemente_methode}
+
+    % subsection finite_elemente_methode (end)
+
     \subsection{Modelprobleme} % (fold)
     \label{sub:modelprobleme}
-      \begin{itemize}
-        \item poisson
-        \item heat
-        \item wave
-      \end{itemize}
+      \newcommand{\domain}{\ensuremath{\Omega}}
+      \newcommand{\boundary}{\ensuremath{\partial\domain}}
+      \newcommand{\neumannBoundary}{\ensuremath{\boundary_\mathrm{N}}}
+      \newcommand{\dirichletBoundary}{\ensuremath{\boundary_\mathrm{D}}}
+
+      \subsubsection{Poisson-Gleichung} % (fold)
+      \label{ssub:poisson_gleichung}
+        Die Poisson-Gleichung stellt eine wichtige Grundlage dar.
+        Sie ist zeitunabhängig, elliptisch und ein grundlegender Bestandteil typischer zeitabhängiger PDE, wie zum Beispiel der Wärmeleitungs- und Wellengleichung.
+        Sie stellt ein ideales Testproblem dar, um zu überprüfen, ob die implementierten Verfahren funktionieren.
+
+        Es sei $\domain\subset\setReal^2$ ein beschränktes Lipschitz-Gebiet mit einem polygonalen Rand $\boundary$.
+        Die folgende Funktion ν beschreibe fast-überall die äußere Normale von $\domain$.
+        \[
+          \function{ν}{\boundary}{\setReal^2}
+        \]
+        Weiterhin sei $\dirichletBoundary$ eine abgeschlossene Teilmenge des Randes $\boundary$ mit positiver Länge und $\neumannBoundary$ deren Komplement.
+        \[
+          \boundary_{\mathrm{D}} \subset \boundary
+          \separate
+          σ\roundBrackets{\dirichletBoundary} > 0
+          \separate
+          \neumannBoundary \define \boundary \setminus \dirichletBoundary
+        \]
+        Auf der Menge $\dirichletBoundary$ sollen Dirichlet-Randbedingungen und auf deren Komplement $\neumannBoundary$ Neumann-Randbedingungen gefordert werden.
+        Gegeben seien zudem die folgenden Funktionen.
+        \[
+          f\in\setIntegrable^2(\domain)
+          \separate
+          u_\mathrm{D} \in \setSobolev^1(\domain)
+          \separate
+          u_\mathrm{N} \in \setIntegrable^2\roundBrackets{\neumannBoundary}
+        \]
+        Die Funktion $f$ ist auch bekannt als die Volumenkraft.
+        Die Funktionen $u_\mathrm{D}$ und $u_\mathrm{N}$ stellen die Dirichlet- und Neumann-Randbedingungen dar.
+        Gesucht ist nun eine Funktion $u\in\setSobolev^1(\domain)$, sodass die folgenden Gleichungen erfüllt sind.
+        \begin{align*}
+          -\laplacian u &= f \\
+          u\vert_{\dirichletBoundary} &= u_\mathrm{D}\vert_{\dirichletBoundary} \\
+          \scalarProduct{\nabla u\vert_{\neumannBoundary}}{ν} &= u_\mathrm{N}
+        \end{align*}
+        % Zu beachten ist, dass die Gleichungen im Sinne der punktweisen Gleichheit nur fast-überall erfüllt sein müssen.
+        In diesem Falle stellt $u$ eine Lösung der Poisson-Gleichung dar.
+        Nach dem Lemma von Lax und Milgram ist bekannt, dass für das gegebene Poisson-Problem eine schwache Lösung existiert.
+        Aus diesem Grund bilden wir zunächst die schwache Formulierung des Poisson-Problems.
+        Wir arbeiten die inhomogenen Dirichlet-Randbedingungen durch die folgende Zerlegung in das Problem ein.
+        \[
+          v\in\setSobolev^1_\mathrm{D}(\domain) \define \set{w\in\setSobolev^1(\domain)}{w\vert_{\dirichletBoundary} = 0}
+        \]
+        \[
+          v\define u - u_\mathrm{D}
+        \]
+        Die schwache Formulierung ergibt sich dann zu der folgenden Form.
+        Für alle $w\in\setSobolev^1_\mathrm{D}(\domain)$ muss das folgende gelten.
+        \[
+          \integral{\domain}{}{\scalarProduct{\nabla u}{\nabla w}}{λ} = \integral{\domain}{}{fw}{λ} + \integral{\neumannBoundary}{}{u_\mathrm{N}w}{σ} - \integral{\domain}{}{\scalarProduct{\nabla u_\mathrm{D}}{\nabla w}}{λ}
+        \]
+      % subsubsection poisson_gleichung (end)
+
+      \subsubsection{Wärmeleitungsgleichung} % (fold)
+      \label{ssub:wärmeleitungsgleichung}
+        Die einfachste zeitabhängige PDE ist die Wärmeleitungsgleichung.
+
+        \begin{align*}
+          \partial_t u - \laplacian u &= f \\
+          u(\cdot,t_0) &= u_0 \\
+          u(\cdot,t)\vert_{\dirichletBoundary} &= u_\mathrm{D}\vert_{\dirichletBoundary} \\
+          \scalarProduct{\nabla u(\cdot,t)\vert_{\neumannBoundary}}{ν} &= u_\mathrm{N}
+        \end{align*}
+      % subsubsection wärmeleitungsgleichung (end)
+
+      \subsubsection{Wellengleichung} % (fold)
+      \label{ssub:wellengleichung}
+        \begin{align*}
+          \partial^2_t u - \laplacian u &= f \\
+          u(\cdot,t_0) &= u_0 \\
+          \partial_t u(\cdot,t_0) &= u_1 \\
+          u(\cdot,t)\vert_{\dirichletBoundary} &= u_\mathrm{D}\vert_{\dirichletBoundary} \\
+          \scalarProduct{\nabla u(\cdot,t)\vert_{\neumannBoundary}}{ν} &= u_\mathrm{N}
+        \end{align*}
+      % subsubsection wellengleichung (end)
+
     % subsection modelprobleme (end)
 
     \subsection{Galerkin Methode} % (fold)
     \label{sub:galerkin_methode}
 
     % subsection galerkin_methode (end)
-
-    \subsection{Finite Elemente Methode} % (fold)
-    \label{sub:finite_elemente_methode}
-
-    % subsection finite_elemente_methode (end)
 
     \subsection{Sparse Matrix Methoden} % (fold)
     \label{sub:sparse_matrix_methoden}
