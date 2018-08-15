@@ -137,6 +137,12 @@
         Dabei wird die Anzahl, der Typ und die Größe dieser Elemente durch den Modellierer festgelegt.
         Für zwei Raumdimensionen werden zumeist Dreiecke und Vierecke gewählt.
         \begin{figure}[h]
+          \center
+          \includegraphics[width=0.5\textwidth]{images/domain_one_dimension_example.pdf}
+          \caption{}
+          \label{fig:domain-example}
+        \end{figure}
+        \begin{figure}[h]
           \begin{subfigure}[b]{0.5\textwidth}
             \center
             \includegraphics[width=0.6\textwidth]{images/domain_discretization_1.pdf}
@@ -161,6 +167,12 @@
         Gerade für partielle Differentialgleichung zweiter Ordnung ist die Wahl von stückweise linearen Basisfunktionen ausreichend.
         \begin{figure}[h]
           \center
+          \includegraphics[width=0.5\textwidth]{images/hat_function_one_dimension_example.pdf}
+          \caption{}
+          \label{fig:hat-function-example}
+        \end{figure}
+        \begin{figure}[h]
+          \center
           \includegraphics[width=0.5\textwidth]{images/hat_function.pdf}
           \caption{%
             Die Abbildung zeigt die typische Wahl einer Basisfunktion $η_i$ über dem $i$.~Vertex des diskretisierten Berechnungsgebietes $\domain$.
@@ -177,6 +189,24 @@
         Das Einsetzen der Diskretisierung in die ursprüngliche schwache Formulierung der partiellen Differentialgleichung führt zu einem System von algebraischen Gleichungen.
         Die in dieser Arbeit besprochenen Fälle resultieren in linearen Gleichungssystemen mit dünnbesetzten Matrizen.
         Diese hängen zudem stark von der gewählten Diskretisierung ab.
+        \[
+          \roundBrackets{ \integral{\domain}{}{ \scalarProduct{\nabla η_i}{\nabla η_j} }{λ} }_{i,j} =
+          \begin{pmatrix}
+            1 & -1 & & & \\
+            -1 & 2 & 1 & & \\
+            & -1 & 2 & -1 & \\
+            & & -1 & 2 & -1 \\
+            & & & -1 & 1
+          \end{pmatrix}
+        \]
+        \[
+          \roundBrackets{ \integral{\domain}{}{ \scalarProduct{\nabla η_i}{\nabla η_j} }{λ} }_{i,j\in I} =
+          \begin{pmatrix}
+            2 & 1 & \\
+            -1 & 2 & -1 \\
+            & -1 & 2 \\
+          \end{pmatrix}
+        \]
       % paragraph schritt_4_konstruktion_der_algebraischen_formulierung (end)
 
       \paragraph{Schritt 5: Lösung des algebraischen Systems} % (fold)

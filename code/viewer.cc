@@ -147,8 +147,8 @@ void Viewer::set_analytic_volume_force() {
 
       system.wave()[i] = g(system.domain().vertex_data()[i]);
       // system.wave()[i] = 0.0f;
-      system.evolution()[i] = -10.0f * g(system.domain().vertex_data()[i]);
-      // system.evolution()[i] = 0.0f;
+      // system.evolution()[i] = -10.0f * g(system.domain().vertex_data()[i]);
+      system.evolution()[i] = 0.0f;
       // (g(system.domain().vertex_data()[i] + Eigen::Vector2f{0.1f, 0.1f}) -
       //  g(system.domain().vertex_data()[i] - Eigen::Vector2f{0.1f, 0.1f})) /
       // 0.01f;
