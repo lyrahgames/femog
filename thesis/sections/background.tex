@@ -98,7 +98,7 @@
 
     % subsection modelprobleme (end)
 
-    \subsection{Finite Elemente Methode} % (fold)
+    \subsection{Finite-Elemente-Methode} % (fold)
     \label{sub:finite_elemente_methode}
       Die Finite-Elemente-Methode ist, wie bereits in Abschnitt \ref{sec:introduction} erwähnt, ein allgemeines numerisches Verfahren, um partielle Differentialgleichungen approximativ zu lösen.
       Genauer gesagt, handelt es sich um eine spezielle Form des Ritz-Galerkin-Verfahrens.
@@ -106,14 +106,50 @@
       Um ein Problem zu lösen, unterteilt es das Berechnungsgebiet in kleinere und einfach zu behandelnde Teile (engl.: \textit{primitives}), die auch finite Elemente genannt werden.
       Die einfachen Systeme von algebraischen Gleichungen der einzelnen finiten Elemente werden dann in ein großes System von Gleichungen, welches das gesamte Problem modelliert, assembliert.
       Durch die Minimierung einer Fehlerfunktion mithilfe verschiedener Variationsmethoden ist die Finite-Elemente-Methode dann in der Lage, das Problem zu lösen.
+      Im Folgenden wird die grundlegende Vorgehensweise an den Modelproblemen illustriert.
 
-      \begin{itemize}
-        \item schwache formulierung
-        \item diskretisierung des gebiets
-        \item wahl der basisfunktionen (diskretisierung des funktionenraums) mit kleinem träger
-        \item matrixform des problems
-        \item lösen des matrixproblems
-      \end{itemize}
+      \paragraph{Schritt 1: Konstruktion der schwachen Formulierung} % (fold)
+      \label{par:schritt_1_konstruktion_der_schwachen_formulierung}
+        \hfill\\
+        Bereits in der Theorie ist es sinnvoll, die Lösungen von partiellen Differentialgleichungen in einer abgeschwächten Form zu verstehen, da bereits nicht stetige Quellterme die Forderungen an eine klassische Lösung verletzen \cite[S.~46]{Schweizer2013}.
+        Demzufolge scheint eine klassische Formulierung von partiellen Differentialgleichungen für die numerische Mathematik ungeeignet.
+        Für die Definition einer schwachen Lösung beziehungsweise schwachen Formulierung verallgemeinert man die Ableitung einer Funktion mithilfe von Distributionen \cite[S.~46~ff]{Schweizer2013}.
+        In den Sobolevräumen werden dann die integrierbaren Funktionen zusammengefasst, die im Sinne einer Distribution wieder eine integrierbare Ableitung besitzen \cite[S.~54~ff]{Schweizer2013}.
+      % paragraph schritt_1_konstruktion_der_schwachen_formulierung (end)
+
+      \paragraph{Schritt 2: Diskretisierung des Berechnungsgebietes} % (fold)
+      \label{par:schritt_2_diskretisierung_des_berechnungsgebietes}
+        \hfill\\
+        Aufgrund der Funktionsweise eines Computers ist man bei numerischen Simulationen gezwungen, kontinuierliche Probleme auf die eine oder andere Art und Weise zu diskretisieren.
+        In der Finite-Elemente-Methode findet diese Diskretisierung durch die Einführung von finiten Elementen statt.
+        Das Berechnungsgebiet $\domain$ und dessen Rand $\boundary$ werden in ein äquivalentes System von mehreren finiten Elementen überführt.
+        Dabei wird die Anzahl, der Typ und die Größe dieser Elemente durch den Modellierer festgelegt.
+        Für zwei Raumdimensionen werden zumeist Dreiecke und Vierecke gewählt.
+      % paragraph schritt_2_diskretisierung_des_berechnungsgebietes (end)
+
+      \paragraph{Schritt 3: Wahl der Basisfunktionen} % (fold)
+      \label{par:schritt_3_wahl_der_basisfunktionen}
+        \hfill\\
+        Neben der Diskretisierung des Berechnungsgebietes $\domain$ ist auch die Diskretisierung der Funktionenräume $\setSobolev^1(\domain)$ und $\setSobolev^1_\mathrm{D}(\domain)$ nötig.
+        Dies erreicht man durch die Wahl endlich vieler Basisfunktionen.
+        Im Idealfall sollten diese einen kleinen Träger aufweisen, um die spätere Berechnung effizienter zu gestalten.
+        Gerade für partielle Differentialgleichung zweiter Ordnung ist die Wahl von stückweise linearen Basisfunktionen ausreichend.
+      % paragraph schritt_3_wahl_der_basisfunktionen (end)
+
+      \paragraph{Schritt 4: Konstruktion der algebraischen Formulierung} % (fold)
+      \label{par:schritt_4_konstruktion_der_algebraischen_formulierung}
+        \hfill\\
+        Das Einsetzen der Diskretisierung in die ursprüngliche schwache Formulierung der partiellen Differentialgleichung führt zu einem System von algebraischen Gleichungen.
+        Die in dieser Arbeit besprochenen Fälle resultieren in linearen Gleichungssystemen mit dünnbesetzten Matrizen.
+        Diese hängen zudem stark von der gewählten Diskretisierung ab.
+      % paragraph schritt_4_konstruktion_der_algebraischen_formulierung (end)
+
+      \paragraph{Schritt 5: Lösung des algebraischen Systems} % (fold)
+      \label{par:schritt_5_lsen_des_algebraischen_systems}
+        \hfill\\
+        Die erhaltenen algebraischen Gleichungen sind äquivalent zu der schwachen Formulierung des diskretisierten Problems.
+        In den hier betrachteten Fällen existieren eindeutige Lösungen.
+      % paragraph schritt_5_lösen_des_algebraischen_systems (end)
     % subsection finite_elemente_methode (end)
 
     \subsection{Sparse Matrix Methoden} % (fold)

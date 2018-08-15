@@ -115,8 +115,9 @@ void Viewer::set_analytic_volume_force() {
     }
   } else {
     auto f = [](const Fem_field::vertex_type& vertex) {
-      // return std::sin(3.0f * vertex.x()) * std::cos(vertex.y());
-      return 0;
+      return std::cos(3.0f * vertex.x() * M_PI) *
+             std::cos(3.0f * vertex.y() * M_PI);
+      // return 0;
     };
 
     auto g = [](const Fem_field::vertex_type& vertex) {
@@ -145,11 +146,16 @@ void Viewer::set_analytic_volume_force() {
       // field.volume_force()[i] = 0;
 
       system.wave()[i] = g(system.domain().vertex_data()[i]);
-      system.evolution()[i] = -system.wave()[i];
+      // system.wave()[i] = 0.0f;
+      system.evolution()[i] = -10.0f * g(system.domain().vertex_data()[i]);
+      // system.evolution()[i] = 0.0f;
+      // (g(system.domain().vertex_data()[i] + Eigen::Vector2f{0.1f, 0.1f}) -
+      //  g(system.domain().vertex_data()[i] - Eigen::Vector2f{0.1f, 0.1f})) /
+      // 0.01f;
     }
   }
 
-  compute_automatic_view();
+  // compute_automatic_view();
 }
 
 void Viewer::solve() {

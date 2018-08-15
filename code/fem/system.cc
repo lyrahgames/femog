@@ -46,7 +46,7 @@ System& System::solve() {
                                 evolution().values().size());
   Eigen::Map<Eigen::VectorXf> x(wave().data(), wave().values().size());
 
-  const float c = 2.0f;
+  const float c = 0.5f;
   const float gamma = 0.0f;
 
   Eigen::ConjugateGradient<Eigen::SparseMatrix<float>> solver;
