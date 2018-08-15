@@ -5,13 +5,6 @@
 
 # thesis whitelist
 !thesis
-thesis/*
-!sections
-sections/*
-
-!*.tex
-!*.bib
-
 
 # code whitelist
 !code

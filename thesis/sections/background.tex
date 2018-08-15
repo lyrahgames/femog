@@ -20,11 +20,8 @@
       Um die Visualisierung und die Konstruktion von Testgebieten zu erleichtern, werden die Gleichungen nur mit zwei Raumdimensionen behaftet.
       Dies ändert nichts Grundlegendes an der Implementierung und dient zudem dem besseren Verständnis des Lesers.
 
-      \subsubsection{Poisson-Gleichung} % (fold)
-      \label{ssub:poisson_gleichung}
-        Die Poisson-Gleichung stellt eine wichtige Grundlage für die Wellen- und Wärmeleitungsgleichung dar.
-        Sie ist eine zeitunabhängige, elliptische lineare partielle Differentialgleichung zweiter Ordnung und gerade aus diesem Grund als ein Test für die Implementierung geeignet.
-
+      \subsection{Berechnungsgebiet} % (fold)
+      \label{sub:berechnungsgebiet}
         Es sei $\domain\subset\setReal^2$ ein beschränktes Lipschitz-Gebiet mit einem polygonalen Rand $\boundary$.
         Die folgende Funktion ν beschreibe fast-überall die äußere Normale von $\domain$.
         \[
@@ -39,6 +36,20 @@
           \neumannBoundary \define \boundary \setminus \dirichletBoundary
         \]
         Auf der Menge $\dirichletBoundary$ sollen Dirichlet-Randbedingungen und auf deren Komplement $\neumannBoundary$ Neumann-Randbedingungen gefordert werden.
+        Abbildung \ref{fig:domain} zeigt diese Definition an einem Beispiel.
+        \begin{figure}[h]
+          \center
+          \includegraphics[width=0.5\textwidth]{images/domain.pdf}
+          \caption{Die Abbildung zeigt ein Beispiel für ein Berechnungsgebiet.}
+          \label{fig:domain}
+        \end{figure}
+      % subsection berechnungsgebiet (end)
+
+      \subsubsection{Poisson-Gleichung} % (fold)
+      \label{ssub:poisson_gleichung}
+        Die Poisson-Gleichung stellt eine wichtige Grundlage für die Wellen- und Wärmeleitungsgleichung dar.
+        Sie ist eine zeitunabhängige, elliptische lineare partielle Differentialgleichung zweiter Ordnung und gerade aus diesem Grund als ein Test für die Implementierung geeignet.
+
         Gegeben seien zudem die folgenden Funktionen.
         \[
           f\in\setIntegrable^2(\domain)
@@ -125,6 +136,20 @@
         Das Berechnungsgebiet $\domain$ und dessen Rand $\boundary$ werden in ein äquivalentes System von mehreren finiten Elementen überführt.
         Dabei wird die Anzahl, der Typ und die Größe dieser Elemente durch den Modellierer festgelegt.
         Für zwei Raumdimensionen werden zumeist Dreiecke und Vierecke gewählt.
+        \begin{figure}[h]
+          \begin{subfigure}[b]{0.5\textwidth}
+            \center
+            \includegraphics[width=0.6\textwidth]{images/domain_discretization_1.pdf}
+          \end{subfigure}
+          \begin{subfigure}[b]{0.5\textwidth}
+            \center
+            \includegraphics[width=0.6\textwidth]{images/domain_discretization_2.pdf}
+          \end{subfigure}
+          \caption{%
+            Die rechte Abbildung zeigt ein Beispiel für die Diskretisierung des polygonalen Berechnungsgebietes aus dem linken Bild durch die Verwendung von Dreiecken als finiten Elementen.%
+          }
+          \label{fig:domain-discretization}
+        \end{figure}
       % paragraph schritt_2_diskretisierung_des_berechnungsgebietes (end)
 
       \paragraph{Schritt 3: Wahl der Basisfunktionen} % (fold)
@@ -134,6 +159,16 @@
         Dies erreicht man durch die Wahl endlich vieler Basisfunktionen.
         Im Idealfall sollten diese einen kleinen Träger aufweisen, um die spätere Berechnung effizienter zu gestalten.
         Gerade für partielle Differentialgleichung zweiter Ordnung ist die Wahl von stückweise linearen Basisfunktionen ausreichend.
+        \begin{figure}[h]
+          \center
+          \includegraphics[width=0.5\textwidth]{images/hat_function.pdf}
+          \caption{%
+            Die Abbildung zeigt die typische Wahl einer Basisfunktion $η_i$ über dem $i$.~Vertex des diskretisierten Berechnungsgebietes $\domain$.
+            Aufgrund ihrer Form wird sie auch Hutfunktion genannt.
+            Sie ist stückweise linear und identisch zu Null auf nicht benachbarten Dreiecken.%
+          }
+          \label{fig:hat-function}
+        \end{figure}
       % paragraph schritt_3_wahl_der_basisfunktionen (end)
 
       \paragraph{Schritt 4: Konstruktion der algebraischen Formulierung} % (fold)
@@ -157,10 +192,11 @@
 
     % subsection sparse_matrix_methoden (end)
 
-    \subsection{Aufbau und Funktionsweise einer Grafikkarte} % (fold)
-    \label{sub:aufbau_und_funktionsweise_einer_grafikkarte}
-
-    % subsection aufbau_und_funktionsweise_einer_grafikkarte (end)
+    \subsection{Aufbau und Funktionsweise des Grafikprozessors} % (fold)
+    \label{sub:aufbau_und_funktionsweise_des_grafikprozessors}
+      In seiner einfachsten Form generiert der Grafikprozessor (GPU, engl.: \textit{graphics processing unit}) zwei- und dreidimensionale Grafiken, Bilder und Videos, die grafische Benutzeroberflächen, Computerspiele, Video- und Bildbearbeitung ermöglichen \cite[S.~A3]{Patterson2011}.
+      Die moderne GPU ist ein massiv paralleler Multiprozessor optimiert für visuelle Berechnungen \cite[S.~A3]{Patterson2011}.
+    % subsection aufbau_und_funktionsweise_des_grafikprozessors (end)
 
   % section grundlagen (end)
 \end{document}

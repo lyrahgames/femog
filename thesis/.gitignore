@@ -1,0 +1,11 @@
+*
+!*/
+
+!sections/images/*.pdf
+
+!*.tex
+!*.bib
+!*.png
+!*.ggb
+
+!.gitignore
