@@ -193,7 +193,7 @@
           \roundBrackets{ \integral{\domain}{}{ \scalarProduct{\nabla η_i}{\nabla η_j} }{λ} }_{i,j} =
           \begin{pmatrix}
             1 & -1 & & & \\
-            -1 & 2 & 1 & & \\
+            -1 & 2 & -1 & & \\
             & -1 & 2 & -1 & \\
             & & -1 & 2 & -1 \\
             & & & -1 & 1
@@ -202,7 +202,7 @@
         \[
           \roundBrackets{ \integral{\domain}{}{ \scalarProduct{\nabla η_i}{\nabla η_j} }{λ} }_{i,j\in I} =
           \begin{pmatrix}
-            2 & 1 & \\
+            2 & -1 & \\
             -1 & 2 & -1 \\
             & -1 & 2 \\
           \end{pmatrix}
@@ -224,8 +224,14 @@
 
     \subsection{Aufbau und Funktionsweise des Grafikprozessors} % (fold)
     \label{sub:aufbau_und_funktionsweise_des_grafikprozessors}
-      In seiner einfachsten Form generiert der Grafikprozessor (GPU, engl.: \textit{graphics processing unit}) zwei- und dreidimensionale Grafiken, Bilder und Videos, die grafische Benutzeroberflächen, Computerspiele, Video- und Bildbearbeitung ermöglichen \cite[S.~A3]{Patterson2011}.
-      Die moderne GPU ist ein massiv paralleler Multiprozessor optimiert für visuelle Berechnungen \cite[S.~A3]{Patterson2011}.
+      Der Grafikprozessor (GPU, engl.: \textit{graphics processing unit}) eines Computers stellt eine weitere Prozessorart gegenüber dem Hauptprozessor (CPU, engl: \textit{central processing unit}) dar.
+      Im Gegensatz zur CPU ist der Aufbau und die Funktionsweise der GPU auf konkrete Aufgaben spezialisiert.
+      In ihrer einfachsten Form generiert die GPU zwei- und dreidimensionale Grafiken, Bilder und Videos, die grafische Benutzeroberflächen, Computerspiele, Video- und Bildbearbeitung ermöglichen.
+      Die moderne GPU ist ein massiv paralleler Multiprozessor optimiert für visuelle Berechnungen.
+      Um dem Benutzer eine visuelle Interaktion in Echtzeit zu bieten, besitzt die GPU eine vereinheitlichte Grafik- und Prozessarchitektur.
+      Diese dient sowohl als programmierbarer Grafikprozessor sowie als skalierbare parallele Plattform.
+      Auf herkömmlichen System werden zudem CPUs mit GPUs verbunden, um ein sogenanntes heterogenes System zu bilden, welches die Vorteile der jeweiligen Prozessorarten ausnutzt.
+      \cite[S.~A3]{Patterson2011}
     % subsection aufbau_und_funktionsweise_des_grafikprozessors (end)
 
   % section grundlagen (end)
