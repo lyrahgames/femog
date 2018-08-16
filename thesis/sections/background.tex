@@ -40,7 +40,11 @@
         \begin{figure}[h]
           \center
           \includegraphics[width=0.5\textwidth]{images/domain.pdf}
-          \caption{Die Abbildung zeigt ein Beispiel für ein Berechnungsgebiet.}
+          \caption[Beispiel eines zweidimensionalen Berechnungsgebietes]{%
+            Die Abbildung zeigt ein schematisches Beispiel für ein zweidimensionales Berechnungsgebiet $\domain$.
+            Der Rand $\boundary$ teilt sich dabei in $\dirichletBoundary$, auf dem Dirichlet-Randbedingungen herrschen, und $\neumannBoundary$, auf dem Neumann-Randbedingungen gelten sollen, ein.
+            $ν$ beschreibt eine Funktion, die für fast-alle Punkte des Randes $\boundary$ deren äußere Normale angibt.
+          }
           \label{fig:domain}
         \end{figure}
       % subsection berechnungsgebiet (end)
@@ -139,7 +143,10 @@
         \begin{figure}[h]
           \center
           \includegraphics[width=0.5\textwidth]{images/domain_one_dimension_example.pdf}
-          \caption{}
+          \caption[Diskretisierung eines eindimensionalen Berechnungsgebietes]{%
+            Die Abbildung zeigt den Übergang von einem eindimensionalen Berechnungsgebiet in ein diskretisiertes Gebiet.
+            Anstatt eines Intervalls wird das diskretisierte Gebiet nur noch durch Eckpunkte und deren Verbindungsstücke beschrieben.
+          }
           \label{fig:domain-example}
         \end{figure}
         \begin{figure}[h]
@@ -151,8 +158,9 @@
             \center
             \includegraphics[width=0.6\textwidth]{images/domain_discretization_2.pdf}
           \end{subfigure}
-          \caption{%
-            Die rechte Abbildung zeigt ein Beispiel für die Diskretisierung des polygonalen Berechnungsgebietes aus dem linken Bild durch die Verwendung von Dreiecken als finiten Elementen.%
+          \caption[Diskretisierung eines zweidimensionalen Berechnungsgebietes]{%
+            Die rechte Abbildung zeigt ein Beispiel für die Diskretisierung des polygonalen Berechnungsgebietes der linken Abbildung durch die Verwendung von Dreiecken.
+            Die Dreiecke werden hierbei auch als finite Elemente bezeichnet.
           }
           \label{fig:domain-discretization}
         \end{figure}
@@ -168,16 +176,20 @@
         \begin{figure}[h]
           \center
           \includegraphics[width=0.5\textwidth]{images/hat_function_one_dimension_example.pdf}
-          \caption{}
+          \caption[Eindimensionale Hutfunktionen]{%
+            Die Abbildung zeigt die eindimensionalen Hutfunktionen $η_i$ für jeden Eckpunkt $i\in\set{0,1,2,3,4}{}$.
+            Für den diskretisierten Raum von Funktionen stellen diese gerade die Basisfunktionen dar und beschreiben eine lineare Interpolation zwischen den Eckpunkten.
+          }
           \label{fig:hat-function-example}
         \end{figure}
         \begin{figure}[h]
           \center
           \includegraphics[width=0.5\textwidth]{images/hat_function.pdf}
-          \caption{%
+          \caption[Zweidimensionale Hutfunktion]{%
             Die Abbildung zeigt die typische Wahl einer Basisfunktion $η_i$ über dem $i$.~Vertex des diskretisierten Berechnungsgebietes $\domain$.
             Aufgrund ihrer Form wird sie auch Hutfunktion genannt.
-            Sie ist stückweise linear und identisch zu Null auf nicht benachbarten Dreiecken.%
+            Sie ist stückweise linear und identisch zu Null auf nicht benachbarten Dreiecken.
+            Sie entspricht einer linearer Interpolation zwischen den Eckpunkten.
           }
           \label{fig:hat-function}
         \end{figure}
@@ -268,7 +280,7 @@
         \begin{figure}[h]
           \center
           \includegraphics[width=0.95\textwidth]{images/unified_gpu_architecture.png}
-          \caption[Grundlegende vereinheitlichte Architektur einer CUDA-fähigen GPU]{%
+          \caption[Grundlegende Architektur einer CUDA-fähigen GPU]{%
             Die Abbildung zeigt die grundlegende vereinheitlichte Architektur einer CUDA-fähigen GPU anhand eines Schemas.
             Es handelt sich dabei nur um Beispiele.
             \cite[S.~9]{Kirk2010}
