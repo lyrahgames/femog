@@ -20,8 +20,8 @@
       Um die Visualisierung und die Konstruktion von Testgebieten zu erleichtern, werden die Gleichungen nur mit zwei Raumdimensionen behaftet.
       Dies ändert nichts Grundlegendes an der Implementierung und dient zudem dem besseren Verständnis des Lesers.
 
-      \subsection{Berechnungsgebiet} % (fold)
-      \label{sub:berechnungsgebiet}
+      \subsubsection{Berechnungsgebiet} % (fold)
+      \label{ssub:berechnungsgebiet}
         Es sei $\domain\subset\setReal^2$ ein beschränktes Lipschitz-Gebiet mit einem polygonalen Rand $\boundary$.
         Die folgende Funktion ν beschreibe fast-überall die äußere Normale von $\domain$.
         \[
@@ -227,11 +227,37 @@
       Der Grafikprozessor (GPU, engl.: \textit{graphics processing unit}) eines Computers stellt eine weitere Prozessorart gegenüber dem Hauptprozessor (CPU, engl: \textit{central processing unit}) dar.
       Im Gegensatz zur CPU ist der Aufbau und die Funktionsweise der GPU auf konkrete Aufgaben spezialisiert.
       In ihrer einfachsten Form generiert die GPU zwei- und dreidimensionale Grafiken, Bilder und Videos, die grafische Benutzeroberflächen, Computerspiele, Video- und Bildbearbeitung ermöglichen.
-      Die moderne GPU ist ein massiv paralleler Multiprozessor optimiert für visuelle Berechnungen.
-      Um dem Benutzer eine visuelle Interaktion in Echtzeit zu bieten, besitzt die GPU eine vereinheitlichte Grafik- und Prozessarchitektur.
+      Die moderne GPU ist ein massiv paralleler Multiprozessor optimiert für visuelle Berechnungen (engl.: \textit{visual computing}).
+      Um dem Benutzer eine visuelle Interaktion in Echtzeit zu bieten, besitzt die GPU eine vereinheitlichte Grafik- und Prozessorarchitektur (engl.: \textit{graphics and computing architecture}).
       Diese dient sowohl als programmierbarer Grafikprozessor sowie als skalierbare parallele Plattform.
-      Auf herkömmlichen System werden zudem CPUs mit GPUs verbunden, um ein sogenanntes heterogenes System zu bilden, welches die Vorteile der jeweiligen Prozessorarten ausnutzt.
+      Auf herkömmlichen Systemen werden zudem CPUs mit GPUs verbunden, um ein sogenanntes heterogenes System zu bilden, welches die Vorteile der jeweiligen Prozessorarten ausnutzt.
       \cite[S.~A3]{Patterson2011}
+
+      Gerade bei parallelisierbaren Problemen mit kohärenten und linearen Speicherzugriffen, die auf Matrix- und Vektoroperationen aufbauen, stellt die Verwendung der GPU eine enormen Anstieg der Effizienz dar.
+      Aus Abschnitt \ref{sub:finite_elemente_methode} wird ersichtlich, dass gerade ein Programm, welches auf der Finite-Elemente-Methode basiert, durch die GPU stark beschleunigt werden könnte.
+      Auch die Auflösung der Diskretisierung des zugrundeliegenden Berechnungsgebietes könnte erhöht werden, da die GPU mit der Anzahl der finiten Elemente skalieren kann.
+
+      \subsubsection{GPU Computing mit CUDA} % (fold)
+      \label{ssub:gpu_computing_mit_cuda}
+        \enquote{GPU Computing} ist das Ausnutzen der GPU für Berechnungen mithilfe einer parallelen Programmiersprache und einer Programmierschnittstelle (API, engl.: \textit{application programming interface}).
+        Das von NVIDIA entwickelte CUDA ist ein skalierbares paralleles Programmiermodell, eine parallele Programmiersprache und  eine API, die es dem Programmierer erlauben, die typische Grafikschnittstelle der GPU zu umgehen und diese direkt durch die Sprachen C und C++ zu programmieren \cite[S.~A5]{Patterson2011}.
+        Das CUDA Programmiermodell arbeitet nach dem Prinzip \enquote{Single-Program Multiple Data} (SPMD).
+        Der Programmierer schreibt hierbei ein Programm für einen einzelnen Thread, welches dann durch die GPU durch mehrere Threads instanziiert und ausgeführt wird \cite[S.~A5]{Patterson2011}.
+      % subsubsection gpu_computing_mit_cuda (end)
+
+      \subsubsection{Architektur einer modernen GPU} % (fold)
+      \label{ssub:architektur_einer_modernen_gpu}
+        Abbildung \ref{fig:gpu-architecture} zeigt die Architektur einer typischen CUDA-fähigen NVIDIA GPU.
+        \begin{figure}[h]
+          \center
+          \includegraphics[width=0.95\textwidth]{images/gpu_architecture.png}
+          \caption{%
+            Die Abbildung zeigt eine schematische Darstellung der Architektur einer CUDA-fähigen GPU.
+            \cite[S.~9]{Kirk2010}
+          }
+          \label{fig:gpu-architecture}
+        \end{figure}
+      % subsubsection architektur_einer_modernen_gpu (end)
     % subsection aufbau_und_funktionsweise_des_grafikprozessors (end)
 
   % section grundlagen (end)
