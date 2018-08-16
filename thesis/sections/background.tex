@@ -233,30 +233,55 @@
       Auf herkömmlichen Systemen werden zudem CPUs mit GPUs verbunden, um ein sogenanntes heterogenes System zu bilden, welches die Vorteile der jeweiligen Prozessorarten ausnutzt.
       \cite[S.~A3]{Patterson2011}
 
-      Gerade bei parallelisierbaren Problemen mit kohärenten und linearen Speicherzugriffen, die auf Matrix- und Vektoroperationen aufbauen, stellt die Verwendung der GPU eine enormen Anstieg der Effizienz dar.
+      Gerade bei parallelisierbaren Problemen mit kohärenten und linearen Speicherzugriffen, die auf Matrix- und Vektoroperationen aufbauen, stellt die Verwendung der GPU einen enormen Anstieg der Effizienz dar.
       Aus Abschnitt \ref{sub:finite_elemente_methode} wird ersichtlich, dass gerade ein Programm, welches auf der Finite-Elemente-Methode basiert, durch die GPU stark beschleunigt werden könnte.
       Auch die Auflösung der Diskretisierung des zugrundeliegenden Berechnungsgebietes könnte erhöht werden, da die GPU mit der Anzahl der finiten Elemente skalieren kann.
 
       \subsubsection{GPU Computing mit CUDA} % (fold)
       \label{ssub:gpu_computing_mit_cuda}
         \enquote{GPU Computing} ist das Ausnutzen der GPU für Berechnungen mithilfe einer parallelen Programmiersprache und einer Programmierschnittstelle (API, engl.: \textit{application programming interface}).
+        Dies steht im Gegensatz zum ursprünglichen GPGPU-Modell (engl.: \textit{general purpose computation on GPU approach}), in welchem die GPU über traditionelle Graphik-APIs, wie zum Beispiel durch OpenGL GLSL, dazu gebracht wurde, Berechnungen durchzuführen, die nicht die Ausgabe eines Bildes auf dem Bildschirm zum Ziel hatten.
         Das von NVIDIA entwickelte CUDA ist ein skalierbares paralleles Programmiermodell, eine parallele Programmiersprache und  eine API, die es dem Programmierer erlauben, die typische Grafikschnittstelle der GPU zu umgehen und diese direkt durch die Sprachen C und C++ zu programmieren \cite[S.~A5]{Patterson2011}.
-        Das CUDA Programmiermodell arbeitet nach dem Prinzip \enquote{Single-Program Multiple Data} (SPMD).
+        Das CUDA-Programmiermodell arbeitet nach dem Prinzip \enquote{Single-Program Multiple Data} (SPMD).
         Der Programmierer schreibt hierbei ein Programm für einen einzelnen Thread, welches dann durch die GPU durch mehrere Threads instanziiert und ausgeführt wird \cite[S.~A5]{Patterson2011}.
+
+        Für einen CUDA-Programmierer besteht ein Computersystem aus dem sogenannten \enquote{Host}, welcher in den meisten Fällen die CPU darstellt, und mindestens einer \enquote{Device}, die die GPU repräsentiert \cite[S.~39]{Kirk2010}.
+        Ein CUDA-Programm teilt sich nun in mehrere Phasen, in denen Code entweder auf dem Host oder der Device ausgeführt wird, ein.
+        Code der eine geringe Datenparallelität aufweist, wird dabei zumeist auf dem Host ausgeführt \cite{Kirk2010}.
+        Umgekehrt sollte Code mit einer hohen Datenparallelität auf der GPU beziehungsweise der Device ausgeführt werden, um deren Vorteile zu nutzen \cite{Kirk2010}.
+        Um bei der Ausführung des Quelltextes zwischen Host und Device wechseln zu können, bietet CUDA diverse Schnittstellen an.
+        Ein CUDA-Programm startet zunächst auf dem Host, der durch den Aufruf eines entsprechenden \enquote{Kernels} in die Lage versetzt wird, Code auf mehreren Prozessoren der GPU auszuführen.
+        Daten die zunächst nur im Arbeitsspeicher (RAM, engl.: \textit{random-access memory}) lagen und damit nur durch die CPU verwendbar waren, können durch CUDA bereit gestellte Befehle über den \enquote{PCI-Express Bus} (PCIe), der eine Datenverbindung zwischen der CPU und GPU bildet, in den dynamischen Arbeitsspeicher (DRAM, engl.: \textit{dynamic random-access memory}) der GPU übertragen werden.
+        Zudem ist es dem Host auch möglich Daten vom DRAM der Device anzufordern.
+        Auch diese werden dann über den PCIe in den RAM übertragen.
+        \cite{Sanders2011}
       % subsubsection gpu_computing_mit_cuda (end)
 
       \subsubsection{Architektur einer modernen GPU} % (fold)
       \label{ssub:architektur_einer_modernen_gpu}
-        Abbildung \ref{fig:gpu-architecture} zeigt die Architektur einer typischen CUDA-fähigen NVIDIA GPU.
+        Vereinheitlichte GPU-Architekturen basieren auf einer parallelen Anordnung von vielen programmierbaren Prozessoren, die auch die typischen Berechnungen für visuelle Ausgaben vollführen.
+        Im Vergleich zu einer mehrkernigen CPU ist die Architektur einer GPU darauf ausgerichtet, extrem viele parallele Threads effizient auf einer großen Anzahl von Prozessorkernen auszuführen.
+        In einer GPU wird diese Effizienz erreicht, indem man einfachere Prozessorkerne als in der CPU verwendet.
+        Diese sind auf die Ausnutzung der Datenparallelität innerhalb einer Gruppe von Threads optimiert, sodass im Gegensatz zu einer CPU kleinere Caches und mehr Transistoren für arithmetische Einheiten verwendet werden können.
+        \cite[S.~A11]{Patterson2011}
+
         \begin{figure}[h]
           \center
-          \includegraphics[width=0.95\textwidth]{images/gpu_architecture.png}
-          \caption{%
-            Die Abbildung zeigt eine schematische Darstellung der Architektur einer CUDA-fähigen GPU.
+          \includegraphics[width=0.95\textwidth]{images/unified_gpu_architecture.png}
+          \caption[Grundlegende vereinheitlichte Architektur einer CUDA-fähigen GPU]{%
+            Die Abbildung zeigt die grundlegende vereinheitlichte Architektur einer CUDA-fähigen GPU anhand eines Schemas.
+            Es handelt sich dabei nur um Beispiele.
             \cite[S.~9]{Kirk2010}
           }
           \label{fig:gpu-architecture}
         \end{figure}
+
+        Abbildung \ref{fig:gpu-architecture} skizziert die Architektur einer typischen CUDA-fähigen NVIDIA GPU.
+        Sie besteht aus einem Feld von 112 \enquote{Streaming Processor Cores} (SP), die wiederum in 14 \enquote{Multithreaded Streaming Multiprocessors} (SM) eingeteilt sind.
+        Jeder SP ist dazu in der Lage bis zu 100 parallele Threads in seiner Hardware zu organisieren und speichern.
+        Die Prozessoren sind über ein Verbindungsnetzwerk mit Partitionen des dynamischen Arbeitsspeichers (DRAM, engl.: \textit{dynamic random-access memory}) verbunden.
+        Zudem besitzt jeder SM \enquote{Special Function Units} (SFU), \enquote{Instruction Caches}, \enquote{Constant Caches}, \enquote{Multithreaded Instruction Units} und \enquote{Shared Memory}.
+        Durch Hinzu- und Wegnahme von SMs und DRAM-Partitionen erhält man ein skalierbares Verfahren um schwächere und stärkere GPU-Konfigurationen zu konstruieren.
       % subsubsection architektur_einer_modernen_gpu (end)
     % subsection aufbau_und_funktionsweise_des_grafikprozessors (end)
 
