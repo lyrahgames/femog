@@ -27,6 +27,13 @@
 
       \subsubsection{Berechnungsgebiet} % (fold)
       \label{ssub:berechnungsgebiet}
+        Für die numerische Behandlung von partiellen Differentialgleichungen in zwei räumlichen Dimensionen ist eine genauere mathematische Betrachtung von Nutzen.
+        Hierfür soll zunächst das räumliche Definitionsgebiet exakt definiert werden.
+        Es wird sich hier auf \cite[S.~39~f]{Schweizer2013} und \cite{Alberty1998} bezogen.
+        Die folgende Definition ist nicht im Sinne einer verallgemeinerten Theorie zu verstehen.
+        Sie wurde in Hinsicht auf deren Verwendung für die hier gestellten Modelprobleme konstruiert und angepasst.
+        Für komplexere Probleme sollte es ein Leichtes sein, die Definition nach Belieben abzuändern, um sie für die Anwendung auf das entsprechende Problem zu optimieren.
+
         \begin{definition}[Berechnungsgebiet]
           Es sei $\domain\subset\setReal^2$ ein beschränktes Lipschitz-Gebiet mit einem polygonalen Rand $\boundary$.
           Die Funktion $\function{ν}{\boundary}{\setReal^2}$ beschreibe fast-überall in $\boundary$ die äußere Normale von $\domain$.
@@ -41,22 +48,12 @@
           In diesem Falle ist das Tupel $\roundBrackets{\domain,\dirichletBoundary, \neumannBoundary, ν}$ ein Berechnungsgebiet.
           Man nennt $\dirichletBoundary$ den Dirichlet-Rand, $\neumannBoundary$ den Neumann-Rand und ν die äußere Normale von $\domain$.
         \end{definition}
-        Es sei $\domain\subset\setReal^2$ ein beschränktes Lipschitz-Gebiet mit einem polygonalen Rand $\boundary$.
-        Die folgende Funktion ν beschreibe fast-überall die äußere Normale von $\domain$.
-        \[
-          \function{ν}{\boundary}{\setReal^2}
-        \]
-        Weiterhin sei $\dirichletBoundary$ eine abgeschlossene Teilmenge des Randes $\boundary$ mit positiver Länge und $\neumannBoundary$ deren Komplement.
-        \[
-          \boundary_{\mathrm{D}} \subset \boundary
-          \separate
-          σ\roundBrackets{\dirichletBoundary} > 0
-          \separate
-          \neumannBoundary \define \boundary \setminus \dirichletBoundary
-        \]
-        Auf der Menge $\dirichletBoundary$ sollen Dirichlet-Randbedingungen und auf deren Komplement $\neumannBoundary$ Neumann-Randbedingungen gefordert werden.
-        Abbildung \ref{fig:domain} zeigt diese Definition an einem Beispiel.
-        \begin{figure}[h]
+
+        Abbildung \ref{fig:domain} veranschaulicht die Definition eines Berechnungsgebietes anhand eines schematischen Beispiels.
+        Im Bezug auf die Definition sollen auf der Menge $\dirichletBoundary$ später die Dirichlet-Randbedingungen und auf deren Komplement $\neumannBoundary$ Neumann-Randbedingungen gefordert werden.
+        Die Forderung, dass es sich bei $\boundary$ um einen polygonalen Rand handeln muss, vereinfacht die noch kommende Diskretisierung des Berechnungsgebietes und der zugehörigen Funktionenräume.
+
+        \begin{figure}[t]
           \center
           \includegraphics[width=0.5\textwidth]{images/domain.pdf}
           \caption[Beispiel eines zweidimensionalen Berechnungsgebietes]{%
