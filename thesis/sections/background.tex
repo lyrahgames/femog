@@ -177,13 +177,51 @@
 
       \subsubsection{Wellengleichung} % (fold)
       \label{ssub:wellengleichung}
-        \begin{align*}
-          \partial^2_t u - \laplacian u &= f \\
-          u(\cdot,t_0) &= u_0 \\
-          \partial_t u(\cdot,t_0) &= u_1 \\
-          u(\cdot,t)\vert_{\dirichletBoundary} &= u_\mathrm{D}\vert_{\dirichletBoundary} \\
-          \scalarProduct{\nabla u(\cdot,t)\vert_{\neumannBoundary}}{ν} &= u_\mathrm{N}
-        \end{align*}
+        Wie schon bei den beiden zuvor genannten Gleichungen, ist auch die Wellengleichung die einfachste ihrer Art.
+        Sie ist eine zeitabhängige, hyperbolische, partielle Differentialgleichung zweiter Ordnung, die die Ausbreitung von Wellen auf dem zugrundeliegenden Berechnungsgebiet beschreibt.
+        Die Wellengleichung, ob nun homogen oder inhomogen, spielt in praktisch jedem Teilgebiet der Physik eine große Rolle.
+        Umso wichtiger ist die Fähigkeit, Wellen, die diese Gleichung lösen, auf komplexen Gebieten simulieren und berechnen zu können.
+        Die Behandlung des zweidimensionalen Falls lässt sich mühelos auf den dreidimensionalen Fall ausweiten \cite[S.~229~ff]{Schweizer2013}.
+
+        Ähnlich der Wärmeleitungsgleichung wählen wir auch für die Wellengleichung den Ansatz eines zeitlich konstanten Berechnungsgebietes.
+        Hierbei sei bemerkt, dass die Länge des Dirichlet-Randes nicht notwendigerweise größer Null sein muss.
+        Die Wellengleichung ist auch lösbar unter der Verwendung eines reinen Neumann-Randes.
+        Um für die Wellengleichung eine eindeutige Lösung zu erlangen, müssen zwei Anfangsfunktionen vorgegeben werden.
+        Diese Tatsache resultiert aus dem Vorkommen der zweiten zeitlichen Ableitung in der Wellengleichung.
+        Die folgende Definition beschreibt dieses Vorgehen im Detail.
+        \cite{Schweizer2013}
+
+        \begin{definition}[Wellengleichung]
+          Es seien $\boxBrackets{\Omega} \define \roundBrackets{\domain,\dirichletBoundary, \neumannBoundary, ν}$ ein Berechnungsgebiet und die folgenden Funktionen gegeben.
+          \begin{align*}
+            f&\in\setIntegrable^2(\domain\times[0,\infty))
+            \\
+            u_0 &\in \setSobolev^1(\domain)
+            &
+            u_\mathrm{D} &\in \setSobolev^1(\domain\times[0,\infty))
+            \\
+            u_1 &\in \setSobolev^1(\domain)
+            &
+            u_\mathrm{N} &\in \setIntegrable^2\roundBrackets{\neumannBoundary \times [0,\infty)}
+          \end{align*}
+          Eine Funktion $u\in\setSobolev^1(\domain\times[0,\infty))$ nennt man eine schwache Lösung der Wellengleichung, wenn die folgenden Gleichungen für alle $t\in[0,\infty)$ gelten.
+          \begin{align*}
+            \partial^2_t u - \laplacian u &= f & \text{(Wellengleichung)} \\
+            u(\cdot,0) &= u_0 & \text{(Anfangswerte)} \\
+            \partial_t u(\cdot,0) &= u_1 & \text{(Anfangswerte)} \\
+            u(\cdot,t)\vert_{\dirichletBoundary} &= u_\mathrm{D}(\cdot,t)\vert_{\dirichletBoundary} & \text{(Dirichlet-Randbedingungen)} \\
+            \scalarProduct{\nabla u(\cdot,t)\vert_{\neumannBoundary}}{ν} &= u_\mathrm{N}(\cdot,t) & \text{(Neumann-Randbedingungen)}
+          \end{align*}
+          Das Tupel $(\boxBrackets{\Omega},f,u_0,u_1,u_\mathrm{D}, u_\mathrm{N},u)$ wird dann auch Wellenproblem genannt.
+        \end{definition}
+
+        Auch diese Definition ist denen der Poisson- und Wärmeleitungsgleichung nicht unähnlich.
+        Demzufolge soll hier wieder auf die Angabe der schwachen Formulierung verzichtet werden, da diese für die Konstruktion der Finite-Elemente-Methode nicht im Vordergrund steht.
+        Nach \cite[S.~236~ff]{Schweizer2013} existiert für die hier angegebene Wellengleichung eine eindeutige Lösung, die durch das Galerkinverfahren beschrieben wird.
+
+        Ein typischer Spezialfall der Wellengleichung setzt alle Randterme und äußeren Einwirkungen identisch zu Null.
+        Stellt man sich die Welle im zweidimensionalen wie ein Tuch vor, so bedeutet ein Dirichlet-Rand mit dem Wert Null, dass das Tuch an diesem Rand festgehalten wird, und ein Neumann-Rand mit dem Wert Null, dass das Tuch an diesem Punkt frei schwingen kann.
+
       % subsubsection wellengleichung (end)
 
     % subsection modelprobleme (end)
