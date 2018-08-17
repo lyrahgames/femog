@@ -27,6 +27,20 @@
 
       \subsubsection{Berechnungsgebiet} % (fold)
       \label{ssub:berechnungsgebiet}
+        \begin{definition}[Berechnungsgebiet]
+          Es sei $\domain\subset\setReal^2$ ein beschränktes Lipschitz-Gebiet mit einem polygonalen Rand $\boundary$.
+          Die Funktion $\function{ν}{\boundary}{\setReal^2}$ beschreibe fast-überall in $\boundary$ die äußere Normale von $\domain$.
+          Weiterhin sei $\dirichletBoundary$ eine abgeschlossene Teilmenge des Randes $\boundary$ mit positiver Länge und $\neumannBoundary$ deren Komplement.
+          \[
+            \boundary_{\mathrm{D}} \subset \boundary
+            \separate
+            σ\roundBrackets{\dirichletBoundary} > 0
+            \separate
+            \neumannBoundary \define \boundary \setminus \dirichletBoundary
+          \]
+          In diesem Falle ist das Tupel $\roundBrackets{\domain,\dirichletBoundary, \neumannBoundary, ν}$ ein Berechnungsgebiet.
+          Man nennt $\dirichletBoundary$ den Dirichlet-Rand, $\neumannBoundary$ den Neumann-Rand und ν die äußere Normale von $\domain$.
+        \end{definition}
         Es sei $\domain\subset\setReal^2$ ein beschränktes Lipschitz-Gebiet mit einem polygonalen Rand $\boundary$.
         Die folgende Funktion ν beschreibe fast-überall die äußere Normale von $\domain$.
         \[
