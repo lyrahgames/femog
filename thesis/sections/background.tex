@@ -137,14 +137,42 @@
 
       \subsubsection{Wärmeleitungsgleichung} % (fold)
       \label{ssub:heat-equation}
-        Die einfachste zeitabhängige PDE ist die Wärmeleitungsgleichung.
+        Die einfachste zeitabhängige partielle Differentialgleichung ist die Wärmeleitungsgleichung \cite[S.~175]{Schweizer2013}.
+        Bei ihr handelt es sich um eine parabolische partielle Differentialgleichung zweiter Ordnung, die ein einfaches Modell für die Berechnung instationärer Temperaturfelder bildet.
+        Physikalisch basiert sie auf dem Energieerhaltungssatz.
 
-        \begin{align*}
-          \partial_t u - \laplacian u &= f \\
-          u(\cdot,t_0) &= u_0 \\
-          u(\cdot,t)\vert_{\dirichletBoundary} &= u_\mathrm{D}\vert_{\dirichletBoundary} \\
-          \scalarProduct{\nabla u(\cdot,t)\vert_{\neumannBoundary}}{ν} &= u_\mathrm{N}
-        \end{align*}
+        Für die Einarbeitung eines Zeitparameters soll zunächst wieder ein räumliches Berechnungsgebiet gewählt werden, welches sich im Laufe der Zeit nicht verändert.
+        Auf diesem lassen sich die räumlichen Ableitungen zu allen Zeiten analog zur Poisson-Gleichung betrachten.
+        Um die Eindeutigkeit der Lösung auch nach dem Hinzufügen der Zeitableitungen zu gewährleisten, sind Anfangswerte von Nöten.
+        Mit diesen Betrachtung lässt sich die Wärmeleitungsgleichung nun ohne neue Erkenntnisse analog zur Poisson-Gleichung definieren.
+        \cite{Schweizer2013,Alberty1998}.
+
+        \begin{definition}[Wärmeleitungsgleichung]
+          Es seien $\boxBrackets{\Omega} \define \roundBrackets{\domain,\dirichletBoundary, \neumannBoundary, ν}$ ein Berechnungsgebiet und die folgenden Funktionen gegeben.
+          \begin{align*}
+            f&\in\setIntegrable^2(\domain\times[0,\infty))
+            &
+            u_\mathrm{D} &\in \setSobolev^1(\domain\times[0,\infty))
+            \\
+            u_0 &\in \setSobolev^1(\domain)
+            &
+            u_\mathrm{N} &\in \setIntegrable^2\roundBrackets{\neumannBoundary \times [0,\infty)}
+          \end{align*}
+          Eine Funktion $u\in\setSobolev^1(\domain\times[0,\infty))$ nennt man eine schwache Lösung der Wärmeleitungsgleichung, wenn die folgenden Gleichungen für alle $t\in[0,\infty)$ gelten.
+          \begin{align*}
+            \partial_t u - \laplacian u &= f & \text{(Wärmeleitungsgleichung)} \\
+            u(\cdot,0) &= u_0 & \text{(Anfangsbedingungen)}\\
+            u(\cdot,t)\vert_{\dirichletBoundary} &= u_\mathrm{D}(\cdot,t)\vert_{\dirichletBoundary} & \text{(Dirichlet-Randbedingungen)}\\
+            \scalarProduct{\nabla u(\cdot,t)\vert_{\neumannBoundary}}{ν} &= u_\mathrm{N}(\cdot,t) & \text{(Neumann-Randbedingungen)}
+          \end{align*}
+          Das Tupel $(\boxBrackets{\Omega},f,u_0,u_\mathrm{D}, u_\mathrm{N},u)$ wird dann auch Wärmeleitungsproblem genannt.
+        \end{definition}
+
+        Ebenfalls analog zur Poisson-Gleichung ist es auch möglich die Wärmeleitungsgleichung in eine schwache Formulierung zu transformieren.
+        Auch bei diesem Vorgang entstehen keine Überraschungen bei der mathematischen Vorgehensweise.
+        Zu bemerken sei hier, dass für die noch kommende Konstruktion der Finite-Elemente-Methode die rigorose schwache Formulierung der Wärmeleitungsgleichung keine direkte Rolle spielt.
+        Beim Übergang zur Diskretisierung erweist es sich als praktisches Vorgehen, jegliche Zeitableitung zuvor durch einen diskreten Differenzenquotienten zu ersetzen, sodass es sich bei dem resultierenden Gleichungssystem streng genommen nicht mehr um eine zeitabhängige Differentialgleichung handelt.
+        \cite{Schweizer2013,Alberty1998}
       % subsubsection wärmeleitungsgleichung (end)
 
       \subsubsection{Wellengleichung} % (fold)
