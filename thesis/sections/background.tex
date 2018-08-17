@@ -68,44 +68,75 @@
       \subsubsection{Poisson-Gleichung} % (fold)
       \label{ssub:poisson_gleichung}
         Die Poisson-Gleichung stellt eine wichtige Grundlage für die Wellen- und Wärmeleitungsgleichung dar.
-        Sie ist eine zeitunabhängige, elliptische lineare partielle Differentialgleichung zweiter Ordnung und gerade aus diesem Grund als ein Test für die Implementierung geeignet.
+        Sie ist eine zeitunabhängige, elliptische lineare partielle Differentialgleichung zweiter Ordnung.
+        Ihre Kernkomponente stellt die Verwendung des Laplace-Operators $\laplacian$ dar, der in der Physik in fast allen Teilgebieten eine elementare Rolle einnimmt.
+        Gerade aus diesem Grund ist die Poisson-Gleichung als ein Test für die Implementierung einer Finite-Elemente-Methode ideal geeignet.
 
-        Gegeben seien zudem die folgenden Funktionen.
+        Zu Beginn soll die klassische Variante betrachtet werden, wie es auch in \cite[S.~46]{Schweizer2013} geschehen ist.
+        Es seien $\Omega\subset\setReal^2$ eine nichtleere, offene, zusammenhängende Teilmenge und $f\in\setDifferentiable^1(\Omega)$ eine stetige Funktion.
+        Eine klassische Lösung $u\in\setDifferentiable^2(\Omega)$ der Poisson-Gleichung erfüllt diese dann punktweise für alle $x\in\Omega$.
         \[
-          f\in\setIntegrable^2(\domain)
-          \separate
-          u_\mathrm{D} \in \setSobolev^1(\domain)
-          \separate
-          u_\mathrm{N} \in \setIntegrable^2\roundBrackets{\neumannBoundary}
+          -\laplacian u(x) \define -\roundBrackets{\partial_1^2 + \partial_2^2}u(x) = f(x)
         \]
+        Bereits in der Theorie erweist sich allerdings dieser klassische Lösungsbegriff als nicht ausreichend.
+        Handelt es sich bei $f$ um eine nicht-stetige Funktion, so kann $u$ die Gleichung entweder nicht punktweise erfüllen oder nicht der Familie $\setDifferentiable^2(\Omega)$ zweimal stetig differenzierbarer Funktionen angehören.
+        Der Ausweg besteht darin einen verallgemeinerten schwachen Lösungsbegriff auf der Basis von Distributionen und Sobolevräumen einzuführen \cite{Schweizer2013}.
+        Diese erweisen sich dann auch in der numerischen Mathematik als ausreichend und dienen als Grundlage für die Formulierung der Finite-Elemente-Methode \cite{Logan2007}.
+        Über die Theorie der Distributionen und Sobolevräume können jedoch komplette Bücher geschrieben werden.
+        Da man dies auch getan hat, soll hier für eine detailliertere Behandlung des Themas auf \cite{Schweizer2013} verwiesen werden.
+
+        Die folgende Definition gibt die erste verallgemeinerte Form des Poisson-Problems an.
+        Es wurde sich auch hier auf \cite{Alberty1998} und \cite{Schweizer2013} gestützt, wobei diverse Notation angepasst wurden.
+
+        \begin{definition}[Poisson-Problem]
+          Es seien $\boxBrackets{\Omega} \define \roundBrackets{\domain,\dirichletBoundary, \neumannBoundary, ν}$ ein Berechnungsgebiet und die folgenden Funktionen gegeben.
+          \[
+            f\in\setIntegrable^2(\domain)
+            \separate
+            u_\mathrm{D} \in \setSobolev^1(\domain)
+            \separate
+            u_\mathrm{N} \in \setIntegrable^2\roundBrackets{\neumannBoundary}
+          \]
+          Eine Funktion $u\in\setSobolev^1(\domain)$ nennt man eine schwache Lösung der Poisson-Gleichung, wenn die folgenden Gleichungen gelten.
+          \begin{align*}
+            -\laplacian u &= f & \text{(Poisson-Gleichung)}\\
+            u\vert_{\dirichletBoundary} &= u_\mathrm{D}\vert_{\dirichletBoundary} & \text{(Dirichlet-Randbedingungen)} \\
+            \scalarProduct{\nabla u\vert_{\neumannBoundary}}{ν} &= u_\mathrm{N} & \text{(Neumann-Randbedingungen)}
+          \end{align*}
+          Das Tupel $(\boxBrackets{\Omega},f,u_\mathrm{D}, u_\mathrm{N},u)$ wird dann auch Poisson-Problem genannt.
+        \end{definition}
+
         Die Funktion $f$ ist auch bekannt als die Volumenkraft.
-        Die Funktionen $u_\mathrm{D}$ und $u_\mathrm{N}$ stellen die Dirichlet- und Neumann-Randbedingungen dar.
-        Gesucht ist nun eine Funktion $u\in\setSobolev^1(\domain)$, sodass die folgenden Gleichungen erfüllt sind.
-        \begin{align*}
-          -\laplacian u &= f \\
-          u\vert_{\dirichletBoundary} &= u_\mathrm{D}\vert_{\dirichletBoundary} \\
-          \scalarProduct{\nabla u\vert_{\neumannBoundary}}{ν} &= u_\mathrm{N}
-        \end{align*}
-        % Zu beachten ist, dass die Gleichungen im Sinne der punktweisen Gleichheit nur fast-überall erfüllt sein müssen.
-        In diesem Falle stellt $u$ eine Lösung der Poisson-Gleichung dar.
-        Nach dem Lemma von Lax und Milgram ist bekannt, dass für das gegebene Poisson-Problem eine schwache Lösung existiert.
-        Aus diesem Grund bilden wir zunächst die schwache Formulierung des Poisson-Problems.
-        Wir arbeiten die inhomogenen Dirichlet-Randbedingungen durch die folgende Zerlegung in das Problem ein.
+        Die Funktionen $u_\mathrm{D}$ und $u_\mathrm{N}$ stellen, wie bereits in der Definition erwähnt, die Dirichlet- und Neumann-Randbedingungen dar.
+        Die Ableitungen in den Gleichungen der Definition sind im Sinne der Distributionen zu verstehen.
+        Diese Formulierung ist nun aber nicht besonders geeignet für die Konstruktion der Finite-Elemente-Methode.
+        Für diese soll hier die schwache Formulierung verwendet werden, die sich aus der Anwendung des Gaußschen Satzes und der Berechnungsformel für die Ableitung von Distributionen ergibt \cite[S.~62~ff]{Schweizer2013}.
+
+        \begin{definition}[Schwache Formulierung des Poisson-Problems]
+          Es seien $(\boxBrackets{\Omega},f,u_\mathrm{D}, u_\mathrm{N},u)$ ein Poisson-Problem und die folgenden Definitionen gegeben.
+          \[
+            v\in\setSobolev^1_\mathrm{D}(\domain) \define \set{w\in\setSobolev^1(\domain)}{w\vert_{\dirichletBoundary} = 0}
+          \]
+          \[
+            v\define u - u_\mathrm{D}
+          \]
+          Die Eigenschaft, dass es sich bei $u$ um eine schwache Lösung handelt, ist dazu äquivalent, dass für alle $w\in\setSobolev^1_\mathrm{D}(\domain)$ das Folgende gilt.
+          \[
+            \integral{\domain}{}{\scalarProduct{\nabla v}{\nabla w}}{λ} = \integral{\domain}{}{fw}{λ} + \integral{\neumannBoundary}{}{u_\mathrm{N}w}{σ} - \integral{\domain}{}{\scalarProduct{\nabla u_\mathrm{D}}{\nabla w}}{λ}
+          \]
+          Man nennt diese Gleichung die schwache Formulierung des Poisson-Problems.
+        \end{definition}
+
+        Bei der hier notierten schwachen Formulierung wurde das Vorgehen aus \cite{Alberty1998} gewählt.
+        Dieses erlaubt eine direkte Einarbeitung der Dirichlet-Randbedingungen für eine leichtere numerische Behandlung der noch folgenden algebraischen Gleichungen.
+        Setzt man die Dirichlet- und Neumann-Randbedingungen identisch Null, so entsteht der folgende Spezialfall für alle $w\in\setSobolev_\mathrm{D}^1(\domain)$, der den Formeln aus \cite[S.~63]{Schweizer2013} entspricht.
         \[
-          v\in\setSobolev^1_\mathrm{D}(\domain) \define \set{w\in\setSobolev^1(\domain)}{w\vert_{\dirichletBoundary} = 0}
-        \]
-        \[
-          v\define u - u_\mathrm{D}
-        \]
-        Die schwache Formulierung ergibt sich dann zu der folgenden Form.
-        Für alle $w\in\setSobolev^1_\mathrm{D}(\domain)$ muss das folgende gelten.
-        \[
-          \integral{\domain}{}{\scalarProduct{\nabla u}{\nabla w}}{λ} = \integral{\domain}{}{fw}{λ} + \integral{\neumannBoundary}{}{u_\mathrm{N}w}{σ} - \integral{\domain}{}{\scalarProduct{\nabla u_\mathrm{D}}{\nabla w}}{λ}
+          \integral{\domain}{}{\scalarProduct{\nabla u}{\nabla w}}{λ} = \integral{\domain}{}{fw}{λ}
         \]
       % subsubsection poisson_gleichung (end)
 
       \subsubsection{Wärmeleitungsgleichung} % (fold)
-      \label{ssub:wärmeleitungsgleichung}
+      \label{ssub:heat-equation}
         Die einfachste zeitabhängige PDE ist die Wärmeleitungsgleichung.
 
         \begin{align*}
