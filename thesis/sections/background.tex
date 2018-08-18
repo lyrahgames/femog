@@ -113,6 +113,7 @@
         Für diese soll hier die schwache Formulierung verwendet werden, die sich aus der Anwendung des Gaußschen Satzes und der Berechnungsformel für die Ableitung von Distributionen ergibt \cite[S.~62~ff]{Schweizer2013}.
 
         \begin{definition}[Schwache Formulierung des Poisson-Problems]
+        \label{def:weak-formulation-poisson}
           Es seien $(\boxBrackets{\Omega},f,u_\mathrm{D}, u_\mathrm{N},u)$ ein Poisson-Problem und die folgenden Definitionen gegeben.
           \[
             v\in\setSobolev^1_\mathrm{D}(\domain) \define \set{w\in\setSobolev^1(\domain)}{w\vert_{\dirichletBoundary} = 0}
@@ -247,69 +248,121 @@
         \label{fig:fem-scheme}
       \end{figure}
 
-      \paragraph{Schritt 1: Konstruktion der schwachen Formulierung} % (fold)
-      \label{par:schritt_1_konstruktion_der_schwachen_formulierung}
-        \hfill\\
+      % \paragraph{Schritt 1: Konstruktion der schwachen Formulierung} % (fold)
+      % \label{par:schritt_1_konstruktion_der_schwachen_formulierung}
+        % \hfill\\
+      \subsubsection{Konstruktion der schwachen Formulierung}
         Wie in Abschnitt \ref{ssub:poisson_gleichung} erwähnt, ist es bereits in der Theorie sinnvoll, die Lösungen von partiellen Differentialgleichungen in einer abgeschwächten Form zu verstehen, da bereits nicht stetige Quellterme die Forderungen an eine klassische Lösung verletzen \cite[S.~46]{Schweizer2013}.
         Demzufolge scheint eine klassische Formulierung von partiellen Differentialgleichungen für die numerische Mathematik ungeeignet.
         Für die Definition einer schwachen Lösung beziehungsweise schwachen Formulierung verallgemeinert man die Ableitung einer Funktion mithilfe von Distributionen \cite[S.~46~ff]{Schweizer2013}.
         In den Sobolevräumen werden dann die integrierbaren Funktionen zusammengefasst, die im Sinne einer Distribution wieder eine Ableitung in einem integrierbaren Raum besitzen \cite[S.~54~ff]{Schweizer2013}.
 
-        Auf die Poisson-Gleichung wurde dieses Verfahren bereits angewendet.
-        Allerdings wurde in den Abschnitten \ref{ssub:wellengleichung} und \ref{ssub:heat-equation} erwähnt, dass die für die Finite-Elemente-Methode benötigte schwache Formulierung der Wellen- und Wärmeleitungsgleichung durch die separate Diskretisierung der Zeit erlangt wird.
-        Es sei also ein kleiner Zeitschritt $\infinitesimal{t}\in (0,\infty)$ gegeben.
-        Im Falle der Wärmeleitungsgleichung wendet man nun ein implizites Euler-Verfahren auf die zeitliche Ableitung an \cite{Alberty1998}.
-        Dies stellt sicher, dass die Lösung des Problems nicht divergiert.
-        \[
-          \partial_t u \approx \frac{u_{n+1} - u_n}{\infinitesimal{t}} \approx \laplacian u_{n+1} + f_{n+1}
-        \]
-        \[
-          \roundBrackets{\identity - \infinitesimal{t}\laplacian}u_{n+1} = \infinitesimal{t} f_{n+1} + u_n
-        \]
-        \[
-          \integral{\domain}{}{u_{n+1}w}{λ}
-          + \infinitesimal{t}\integral{\domain}{}{\scalarProduct{\nabla u_{n+1}}{\nabla w}}{λ} = \integral{\domain}{}{fw}{λ} + \integral{\neumannBoundary}{}{u_\mathrm{N}w}{σ} - \integral{\domain}{}{\scalarProduct{\nabla u_\mathrm{D}}{\nabla w}}{λ}
-        \]
+        Auf die Poisson-Gleichung wurde dieses Verfahren in Definition \ref{def:weak-formulation-poisson} bereits angewendet, sodass deren schwache Formulierung hier nicht noch einmal wiederholt werden soll.
+        Allerdings wurde in den Abschnitten \ref{ssub:wellengleichung} und \ref{ssub:heat-equation} erwähnt, dass die für die Finite-Elemente-Methode benötigte schwache Formulierung der Wellen- und Wärmeleitungsgleichung durch die separate Diskretisierung der Zeit erlangt wird \cite{Alberty1998,Logan2007}.
+        Es sei angemerkt, dass dies nicht die einzige Möglichkeit beschreibt, die Zeit in die Finite-Elemente-Methode einzubauen.
+        Auch diese ließe sich theoretisch gesehen wie die räumlichen Dimensionen durch die Finite-Elemente-Methode behandeln.
+        Dennoch erweist sich dieses Vorgehen der separaten Zeitdiskretisierung als sehr effizient sowohl bei der numerischen Behandlung als auch bei der Implementierung \cite{Logan2007}.
+        Eine detailliertere Betrachtung der Theorie ist dabei in \cite[S.~211~ff]{Schweizer2013} und \cite[S.~653~ff]{Logan2007} nachzulesen.
 
-        Das Vorkommen der zweiten zeitlichen Ableitung in der Wellengleichung ermöglicht die Anwendung des symplektischen Euler-Verfahrens.
-        Diese Methode erhält, abgesehen von kleinen Schwankungen, die Gesamtenergie eines Systems und führt damit nicht, wie beim expliziten Euler-Verfahren, zur Divergenz der Lösungen.
-        Zunächst überführt man die Wellengleichung durch die Einführung einer neuen Variable in ein System partieller Differentialgleichungen, in der die zeitliche Ableitung nur in erster Ordnung vorkommt.
-        \[
-          \partial_t^2 φ - \laplacian φ = f
-          \qquad\iff\qquad
-          \begin{pmatrix}
-            \partial_t φ \\ \partial_t ϑ
-          \end{pmatrix}
-          =
-          \begin{pmatrix}
-            ϑ \\ \laplacian φ + f
-          \end{pmatrix}
-        \]
-        Für ein solches System kann nun das symplektische Euler-Verfahren explizit notiert werden.
-        Die Idee besteht darin, nicht alle Terme auf der linken Seite der Gleichung gleichzeitig zu berechnen.
-        In diesem Falle wird die Funktion $ϑ_{n+1}$ als Erstes berechnet, um die Berechnung von $φ_{n+1}$ zu ermöglichen.
-        \[
-          \begin{pmatrix}
-            φ_{n+1} \\ ϑ_{n+1}
-          \end{pmatrix}
-          =
-          \begin{pmatrix}
-            φ_{n} \\ ϑ_{n}
-          \end{pmatrix}
-          + \infinitesimal{t}
-          \begin{pmatrix}
-            ϑ_{n+1} \\ \laplacian φ_{n} + f_{n}
-          \end{pmatrix}
-        \]
-        \[
-          \integral{\domain}{}{ϑ_{n+1}w}{λ}
-           = \integral{\domain}{}{\roundBrackets{ϑ_n + \infinitesimal{t}f_n}w}{λ} + \integral{\neumannBoundary}{}{φ^\mathrm{N}_nw}{σ} - \integral{\domain}{}{\scalarProduct{\nabla φ_n}{\nabla w}}{λ}
-        \]
+        \paragraph{Wärmeleitungsgleichung} % (fold)
+        \label{par:heat-equation}
+        \hfill\\
+          Für die zeitliche Diskretisierung der Wärmeleitungsgleichung kann man die sogenannte Rothe-Methode, wie sie in \cite[S.~211~ff]{Schweizer2013} und \cite{Alberty1998} beschrieben ist, verwenden.
+          Sie basiert auf dem impliziten Euler-Verfahren und verhindert damit die Divergenz numerischer Lösungen \cite[S.~472~f]{Quarteroni2000}.
+          Auch andere Zeitschrittverfahren, wie die Crank-Nicolson-Methode oder die Familie der Runge-Kutta-Verfahren sind jedoch denkbar \cite{Quarteroni2000,Cheney2008}.
+
+          Es seien nun ein kleiner Zeitschritt $\infinitesimal{t}\in (0,\infty)$, ein Berechnungsgebiet $\boxBrackets{\domain} \define (\domain,\dirichletBoundary,\neumannBoundary,ν)$ und ein Wärmeleitungsproblem $(\boxBrackets{\domain},f,u_0,u^{(\mathrm{D})},u^{(\mathrm{N})},u)$ gegeben.
+          Durch $\infinitesimal{t}$ wird das Zeitintervall $T\define[0,\infty)$ diskretisiert und durch die Menge $\boxBrackets{T}\define\set{k\cdot\infinitesimal{t}}{k\in\setNatural_0}$ dargestellt.
+          Weiterhin bezeichne eine natürliche Zahl $n\in\setNatural$ als Index der zeitabhängigen Funktionen $f$, $u^{(\mathrm{D})}$, $u^{(\mathrm{N})}$ und $u$ deren Diskretisierung zum Zeitpunkt $n\cdot\infinitesimal{t}$.
+          Dieses Schema soll am Beispiel von $u$ demonstriert werden.
+          \[
+            u \longleftrightarrow (u_n)_{n\in\setNatural_0}
+            \separate
+            u(\cdot,n\infinitesimal{t}) \longleftrightarrow u_n
+          \]
+          Zu beachten ist hier, dass die Diskretisierung $u_n$ im Allgemeinen $u(\cdot,n\infinitesimal{t})$ nur annähert und nicht exakt beschreibt.
+          Für die Diskretisierung der zeitlichen Ableitung folgt durch die Anwendung des impliziten Euler-Verfahrens ein ähnliches Schema.
+          \[
+            \partial_t u \longleftrightarrow (\partial_t u_n)_{n\in\setNatural}
+            \separate
+            \partial_t u(\cdot,n\infinitesimal{t}) \longleftrightarrow \frac{u_{n} - u_{n-1}}{\infinitesimal{t}}
+          \]
+          Mit diesen Transformationen ist es jetzt möglich, die gesamte Wärmeleitungsgleichung zu diskretisieren, wie im folgenden Schema gezeigt.
+          \[
+            \partial_t u -\laplacian u = f
+            \qquad \longleftrightarrow \qquad
+            \frac{u_{n} - u_{n-1}}{\infinitesimal{t}} - \laplacian u_n = f_n
+          \]
+          Bei der Berechnung wird davon ausgegangen, dass $u_{n-1}$ entweder als Anfangswert $u_0$ gegeben ist oder durch einen vorherigen Zeitschritt berechnet wurde.
+          Die einzige Unbekannte in der diskretisierten Gleichung ist damit $u_{n}$, für die man den folgenden Ausdruck erhält.
+          \[
+            \roundBrackets{\identity - \infinitesimal{t}\laplacian}u_{n} = \infinitesimal{t} f_{n} + u_{n-1}
+          \]
+          Für jeden Zeitpunkt $t\in\boxBrackets{T}$ handelt es sich hier um eine zeitunabhängige partielle Differentialgleichung zweiter Ordnung, deren schwache Lösung analog zu der der Poisson-Gleichung konstruiert werden kann.
+          Zunächst werden die Dirichlet-Randbedingungen wieder über eine Transformation in die Gleichung eingearbeitet.
+          \[
+            s_n\in\setSobolev^1_\mathrm{D}(\domain)
+            \separate
+            s_n\define u_n - u_n^\mathrm{D}
+          \]
+          Durch die Integration mit Testfunktionen und die Anwendung des Gaußschen Satzes erhält man nun für die schwachen Lösungen der Zeit-diskretisierten Wärmeleitungsgleichung die folgende etwas längliche Formulierung für alle $φ\in\setSobolev^1_\mathrm{D}(\domain)$.
+          \begin{align*}
+            &\integral{\domain}{}{s_nφ}{λ}
+            + \infinitesimal{t}\integral{\domain}{}{\scalarProduct{\nabla s_n}{\nabla φ}}{λ} \\
+            &= \infinitesimal{t}\boxBrackets{
+              \integral{\domain}{}{f_n φ}{λ}
+              + \integral{\neumannBoundary}{}{u_n^\mathrm{N}φ}{σ}
+              - \integral{\domain}{}{\scalarProduct{\nabla u_n^\mathrm{D}}{\nabla φ}}{λ}
+            }
+            - \integral{\domain}{}{u^\mathrm{D}_{n}φ}{λ}
+          \end{align*}
+        % paragraph wärmeleitungsgleichung (end)
+
+        \paragraph{Wellengleichung} % (fold)
+        \label{par:wave-equation}
+        \hfill\\
+          Das Vorkommen der zweiten zeitlichen Ableitung in der Wellengleichung ermöglicht die Anwendung des symplektischen Euler-Verfahrens.
+          Diese Methode erhält, abgesehen von kleinen Schwankungen, die Gesamtenergie eines Systems und führt damit nicht, wie beim expliziten Euler-Verfahren, zur Divergenz der Lösungen.
+          Zunächst überführt man die Wellengleichung durch die Einführung einer neuen Variable in ein System partieller Differentialgleichungen, in der die zeitliche Ableitung nur in erster Ordnung vorkommt.
+          \[
+            \partial_t^2 φ - \laplacian φ = f
+            \qquad\iff\qquad
+            \begin{pmatrix}
+              \partial_t φ \\ \partial_t ϑ
+            \end{pmatrix}
+            =
+            \begin{pmatrix}
+              ϑ \\ \laplacian φ + f
+            \end{pmatrix}
+          \]
+          Für ein solches System kann nun das symplektische Euler-Verfahren explizit notiert werden.
+          Die Idee besteht darin, nicht alle Terme auf der linken Seite der Gleichung gleichzeitig zu berechnen.
+          In diesem Falle wird die Funktion $ϑ_{n+1}$ als Erstes berechnet, um die Berechnung von $φ_{n+1}$ zu ermöglichen.
+          \[
+            \begin{pmatrix}
+              φ_{n+1} \\ ϑ_{n+1}
+            \end{pmatrix}
+            =
+            \begin{pmatrix}
+              φ_{n} \\ ϑ_{n}
+            \end{pmatrix}
+            + \infinitesimal{t}
+            \begin{pmatrix}
+              ϑ_{n+1} \\ \laplacian φ_{n} + f_{n}
+            \end{pmatrix}
+          \]
+          \[
+            \integral{\domain}{}{ϑ_{n+1}w}{λ}
+             = \integral{\domain}{}{\roundBrackets{ϑ_n + \infinitesimal{t}f_n}w}{λ} + \integral{\neumannBoundary}{}{φ^\mathrm{N}_nw}{σ} - \integral{\domain}{}{\scalarProduct{\nabla φ_n}{\nabla w}}{λ}
+          \]
+        % paragraph wellengleichung (end)
+
       % paragraph schritt_1_konstruktion_der_schwachen_formulierung (end)
 
-      \paragraph{Schritt 2: Diskretisierung des Berechnungsgebietes} % (fold)
-      \label{par:schritt_2_diskretisierung_des_berechnungsgebietes}
-        \hfill\\
+      % \paragraph{Schritt 2: Diskretisierung des Berechnungsgebietes} % (fold)
+      % \label{par:schritt_2_diskretisierung_des_berechnungsgebietes}
+      %   \hfill\\
+      \subsubsection{Diskretisierung des Berechnungsgebietes}
         Aufgrund der Funktionsweise eines Computers ist man bei numerischen Simulationen gezwungen, kontinuierliche Probleme auf die eine oder andere Art und Weise zu diskretisieren.
         In der Finite-Elemente-Methode findet diese Diskretisierung durch die Einführung von finiten Elementen statt.
         Das Berechnungsgebiet $\domain$ und dessen Rand $\boundary$ werden in ein äquivalentes System von mehreren finiten Elementen überführt.
@@ -341,9 +394,10 @@
         \end{figure}
       % paragraph schritt_2_diskretisierung_des_berechnungsgebietes (end)
 
-      \paragraph{Schritt 3: Wahl der Basisfunktionen} % (fold)
-      \label{par:schritt_3_wahl_der_basisfunktionen}
-        \hfill\\
+      % \paragraph{Schritt 3: Wahl der Basisfunktionen} % (fold)
+      % \label{par:schritt_3_wahl_der_basisfunktionen}
+      %   \hfill\\
+      \subsubsection{Wahl der Basisfunktionen}
         Neben der Diskretisierung des Berechnungsgebietes $\domain$ ist auch die Diskretisierung der Funktionenräume $\setSobolev^1(\domain)$ und $\setSobolev^1_\mathrm{D}(\domain)$ nötig.
         Dies erreicht man durch die Wahl endlich vieler Basisfunktionen.
         Im Idealfall sollten diese einen kleinen Träger aufweisen, um die spätere Berechnung effizienter zu gestalten.
@@ -370,9 +424,10 @@
         \end{figure}
       % paragraph schritt_3_wahl_der_basisfunktionen (end)
 
-      \paragraph{Schritt 4: Konstruktion der algebraischen Formulierung} % (fold)
-      \label{par:schritt_4_konstruktion_der_algebraischen_formulierung}
-        \hfill\\
+      % \paragraph{Schritt 4: Konstruktion der algebraischen Formulierung} % (fold)
+      % \label{par:schritt_4_konstruktion_der_algebraischen_formulierung}
+      %   \hfill\\
+      \subsubsection{Konstruktion der algebraischen Formulierung}
         Das Einsetzen der Diskretisierung in die ursprüngliche schwache Formulierung der partiellen Differentialgleichung führt zu einem System von algebraischen Gleichungen.
         Die in dieser Arbeit besprochenen Fälle resultieren in linearen Gleichungssystemen mit dünnbesetzten Matrizen.
         Diese hängen zudem stark von der gewählten Diskretisierung ab.
@@ -396,9 +451,10 @@
         \]
       % paragraph schritt_4_konstruktion_der_algebraischen_formulierung (end)
 
-      \paragraph{Schritt 5: Lösung des algebraischen Systems} % (fold)
-      \label{par:schritt_5_lsen_des_algebraischen_systems}
-        \hfill\\
+      % \paragraph{Schritt 5: Lösung des algebraischen Systems} % (fold)
+      % \label{par:schritt_5_lsen_des_algebraischen_systems}
+      %   \hfill\\
+      \subsubsection{Lösung des algebraischen Systems}
         Die erhaltenen algebraischen Gleichungen sind äquivalent zu der schwachen Formulierung des diskretisierten Problems.
         In den hier betrachteten Fällen existieren eindeutige Lösungen.
       % paragraph schritt_5_lösen_des_algebraischen_systems (end)
