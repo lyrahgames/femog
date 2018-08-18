@@ -234,15 +234,77 @@
       Um ein Problem zu lösen, unterteilt es das Berechnungsgebiet in kleinere und einfach zu behandelnde Teile (engl.: \textit{primitives}), die auch finite Elemente genannt werden.
       Die einfachen Systeme von algebraischen Gleichungen der einzelnen finiten Elemente werden dann in ein großes System von Gleichungen, welches das gesamte Problem modelliert, assembliert.
       Durch die Minimierung einer Fehlerfunktion mithilfe verschiedener Variationsmethoden ist die Finite-Elemente-Methode dann in der Lage, das Problem zu lösen.
-      Im Folgenden wird die grundlegende Vorgehensweise an den Modelproblemen illustriert.
+      Im Folgenden wird die grundlegende Vorgehensweise an den in Abschnitt \ref{sub:modelprobleme} beschriebenen Modelproblemen illustriert und in Abbildung \ref{fig:fem-scheme} zusammengefasst dargestellt.
+      \cite{Schweizer2013,Logan2007,Cheney2008,Quarteroni2000}
+
+      \begin{figure}[h]
+        \center
+        \includegraphics[width=0.3\textwidth]{images/fem_scheme.pdf}
+        \caption[Schematisches Vorgehen der Finite-Elemente-Methode]{%
+          Die Abbildung zeigt das schematische Vorgehen bei der Konstruktion der Finite-Elemente-Methode.
+          Das Vorgehen kann prinzipiell auf jedes partielle Differentialgleichungssystem angewendet werden, um einen Algorithmus zu generieren, der dieses unter Verwendung eines Computers numerisch approximiert.
+        }
+        \label{fig:fem-scheme}
+      \end{figure}
 
       \paragraph{Schritt 1: Konstruktion der schwachen Formulierung} % (fold)
       \label{par:schritt_1_konstruktion_der_schwachen_formulierung}
         \hfill\\
-        Bereits in der Theorie ist es sinnvoll, die Lösungen von partiellen Differentialgleichungen in einer abgeschwächten Form zu verstehen, da bereits nicht stetige Quellterme die Forderungen an eine klassische Lösung verletzen \cite[S.~46]{Schweizer2013}.
+        Wie in Abschnitt \ref{ssub:poisson_gleichung} erwähnt, ist es bereits in der Theorie sinnvoll, die Lösungen von partiellen Differentialgleichungen in einer abgeschwächten Form zu verstehen, da bereits nicht stetige Quellterme die Forderungen an eine klassische Lösung verletzen \cite[S.~46]{Schweizer2013}.
         Demzufolge scheint eine klassische Formulierung von partiellen Differentialgleichungen für die numerische Mathematik ungeeignet.
         Für die Definition einer schwachen Lösung beziehungsweise schwachen Formulierung verallgemeinert man die Ableitung einer Funktion mithilfe von Distributionen \cite[S.~46~ff]{Schweizer2013}.
-        In den Sobolevräumen werden dann die integrierbaren Funktionen zusammengefasst, die im Sinne einer Distribution wieder eine integrierbare Ableitung besitzen \cite[S.~54~ff]{Schweizer2013}.
+        In den Sobolevräumen werden dann die integrierbaren Funktionen zusammengefasst, die im Sinne einer Distribution wieder eine Ableitung in einem integrierbaren Raum besitzen \cite[S.~54~ff]{Schweizer2013}.
+
+        Auf die Poisson-Gleichung wurde dieses Verfahren bereits angewendet.
+        Allerdings wurde in den Abschnitten \ref{ssub:wellengleichung} und \ref{ssub:heat-equation} erwähnt, dass die für die Finite-Elemente-Methode benötigte schwache Formulierung der Wellen- und Wärmeleitungsgleichung durch die separate Diskretisierung der Zeit erlangt wird.
+        Es sei also ein kleiner Zeitschritt $\infinitesimal{t}\in (0,\infty)$ gegeben.
+        Im Falle der Wärmeleitungsgleichung wendet man nun ein implizites Euler-Verfahren auf die zeitliche Ableitung an \cite{Alberty1998}.
+        Dies stellt sicher, dass die Lösung des Problems nicht divergiert.
+        \[
+          \partial_t u \approx \frac{u_{n+1} - u_n}{\infinitesimal{t}} \approx \laplacian u_{n+1} + f_{n+1}
+        \]
+        \[
+          \roundBrackets{\identity - \infinitesimal{t}\laplacian}u_{n+1} = \infinitesimal{t} f_{n+1} + u_n
+        \]
+        \[
+          \integral{\domain}{}{u_{n+1}w}{λ}
+          + \infinitesimal{t}\integral{\domain}{}{\scalarProduct{\nabla u_{n+1}}{\nabla w}}{λ} = \integral{\domain}{}{fw}{λ} + \integral{\neumannBoundary}{}{u_\mathrm{N}w}{σ} - \integral{\domain}{}{\scalarProduct{\nabla u_\mathrm{D}}{\nabla w}}{λ}
+        \]
+
+        Das Vorkommen der zweiten zeitlichen Ableitung in der Wellengleichung ermöglicht die Anwendung des symplektischen Euler-Verfahrens.
+        Diese Methode erhält, abgesehen von kleinen Schwankungen, die Gesamtenergie eines Systems und führt damit nicht, wie beim expliziten Euler-Verfahren, zur Divergenz der Lösungen.
+        Zunächst überführt man die Wellengleichung durch die Einführung einer neuen Variable in ein System partieller Differentialgleichungen, in der die zeitliche Ableitung nur in erster Ordnung vorkommt.
+        \[
+          \partial_t^2 φ - \laplacian φ = f
+          \qquad\iff\qquad
+          \begin{pmatrix}
+            \partial_t φ \\ \partial_t ϑ
+          \end{pmatrix}
+          =
+          \begin{pmatrix}
+            ϑ \\ \laplacian φ + f
+          \end{pmatrix}
+        \]
+        Für ein solches System kann nun das symplektische Euler-Verfahren explizit notiert werden.
+        Die Idee besteht darin, nicht alle Terme auf der linken Seite der Gleichung gleichzeitig zu berechnen.
+        In diesem Falle wird die Funktion $ϑ_{n+1}$ als Erstes berechnet, um die Berechnung von $φ_{n+1}$ zu ermöglichen.
+        \[
+          \begin{pmatrix}
+            φ_{n+1} \\ ϑ_{n+1}
+          \end{pmatrix}
+          =
+          \begin{pmatrix}
+            φ_{n} \\ ϑ_{n}
+          \end{pmatrix}
+          + \infinitesimal{t}
+          \begin{pmatrix}
+            ϑ_{n+1} \\ \laplacian φ_{n} + f_{n}
+          \end{pmatrix}
+        \]
+        \[
+          \integral{\domain}{}{ϑ_{n+1}w}{λ}
+           = \integral{\domain}{}{\roundBrackets{ϑ_n + \infinitesimal{t}f_n}w}{λ} + \integral{\neumannBoundary}{}{φ^\mathrm{N}_nw}{σ} - \integral{\domain}{}{\scalarProduct{\nabla φ_n}{\nabla w}}{λ}
+        \]
       % paragraph schritt_1_konstruktion_der_schwachen_formulierung (end)
 
       \paragraph{Schritt 2: Diskretisierung des Berechnungsgebietes} % (fold)
