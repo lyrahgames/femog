@@ -303,7 +303,7 @@
           \[
             s_n\in\setSobolev^1_\mathrm{D}(\domain)
             \separate
-            s_n\define u_n - u_n^\mathrm{D}
+            s_n\define u_n - u_n^{(\mathrm{D})}
           \]
           Durch die Integration mit Testfunktionen und die Anwendung des Gaußschen Satzes erhält man nun für die schwachen Lösungen der Zeit-diskretisierten Wärmeleitungsgleichung die folgende etwas längliche Formulierung für alle $φ\in\setSobolev^1_\mathrm{D}(\domain)$.
           \begin{align*}
@@ -311,10 +311,10 @@
             + \infinitesimal{t}\integral{\domain}{}{\scalarProduct{\nabla s_n}{\nabla φ}}{λ} \\
             &= \infinitesimal{t}\boxBrackets{
               \integral{\domain}{}{f_n φ}{λ}
-              + \integral{\neumannBoundary}{}{u_n^\mathrm{N}φ}{σ}
-              - \integral{\domain}{}{\scalarProduct{\nabla u_n^\mathrm{D}}{\nabla φ}}{λ}
+              + \integral{\neumannBoundary}{}{u_n^{(\mathrm{N})}φ}{σ}
+              - \integral{\domain}{}{\scalarProduct{\nabla u_n^{(\mathrm{D)}}}{\nabla φ}}{λ}
             }
-            - \integral{\domain}{}{u^\mathrm{D}_{n}φ}{λ}
+            - \integral{\domain}{}{u^{(\mathrm{D})}_{n}φ}{λ}
           \end{align*}
         % paragraph wärmeleitungsgleichung (end)
 
@@ -323,7 +323,11 @@
         \hfill\\
           Das Vorkommen der zweiten zeitlichen Ableitung in der Wellengleichung ermöglicht die Anwendung des symplektischen Euler-Verfahrens.
           Diese Methode erhält, abgesehen von kleinen Schwankungen, die Gesamtenergie eines Systems und führt damit nicht, wie beim expliziten Euler-Verfahren, zur Divergenz der Lösungen.
+          Analog zur Wärmeleitungsgleichung könnte man auch hier andere Zeitschrittverfahren verwenden.
+
           Zunächst überführt man die Wellengleichung durch die Einführung einer neuen Variable in ein System partieller Differentialgleichungen, in der die zeitliche Ableitung nur in erster Ordnung vorkommt.
+          Es seien also $\boxBrackets{\domain} \define (\domain,\dirichletBoundary,\neumannBoundary,ν)$ ein Berechnungsgebiet und $(\boxBrackets{\domain},f,φ_0, ϑ_0,φ^{(\mathrm{D})},φ^{(\mathrm{N})},φ)$ ein Wellenproblem.
+          In diesem Falle gilt die folgende Äquivalenz für $ϑ\define \partial_t φ$.
           \[
             \partial_t^2 φ - \laplacian φ = f
             \qquad\iff\qquad
@@ -335,9 +339,55 @@
               ϑ \\ \laplacian φ + f
             \end{pmatrix}
           \]
+          Des Weiteren gelten die folgenden für die Dirichlet-Randbedingungen wichtigen Zusammenhänge für alle $t\in T$.
+          \[
+            φ(\cdot,0) = φ_0
+            \separate
+            ϑ(\cdot,0) = ϑ_0
+            \separate
+            \appendValue{ϑ(\cdot,t)}{\dirichletBoundary} = \appendValue{\partial_t φ^\mathrm{(D)}(\cdot,t)}{\dirichletBoundary}
+          \]
+          Wie zuvor bei der Wärmeleitungsgleichung soll auch hier ein kleiner Zeitschritt $\infinitesimal{t}\in(0,\infty)$ gewählt werden, der das Zeitintervall $T$ durch $\boxBrackets{T}$ diskretisiert.
+          Des Weiteren soll für ein $n\in\setNatural$ die gleiche Notation für die Diskretisierung der zeitabhängigen Funktionen $f$, $φ^\mathrm{(D)}$, $φ^\mathrm{(N)}$, $φ$ und $ϑ$ verwendet werden, deren Schema noch einmal am Beispiel von φ gezeigt werden soll.
+          \[
+            φ\longleftrightarrow (φ_n)_{n\in\setNatural_0}
+            \separate
+            φ(\cdot,n\infinitesimal{t}) \longleftrightarrow φ_n
+          \]
+          Für die Dirichlet-Randbedingungen von $ϑ_n$ soll auch hier ein einfaches Euler-Verfahren verwendet werden.
+          Da die Randbedingungen von Vornherein bekannt sind, wäre hier auch die Wahl eines analytischen Verfahrens möglich.
+          \[
+            \appendValue{ϑ(\cdot,n\infinitesimal{t})}{\dirichletBoundary} = \appendValue{\partial_t φ^\mathrm{(D)}(\cdot,n\infinitesimal{t})}{\dirichletBoundary}
+            \qquad \longleftrightarrow \qquad
+            \appendValue{ϑ_{n}}{\dirichletBoundary} = \appendValue{\frac{φ_{n}^\mathrm{(D)} - φ_{n-1}^\mathrm{(D)}}{\infinitesimal{t}}}{\dirichletBoundary}
+          \]
           Für ein solches System kann nun das symplektische Euler-Verfahren explizit notiert werden.
           Die Idee besteht darin, nicht alle Terme auf der linken Seite der Gleichung gleichzeitig zu berechnen.
           In diesem Falle wird die Funktion $ϑ_{n+1}$ als Erstes berechnet, um die Berechnung von $φ_{n+1}$ zu ermöglichen.
+          \[
+            \begin{pmatrix}
+              \partial_t φ \\ \partial_t ϑ
+            \end{pmatrix}
+            =
+            \begin{pmatrix}
+              ϑ \\ \laplacian φ + f
+            \end{pmatrix}
+            \qquad \longleftrightarrow \qquad
+            \frac{1}{\infinitesimal{t}}\boxBrackets{
+              \begin{pmatrix}
+                φ_{n+1} \\ ϑ_{n+1}
+              \end{pmatrix}
+              -
+              \begin{pmatrix}
+                φ_n \\ ϑ_n
+              \end{pmatrix}
+            }
+            =
+            \begin{pmatrix}
+              ϑ_{n+1} \\ \laplacian φ_n + f_n
+            \end{pmatrix}
+          \]
+          Umgestellt nach $φ_{n+1}$ und $ϑ_{n+1}$ erhält man nun die explizite Berechnungsformel eines Zeitschrittes.
           \[
             \begin{pmatrix}
               φ_{n+1} \\ ϑ_{n+1}
@@ -351,10 +401,38 @@
               ϑ_{n+1} \\ \laplacian φ_{n} + f_{n}
             \end{pmatrix}
           \]
+          Die Konstruktion der schwachen Formulierung erfolgt wieder analog zur Wärmeleitungsgleichung.
+          Zunächst werden wieder durch Hilfsvariablen die Randbedingungen eingearbeitet.
+          \begin{align*}
+            φ^\circ_{n+1} &\define φ_{n+1} - φ_{n+1}^\mathrm{(D)}
+            &
+            φ^\circ_{n+1} &\in \setSobolev^1_\mathrm{D}(\domain)
+            \\
+            ϑ^\circ_{n+1} &\define ϑ_{n+1} - \appendValue{ϑ_{n+1}}{\dirichletBoundary}
+            &
+            ϑ^\circ_{n+1} &\in \setSobolev^1_\mathrm{D}(\domain)
+          \end{align*}
+          Die erste Gleichung des Systems für $φ_{n+1}$ ändert sich im Prinzip nicht, da keine räumlichen Ableitungen enthalten sind.
+          Das Einsetzen der Hilfsvariablen ergibt die folgende Gleichung.
           \[
-            \integral{\domain}{}{ϑ_{n+1}w}{λ}
-             = \integral{\domain}{}{\roundBrackets{ϑ_n + \infinitesimal{t}f_n}w}{λ} + \integral{\neumannBoundary}{}{φ^\mathrm{N}_nw}{σ} - \integral{\domain}{}{\scalarProduct{\nabla φ_n}{\nabla w}}{λ}
+            φ^\circ_{n+1} = φ^\circ_n + \infinitesimal{t} ϑ^\circ_{n+1}
           \]
+          Die Umformulierung der Gleichung für $ϑ_{n+1}$ ergibt wieder einen länglichen Ausdruck für alle $ξ\in\setSobolev^1_\mathrm{D}(\domain)$.
+          \begin{align*}
+            \integral{\domain}{}{ϑ^\circ_{n+1}ξ}{λ}
+            &= \integral{\domain}{}{ϑ_n ξ}{λ}
+            - \frac{1}{\infinitesimal{t}}
+            \boxBrackets{
+              \integral{\domain}{}{φ_{n+1}^\mathrm{(D)}ξ}{λ}
+              -\integral{\domain}{}{φ_{n}^\mathrm{(D)}ξ}{λ}
+            }\\
+            &+ \infinitesimal{t}
+            \boxBrackets{
+              \integral{\domain}{}{f_nξ}{λ}
+              + \integral{\neumannBoundary}{}{φ^{(\mathrm{N})}_n ξ}{σ}
+              - \integral{\domain}{}{\scalarProduct{\nabla φ_n}{\nabla ξ}}{λ}
+            }
+          \end{align*}
         % paragraph wellengleichung (end)
 
       % paragraph schritt_1_konstruktion_der_schwachen_formulierung (end)
