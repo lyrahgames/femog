@@ -638,10 +638,19 @@
         \]
       % paragraph schritt_3_wahl_der_basisfunktionen (end)
 
-      % \paragraph{Schritt 4: Konstruktion der algebraischen Formulierung} % (fold)
-      % \label{par:schritt_4_konstruktion_der_algebraischen_formulierung}
-      %   \hfill\\
       \subsubsection{Konstruktion der algebraischen Formulierung}
+        Nachdem sowohl das Berechnungsgebiet als auch die Funktionenräume diskretisiert wurden, ist es nun möglich, darauf aufbauend aus den schwachen Formulierungen der partiellen Differentialgleichungen ein System algebraischer Gleichungen zu erlangen.
+        Grundsätzlich ersetzt das Vorgehen alle Funktionen aus den Räumen $\setSobolev^1_\mathrm{D}(\domain)$ und $\setSobolev^1(\domain)$ durch die stückweisen linearen Funktionen der Räume $\mathrm{S}_\mathrm{D}$ und $\mathrm{S}$.
+
+        \paragraph{Poisson-Problem am eindimensionalen Beispiel} % (fold)
+        \hfill\\
+          Es sei wieder $([\Omega], f, u^\mathrm{(D)}, u^\mathrm{(N)},u)$ ein Poisson-Problem.
+          Nach Definition \ref{def:weak-formulation-poisson} ist die schwache Formulierung des Poisson-Problems durch die folgende Gleichung für alle $φ\in\setSobolev^1_\mathrm{D}(\domain)$ gegeben.
+          \[
+            \integral{\domain}{}{\scalarProduct{\nabla v}{\nabla φ}}{λ} = \integral{\domain}{}{f φ}{λ} + \integral{\neumannBoundary}{}{u^\mathrm{(N)} φ}{σ} - \integral{\domain}{}{\scalarProduct{\nabla u^\mathrm{(D)}}{\nabla φ}}{λ}
+          \]
+        % paragraph poisson_problem_am_eindimensionalen_beispiel (end)
+
         Das Einsetzen der Diskretisierung in die ursprüngliche schwache Formulierung der partiellen Differentialgleichung führt zu einem System von algebraischen Gleichungen.
         Die in dieser Arbeit besprochenen Fälle resultieren in linearen Gleichungssystemen mit dünnbesetzten Matrizen.
         Diese hängen zudem stark von der gewählten Diskretisierung ab.
