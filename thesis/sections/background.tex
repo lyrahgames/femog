@@ -636,6 +636,10 @@
           \separate
           \mathrm{S}_\mathrm{D} \define \mathrm{S} \cap \setSobolev^1_\mathrm{D}(\domain)
         \]
+        Das Ziel wird es sein, jede beliebige Funktion durch Elemente dieses Raumes zu beschreiben.
+        Um dies zu vereinfachen, soll $\mathrm{S}$ in drei verschiedene Unterräume separiert werden.
+        $\mathrm{S}^\circ$ bezeichnet hierbei den Raum der Funktionen, die auf dem Rand $\boundary$ identisch zu Null sind.
+        $\mathrm{S}^\mathrm{(D)}$
       % paragraph schritt_3_wahl_der_basisfunktionen (end)
 
       \subsubsection{Konstruktion der algebraischen Formulierung}
@@ -647,29 +651,96 @@
           Es sei wieder $([\Omega], f, u^\mathrm{(D)}, u^\mathrm{(N)},u)$ ein Poisson-Problem.
           Nach Definition \ref{def:weak-formulation-poisson} ist die schwache Formulierung des Poisson-Problems durch die folgende Gleichung für alle $φ\in\setSobolev^1_\mathrm{D}(\domain)$ gegeben.
           \[
+            u
+            = \sum_{i\in V} u_i η_i
+            = \underbrace{\sum_{i\in V^\circ} u_i η_i}_{= v}
+            + \underbrace{\sum_{i\in V_\mathrm{D}} u^\mathrm{D}_i η_i}_{=u^\mathrm{(D)}}
+            \separate
+            f = \sum_{i\in V} f_i η_i
+            \separate
+            v = \sum_{i\in V^\circ} v_i η_i
+            \separate
+            φ = \sum_{i\in V^\circ} φ_i η_i
+          \]
+          \[
+            u^\mathrm{(D)} = \sum_{i\in V_\mathrm{D}} u^\mathrm{(D)}_i η_i
+            \separate
+            u^\mathrm{(N)} = \sum_{i\in V_\mathrm{N}} u^\mathrm{(N)}_i \appendValue{η_i}{\neumannBoundary}
+          \]
+          \[
             \integral{\domain}{}{\scalarProduct{\nabla v}{\nabla φ}}{λ} = \integral{\domain}{}{f φ}{λ} + \integral{\neumannBoundary}{}{u^\mathrm{(N)} φ}{σ} - \integral{\domain}{}{\scalarProduct{\nabla u^\mathrm{(D)}}{\nabla φ}}{λ}
           \]
+          Weiterhin sei die Menge der Eckpunkte des diskretisierten Berechnungsgebietes gegeben durch $V$ und deren zugehörige Basisfunktionen durch die Menge $B\define\set{\function{η_i}{\domain}{\setReal}}{i\in V}$.
+          Im diskretisierten Falle gilt demnach für alle $ξ\in\mathrm{S}_\mathrm{D}$ die folgende Gleichung für die diskretisierten Funktionen $v\in\mathrm{S}_\mathrm{D}$, $f\in\mathrm{S}$.
+          \[
+            \sum_{j\in V^\circ} v_j \integral{\domain}{}{\scalarProduct{\nabla η_i}{\nabla η_j}}{λ}
+            = \sum_{j \in V} f_j \integral{\domain}{}{η_iη_j}{λ}
+            + \sum_{j \in V_\mathrm{N}} u_j^\mathrm{(N)} \integral{\neumannBoundary}{}{η_i η_j}{σ}
+            - \sum_{j \in V_\mathrm{D}} u_j^\mathrm{(D)} \integral{\domain}{}{\scalarProduct{\nabla η_i}{\nabla η_j}}{λ}
+          \]
+          \[
+            [\laplacian][v] = [M][f] + [N][u^\mathrm{(N)}] - [\laplacian][u^\mathrm{(D)}]
+          \]
+          Man ersetzt zunächst die Funktionen $φ\in \setSobolev^1_\mathrm{D}(\domain)$ durch Funktionen $ξ\in \mathrm{S}_\mathrm{D}$ des diskretisierten Raumes.
+          Da es sich bei $B$ um eine Basis dieses Raumes handelt, lässt sich jedes $ξ\in\mathrm{S}_\mathrm{D}$ durch eine Linearkombination der Basisfunktionen beschreiben.
         % paragraph poisson_problem_am_eindimensionalen_beispiel (end)
 
         Das Einsetzen der Diskretisierung in die ursprüngliche schwache Formulierung der partiellen Differentialgleichung führt zu einem System von algebraischen Gleichungen.
         Die in dieser Arbeit besprochenen Fälle resultieren in linearen Gleichungssystemen mit dünnbesetzten Matrizen.
         Diese hängen zudem stark von der gewählten Diskretisierung ab.
         \[
-          \roundBrackets{ \integral{\domain}{}{ \scalarProduct{\nabla η_i}{\nabla η_j} }{λ} }_{i,j} =
+          \roundBrackets{ \integral{\domain}{}{η_i η_j}{λ} }_{i\in V^\circ,j\in V} = \frac{h}{6}
           \begin{pmatrix}
-            1 & -1 & & & \\
-            -1 & 2 & -1 & & \\
-            & -1 & 2 & -1 & \\
-            & & -1 & 2 & -1 \\
-            & & & -1 & 1
+            1 & 4 & 1 & & \\
+            & 1 & 4 & 1 & \\
+            & & 1 & 4 & 1 \\
           \end{pmatrix}
         \]
         \[
-          \roundBrackets{ \integral{\domain}{}{ \scalarProduct{\nabla η_i}{\nabla η_j} }{λ} }_{i,j\in I} =
+          \roundBrackets{ \integral{\domain}{}{ \scalarProduct{\nabla η_i}{\nabla η_j} }{λ} }_{i,j\in V^\circ} = \frac{1}{h}
           \begin{pmatrix}
             2 & -1 & \\
             -1 & 2 & -1 \\
             & -1 & 2 \\
+          \end{pmatrix}
+        \]
+        \[
+          \roundBrackets{ \integral{\domain}{}{ \scalarProduct{\nabla η_i}{\nabla η_j} }{λ} }_{i\in V^\circ,j\in V_\mathrm{D}} = \frac{1}{h}
+          \begin{pmatrix}
+            -1 & 0 \\
+            0 & 0 \\
+            0 & -1 \\
+          \end{pmatrix}
+        \]
+        \[
+          \frac{1}{h}
+          \begin{pmatrix}
+            2 & -1 & \\
+            -1 & 2 & -1 \\
+            & -1 & 2 \\
+          \end{pmatrix}
+          \begin{pmatrix}
+            v_1 \\ v_2 \\ v_3
+          \end{pmatrix}
+          =
+          \frac{h}{6}
+          \begin{pmatrix}
+            1 & 4 & 1 & & \\
+            & 1 & 4 & 1 & \\
+            & & 1 & 4 & 1 \\
+          \end{pmatrix}
+          \begin{pmatrix}
+            f_0 \\ f_1 \\ f_2 \\ f_3 \\ f_4
+          \end{pmatrix}
+          -
+          \frac{1}{h}
+          \begin{pmatrix}
+            -1 & 0 \\
+            0 & 0 \\
+            0 & -1 \\
+          \end{pmatrix}
+          \begin{pmatrix}
+            u^\mathrm{(D)}_0 \\ u^\mathrm{(D)} _4
           \end{pmatrix}
         \]
       % paragraph schritt_4_konstruktion_der_algebraischen_formulierung (end)
