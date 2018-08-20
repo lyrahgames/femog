@@ -444,7 +444,7 @@
         Dabei wird die Anzahl, der Typ und die Größe dieser Elemente durch den Modellierer festgelegt.
         Für zwei Raumdimensionen werden zumeist Dreiecke und Vierecke gewählt.
         Die Abbildungen \ref{fig:domain-example} und \ref{fig:domain-discretization} veranschaulichen dieses Vorgehen im ein- und zweidimensionalen Fall anhand schematischer Beispiele.
-        Das weitere Vorgehen in der Finite-Elemente-Methode wird nun am dem eindimensionalen Berechnungsgebiet aus Abbildung \ref{fig:domain-example} vorgeführt werden.
+        Das weitere Vorgehen der nächsten Paragraphen wird am Beispiel des eindimensionalen Berechnungsgebiet aus Abbildung \ref{fig:domain-example} gezeigt werden.
         \cite{Logan2007,Alberty1998,Cheney2008,Quarteroni2000}
 
         \begin{figure}[h]
@@ -472,6 +472,26 @@
           }
           \label{fig:domain-discretization}
         \end{figure}
+
+        Sowohl im ein- und zweidimensionalen Fall ist zuallererst die Wahl von Eckpunkten (engl.: \textit{vertex}), die den Rand und das innere des Berechnungsgebietes näherungsweise beschreiben, nötig.
+        Im Anschluss daran ist die Wahl der finiten Elemente zu treffen.
+        Im eindimensionalen Beispiel aus Abbildung \ref{fig:domain-example} muss es sich dabei um Kanten handeln, die benachbarte Eckpunkte verbinden.
+        Im zweidimensionalen Fall sollen in dieser Arbeit als finite Elemente nur Dreiecke gewählt werden.
+        Andere Arten von finiten Elementen können vollkommen analog zu diesen eingeführt werden.
+        Auch die Dreiecke definieren auf der Menge der Eckpunkte eine Art Nachbarschaft.
+        Wichtig daran ist, dass sich nur die Kanten der Dreiecke schneiden dürfen, nicht aber die Dreiecke selbst, da sonst ein Teil des Berechnungsgebietes durch mehr als ein Dreieck beschrieben werden würde.
+
+        Für den weiteren Verlauf beschreibe $V$ die endliche nichtleere Menge der gewählten Eckpunkte in einem Berechnungsgebiet.
+        Um einfacher mit der Diskretisierung von Randwerten und -integralen umzugehen, soll zudem $V^\circ$ die Menge aller Eckpunkte, die nicht auf dem Dirichlet-Rand $\dirichletBoundary$ liegen, $V_\mathrm{D}$ die Menge aller Eckpunkte, die auf dem Dirichlet-Rand $\dirichletBoundary$ liegen, und $V_\mathrm{N}$ die Menge aller Eckpunkte, die auf dem Neumann-Rand $\neumannBoundary$ liegen, bezeichnen.
+        In diesem Falle gelten die folgenden Beziehungen.
+        \[
+          V = V^\circ \cup V_\mathrm{D}
+          \separate
+          V^\circ \cap V_\mathrm{D} = \emptyset
+          \separate
+          V_\mathrm{N} \subset V^\circ
+        \]
+        Die Menge der Dreiecke beziehungsweise Kanten soll hier nicht weiter beschrieben werden, weil diese auch durch die Wahl der Basisfunktionen im nächsten Abschnitt gegeben ist.
       % paragraph schritt_2_diskretisierung_des_berechnungsgebietes (end)
 
       \subsubsection{Wahl der Basisfunktionen}
@@ -535,8 +555,9 @@
         \[
           f = \sum_{i=0}^4 f_i η_i
         \]
+        Die Bedeutung der Linearkombination für die Interpolation wird im rechten Bild von Abbildung \ref{fig:hat-function-example} gezeigt.
 
-        \begin{figure}[t]
+        \begin{figure}[h]
           \center
           \includegraphics[width=0.5\textwidth]{images/hat_function.pdf}
           \caption[Zweidimensionale Hutfunktion]{%
@@ -547,6 +568,8 @@
           }
           \label{fig:hat-function}
         \end{figure}
+
+        \newpage
 
         \paragraph{Zweidimensionale Hutfunktionen auf dem Dreieck}
         \hfill\\
@@ -630,119 +653,219 @@
           \end{vmatrix}
         \end{align*}
         Wie auch im eindimensionalen Fall wird der diskretisierte Funktionenraum $\mathrm{S}$ durch die Menge der Linearkombination der Basisfunktionen beschrieben.
-        Es sei dabei $V$ die Menge aller Eckpunkte des diskretisierten Berechnungsgebietes.
+        Es sei dabei $V$ wieder die Menge aller Eckpunkte des diskretisierten Berechnungsgebietes.
         \[
           \mathrm{S} \define \mathrm{span}\set{η_i}{i\in V} \subset \setSobolev^1(\domain)
           \separate
           \mathrm{S}_\mathrm{D} \define \mathrm{S} \cap \setSobolev^1_\mathrm{D}(\domain)
         \]
-        Das Ziel wird es sein, jede beliebige Funktion durch Elemente dieses Raumes zu beschreiben.
-        Um dies zu vereinfachen, soll $\mathrm{S}$ in drei verschiedene Unterräume separiert werden.
-        $\mathrm{S}^\circ$ bezeichnet hierbei den Raum der Funktionen, die auf dem Rand $\boundary$ identisch zu Null sind.
-        $\mathrm{S}^\mathrm{(D)}$
       % paragraph schritt_3_wahl_der_basisfunktionen (end)
 
       \subsubsection{Konstruktion der algebraischen Formulierung}
         Nachdem sowohl das Berechnungsgebiet als auch die Funktionenräume diskretisiert wurden, ist es nun möglich, darauf aufbauend aus den schwachen Formulierungen der partiellen Differentialgleichungen ein System algebraischer Gleichungen zu erlangen.
         Grundsätzlich ersetzt das Vorgehen alle Funktionen aus den Räumen $\setSobolev^1_\mathrm{D}(\domain)$ und $\setSobolev^1(\domain)$ durch die stückweisen linearen Funktionen der Räume $\mathrm{S}_\mathrm{D}$ und $\mathrm{S}$.
+        Das Verfahren soll zunächst anhand des Poisson-Problems demonstriert werden.
+        Das resultierende lineare Gleichungssystem lässt sich dann analog auch für das Wellen- und Wärmeleitungsproblem herleiten.
 
-        \paragraph{Poisson-Problem am eindimensionalen Beispiel} % (fold)
+        \paragraph{Poisson-Problem} % (fold)
         \hfill\\
           Es sei wieder $([\Omega], f, u^\mathrm{(D)}, u^\mathrm{(N)},u)$ ein Poisson-Problem.
           Nach Definition \ref{def:weak-formulation-poisson} ist die schwache Formulierung des Poisson-Problems durch die folgende Gleichung für alle $φ\in\setSobolev^1_\mathrm{D}(\domain)$ gegeben.
           \[
-            u
-            = \sum_{i\in V} u_i η_i
-            = \underbrace{\sum_{i\in V^\circ} u_i η_i}_{= v}
-            + \underbrace{\sum_{i\in V_\mathrm{D}} u^\mathrm{D}_i η_i}_{=u^\mathrm{(D)}}
-            \separate
-            f = \sum_{i\in V} f_i η_i
-            \separate
-            v = \sum_{i\in V^\circ} v_i η_i
-            \separate
-            φ = \sum_{i\in V^\circ} φ_i η_i
-          \]
-          \[
-            u^\mathrm{(D)} = \sum_{i\in V_\mathrm{D}} u^\mathrm{(D)}_i η_i
-            \separate
-            u^\mathrm{(N)} = \sum_{i\in V_\mathrm{N}} u^\mathrm{(N)}_i \appendValue{η_i}{\neumannBoundary}
-          \]
-          \[
             \integral{\domain}{}{\scalarProduct{\nabla v}{\nabla φ}}{λ} = \integral{\domain}{}{f φ}{λ} + \integral{\neumannBoundary}{}{u^\mathrm{(N)} φ}{σ} - \integral{\domain}{}{\scalarProduct{\nabla u^\mathrm{(D)}}{\nabla φ}}{λ}
           \]
-          Weiterhin sei die Menge der Eckpunkte des diskretisierten Berechnungsgebietes gegeben durch $V$ und deren zugehörige Basisfunktionen durch die Menge $B\define\set{\function{η_i}{\domain}{\setReal}}{i\in V}$.
-          Im diskretisierten Falle gilt demnach für alle $ξ\in\mathrm{S}_\mathrm{D}$ die folgende Gleichung für die diskretisierten Funktionen $v\in\mathrm{S}_\mathrm{D}$, $f\in\mathrm{S}$.
+          Weiterhin sei die Menge der Eckpunkte des diskretisierten Berechnungsgebietes durch $V$ und deren zugehörige Basisfunktionen durch die Menge $B\define\set{\function{η_i}{\domain}{\setReal}}{i\in V}$ gegeben.
+          Um die Notation etwas leichter zu gestalten, werden die folgenden natürlichen Zahlen eingeführt.
           \[
-            \sum_{j\in V^\circ} v_j \integral{\domain}{}{\scalarProduct{\nabla η_i}{\nabla η_j}}{λ}
-            = \sum_{j \in V} f_j \integral{\domain}{}{η_iη_j}{λ}
-            + \sum_{j \in V_\mathrm{N}} u_j^\mathrm{(N)} \integral{\neumannBoundary}{}{η_i η_j}{σ}
-            - \sum_{j \in V_\mathrm{D}} u_j^\mathrm{(D)} \integral{\domain}{}{\scalarProduct{\nabla η_i}{\nabla η_j}}{λ}
+            n\define \absolute{V}
+            \separate
+            m\define \absolute{V^\circ}
+            \separate
+            p\define \absolute{V_\mathrm{D}}
+            \separate
+            q\define \absolute{V_\mathrm{N}}
           \]
+          Alle Funktionen des Poisson-Problems sollen nun durch den diskreten Raum der Funktionen beschrieben werden.
+          Hierfür wählt man die folgenden Vektoren $\boxBrackets{f},\boxBrackets{u}\in\setReal^n$, $\boxBrackets{u^\mathrm{(D)}}\in \setReal^p$, $\boxBrackets{u^\mathrm{(N)}} \in \setReal^q$, $\boxBrackets{v}\in \setReal^m$.
+          Diese Vektoren beschreiben die Koordinaten bezüglich der gewählten Basisfunktionen.
+          \begin{align*}
+            f &= \sum_{i\in V} \boxBrackets{f}_i η_i
+            &
+            u^\mathrm{(D)} &= \sum_{i\in V_\mathrm{D}} \boxBrackets{u^\mathrm{(D)}}_i η_i
+            \\
+            v &= \sum_{i\in V^\circ} \boxBrackets{v}_i η_i
+            &
+            u^\mathrm{(N)} &= \sum_{i\in V_\mathrm{N}} \boxBrackets{u^\mathrm{(N)}}_i \appendValue{η_i}{\neumannBoundary}
+          \end{align*}
+          \[
+            u
+            = \sum_{i\in V} \boxBrackets{u}_i η_i
+            = \underbrace{\sum_{i\in V^\circ} \boxBrackets{v}_i η_i}_{= v}
+            + \underbrace{\sum_{i\in V_\mathrm{D}} \boxBrackets{u^\mathrm{(D)}}_i η_i}_{=u^\mathrm{(D)}}
+            = v + u^\mathrm{(D)}
+          \]
+          Diese verschiedenen Ausdrücke werden nun in das Poisson-Problem eingesetzt.
+          In der schwachen Formulierung des Poisson-Problems kann das $φ\in\setSobolev^1_\mathrm{D}(\domain)$ direkt durch alle Basisfunktionen ersetzt werden.
+          Man erhält damit für alle $i\in V^\circ$ die folgende Gleichung.
+          \begin{align*}
+            \sum_{j\in V^\circ} u_j \integral{\domain}{}{\scalarProduct{\nabla η_i}{\nabla η_j}}{λ}
+            &= \sum_{j \in V} f_j \integral{\domain}{}{η_iη_j}{λ}
+            + \sum_{j \in V_\mathrm{N}} u_j^\mathrm{(N)} \integral{\neumannBoundary}{}{η_i η_j}{σ}
+            \\
+            &- \sum_{j \in V_\mathrm{D}} u_j^\mathrm{(D)} \integral{\domain}{}{\scalarProduct{\nabla η_i}{\nabla η_j}}{λ}
+          \end{align*}
+          Fasst man dies zu einem System von Gleichungen zusammen, so entsteht ein lineares Gleichungssystem.
+          Für eine einfachere Notation führt man aus diesem Grund die Matrizen $\boxBrackets{\laplacian}\in\setReal^{m\times m}$, $\boxBrackets{M}\in\setReal^{m\times n}$, $\boxBrackets{N}\in\setReal^{m\times q}$ und $\boxBrackets{D}\in\setReal^{m\times p}$ ein.
+          \begin{align*}
+            \boxBrackets{\laplacian}_{ij} &\define \integral{\domain}{}{\scalarProduct{\nabla η_i}{\nabla η_j}}{λ}
+            &
+            \boxBrackets{M}_{ij} &\define \integral{\domain}{}{η_iη_j}{λ}
+            \\
+            \boxBrackets{D}_{ij} &\define \integral{\domain}{}{\scalarProduct{\nabla η_i}{\nabla η_j}}{λ}
+            &
+            \boxBrackets{N}_{ij} &\define \integral{\neumannBoundary}{}{η_iη_j}{σ}
+          \end{align*}
+          Die Matrix $\boxBrackets{\laplacian}$ wird auch \enquote{Stiffness Matrix} und $\boxBrackets{M}$ auch \enquote{Mass Matrix} genannt.
+          In der einfacheren Matrix-Vektor-Notation lässt sich das System linearer Gleichungen nun wie folgt schreiben.
           \[
             [\laplacian][v] = [M][f] + [N][u^\mathrm{(N)}] - [\laplacian][u^\mathrm{(D)}]
           \]
-          Man ersetzt zunächst die Funktionen $φ\in \setSobolev^1_\mathrm{D}(\domain)$ durch Funktionen $ξ\in \mathrm{S}_\mathrm{D}$ des diskretisierten Raumes.
-          Da es sich bei $B$ um eine Basis dieses Raumes handelt, lässt sich jedes $ξ\in\mathrm{S}_\mathrm{D}$ durch eine Linearkombination der Basisfunktionen beschreiben.
+          Bei $[\laplacian]$ handelt es sich um eine symmetrische, positiv-definite Matrix \cite{Alberty1998}.
+          Für das System linearer Gleichungen existiert damit eine eindeutige Lösung.
+
+          Ein letzter Schritt für die Formulierung des linearen Gleichungssystems kümmert sich nun darum, die komplexen Systemmatrizen aus den einfachen Matrizen der finiten Elemente zu konstruieren.
+          Es sei $\mathscr{T}$ die Menge der finiten Elemente, die das Berechnungsgebiet diskretisieren.
+          Das Integral über $\domain$ lässt sich für eine beliebige Funktion damit als Summe der Integrale über die finiten Elemente darstellen.
+          \[
+            \integral{\domain}{}{η_iη_j}{λ} = \sum_{E\in\mathscr{T}} \integral{E}{}{η_iη_j}{λ}
+            \separate
+            \integral{\domain}{}{\scalarProduct{\nabla η_i}{\nabla η_j}}{λ} = \sum_{E\in\mathscr{T}} \integral{E}{}{\scalarProduct{\nabla η_i}{\nabla η_j}}{λ}
+          \]
+          Durch die kleinen Träger der Basisfunktionen sind die beschriebenen Integrale häufig Null.
+          Wählt man demnach zwei Basisfunktionen $η_i$ und $η_j$, deren Eckpunkte $i$ und $j$ nicht durch die Kante eines finiten Elements verbunden sind, so ergibt sich das Folgende für alle $E\in\mathscr{T}$.
+          \[
+            \integral{E}{}{η_iη_j}{λ} = \integral{\domain}{}{η_iη_j}{λ} = 0
+            \separate
+            \integral{E}{}{\scalarProduct{\nabla η_i}{\nabla η_j}}{λ} = \integral{\domain}{}{\scalarProduct{\nabla η_i}{\nabla η_j}}{λ} = 0
+          \]
+          Ein ähnliches Vorgehen kann auch für die Integrale über dem Rand $\neumannBoundary$ gewählt werden.
+          Die komplexen Systemmatrizen ergeben sich damit als eine Summe von einfach zu beschreibenden Finite-Elemente-Matrizen.
         % paragraph poisson_problem_am_eindimensionalen_beispiel (end)
 
-        Das Einsetzen der Diskretisierung in die ursprüngliche schwache Formulierung der partiellen Differentialgleichung führt zu einem System von algebraischen Gleichungen.
-        Die in dieser Arbeit besprochenen Fälle resultieren in linearen Gleichungssystemen mit dünnbesetzten Matrizen.
-        Diese hängen zudem stark von der gewählten Diskretisierung ab.
-        \[
-          \roundBrackets{ \integral{\domain}{}{η_i η_j}{λ} }_{i\in V^\circ,j\in V} = \frac{h}{6}
-          \begin{pmatrix}
-            1 & 4 & 1 & & \\
-            & 1 & 4 & 1 & \\
-            & & 1 & 4 & 1 \\
-          \end{pmatrix}
-        \]
-        \[
-          \roundBrackets{ \integral{\domain}{}{ \scalarProduct{\nabla η_i}{\nabla η_j} }{λ} }_{i,j\in V^\circ} = \frac{1}{h}
-          \begin{pmatrix}
-            2 & -1 & \\
-            -1 & 2 & -1 \\
-            & -1 & 2 \\
-          \end{pmatrix}
-        \]
-        \[
-          \roundBrackets{ \integral{\domain}{}{ \scalarProduct{\nabla η_i}{\nabla η_j} }{λ} }_{i\in V^\circ,j\in V_\mathrm{D}} = \frac{1}{h}
-          \begin{pmatrix}
-            -1 & 0 \\
-            0 & 0 \\
-            0 & -1 \\
-          \end{pmatrix}
-        \]
-        \[
-          \frac{1}{h}
-          \begin{pmatrix}
-            2 & -1 & \\
-            -1 & 2 & -1 \\
-            & -1 & 2 \\
-          \end{pmatrix}
-          \begin{pmatrix}
-            v_1 \\ v_2 \\ v_3
-          \end{pmatrix}
-          =
-          \frac{h}{6}
-          \begin{pmatrix}
-            1 & 4 & 1 & & \\
-            & 1 & 4 & 1 & \\
-            & & 1 & 4 & 1 \\
-          \end{pmatrix}
-          \begin{pmatrix}
-            f_0 \\ f_1 \\ f_2 \\ f_3 \\ f_4
-          \end{pmatrix}
-          -
-          \frac{1}{h}
-          \begin{pmatrix}
-            -1 & 0 \\
-            0 & 0 \\
-            0 & -1 \\
-          \end{pmatrix}
-          \begin{pmatrix}
-            u^\mathrm{(D)}_0 \\ u^\mathrm{(D)} _4
-          \end{pmatrix}
-        \]
+        \paragraph{Eindimensionales Beispiel des Poisson-Problems} % (fold)
+        \label{par:eindimensionales_beispiel}
+        \hfill\\
+          Das lineare Gleichungssystem soll einmal für das eindimensionale Beispiel aus Abbildung \ref{fig:domain-example} notiert werden.
+          Dabei sollen an den Randpunkten Dirichlet-Randbedingungen herrschen.
+          Die Neumann-Randbedingungen werden also für dieses Beispiel vernachlässigt.
+          Als Erstes werden die einfachen Matrizen jeder einzelnen Kante $[x_i,x_j]$ mit $i\in\set{0,1,2,3}{}$ und $j=i+1$ konstruiert.
+          Die Länge aller Kanten ist gleich und soll als $h\define x_j-x_i$ bezeichnet werden.
+          \[
+            \roundBrackets{ \integral{[x_i,x_j]}{}{η_pη_q}{λ} }_{p,q\in\set{i,j}{}}
+            = \frac{h}{6}
+            \begin{pmatrix}
+              2 & 1 \\
+              1 & 2
+            \end{pmatrix}
+          \]
+          \[
+            \roundBrackets{ \integral{[x_i,x_j]}{}{\scalarProduct{\nabla η_p}{\nabla η_q}}{λ} }_{p,q\in\set{i,j}{}}
+            = \frac{1}{h}
+            \begin{pmatrix}
+              1 & -1 \\
+              -1 & 1
+            \end{pmatrix}
+          \]
+          Die Addition der einzelnen Finite-Elemente-Matrizen jeder Kanten ergibt dann die komplette Stiffness und Mass Matrix.
+          \[
+            \roundBrackets{ \integral{\domain}{}{η_i η_j}{λ} }_{i\in V^\circ,j\in V} = \frac{h}{6}
+            \begin{pmatrix}
+              1 & 4 & 1 & & \\
+              & 1 & 4 & 1 & \\
+              & & 1 & 4 & 1 \\
+            \end{pmatrix}
+          \]
+          \[
+            \roundBrackets{ \integral{\domain}{}{ \scalarProduct{\nabla η_i}{\nabla η_j} }{λ} }_{i,j\in V^\circ} = \frac{1}{h}
+            \begin{pmatrix}
+              2 & -1 & \\
+              -1 & 2 & -1 \\
+              & -1 & 2 \\
+            \end{pmatrix}
+          \]
+          \[
+            \roundBrackets{ \integral{\domain}{}{ \scalarProduct{\nabla η_i}{\nabla η_j} }{λ} }_{i\in V^\circ,j\in V_\mathrm{D}} = \frac{1}{h}
+            \begin{pmatrix}
+              -1 & 0 \\
+              0 & 0 \\
+              0 & -1 \\
+            \end{pmatrix}
+          \]
+          Diese setzt man nun in die Gesamtgleichung ein und erhält das folgende Gleichungssystem, welches nach $[v]$ aufgelöst werden soll.
+          \[
+            \frac{1}{h}
+            \begin{pmatrix}
+              2 & -1 & \\
+              -1 & 2 & -1 \\
+              & -1 & 2 \\
+            \end{pmatrix}
+            \begin{pmatrix}
+              v_1 \\ v_2 \\ v_3
+            \end{pmatrix}
+            =
+            \frac{h}{6}
+            \begin{pmatrix}
+              1 & 4 & 1 & & \\
+              & 1 & 4 & 1 & \\
+              & & 1 & 4 & 1 \\
+            \end{pmatrix}
+            \begin{pmatrix}
+              f_0 \\ f_1 \\ f_2 \\ f_3 \\ f_4
+            \end{pmatrix}
+            -
+            \frac{1}{h}
+            \begin{pmatrix}
+              -1 & 0 \\
+              0 & 0 \\
+              0 & -1 \\
+            \end{pmatrix}
+            \begin{pmatrix}
+              u^\mathrm{(D)}_0 \\ u^\mathrm{(D)} _4
+            \end{pmatrix}
+          \]
+        % paragraph eindimensionales_beispiel (end)
+
+        \paragraph{Konstruktion der Matrizen im Zweidimensionalen} % (fold)
+        \label{par:konstruktion_der_matrizen_im_zweidimensionalen}
+          \[
+            \roundBrackets{ \integral{\triangle}{}{η_pη_q}{λ} }_{p,q\in\set{i,j,k}{}}
+            = \frac{λ(\triangle)}{12}
+            \begin{pmatrix}
+              2 & 1 & 1 \\
+              1 & 2 & 1 \\
+              1 & 1 & 2
+            \end{pmatrix}
+          \]
+          \[
+            \roundBrackets{ \integral{\triangle}{}{\scalarProduct{\nabla η_p}{\nabla η_q}}{λ} }_{p,q\in\set{i,j,k}{}}
+            = \frac{1}{4λ(\triangle)} \transpose{D}D
+          \]
+          \[
+            D \define
+            \begin{pmatrix}
+              x_k-x_j & x_i-x_k & x_j-x_i \\
+              y_k-y_j & y_i-y_k & y_j-y_i
+            \end{pmatrix}
+          \]
+          \[
+            \roundBrackets{ \integral{E}{}{η_pη_q}{σ} }_{p,q\in\set{i,j}{}}
+            = \frac{σ(E)}{6}
+            \begin{pmatrix}
+              2 & 1 \\
+              1 & 2
+            \end{pmatrix}
+          \]
+        % paragraph konstruktion_der_matrizen_im_zweidimensionalen (end)
       % paragraph schritt_4_konstruktion_der_algebraischen_formulierung (end)
 
       % \paragraph{Schritt 5: Lösung des algebraischen Systems} % (fold)
@@ -751,6 +874,10 @@
       \subsubsection{Lösung des algebraischen Systems}
         Die erhaltenen algebraischen Gleichungen sind äquivalent zu der schwachen Formulierung des diskretisierten Problems.
         In den hier betrachteten Fällen existieren eindeutige Lösungen.
+
+        Das Einsetzen der Diskretisierung in die ursprüngliche schwache Formulierung der partiellen Differentialgleichung führt zu einem System von algebraischen Gleichungen.
+        Die in dieser Arbeit besprochenen Fälle resultieren in linearen Gleichungssystemen mit dünnbesetzten Matrizen.
+        Diese hängen zudem stark von der gewählten Diskretisierung ab.
       % paragraph schritt_5_lösen_des_algebraischen_systems (end)
     % subsection finite_elemente_methode (end)
 
