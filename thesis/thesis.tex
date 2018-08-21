@@ -10,6 +10,11 @@
 
 \definecolor{mathdefback}{rgb}{1,1,1}
 
+\newcommand{\domain}{\ensuremath{\Omega}}
+\newcommand{\boundary}{\ensuremath{\partial\domain}}
+\newcommand{\neumannBoundary}{\ensuremath{\boundary_\mathrm{N}}}
+\newcommand{\dirichletBoundary}{\ensuremath{\boundary_\mathrm{D}}}
+
 \begin{document}
   \import{sections/}{titlepage.tex}
   % \cleardoublepage
@@ -32,6 +37,7 @@
   % \setcounter{page}{0}
   \import{sections/}{introduction.tex}
   \import{sections/}{background.tex}
+  \import{sections/}{methodology.tex}
   \import{sections/}{implementation.tex}
   \import{sections/}{results.tex}
   \import{sections/}{conclusion.tex}

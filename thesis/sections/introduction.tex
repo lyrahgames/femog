@@ -62,9 +62,9 @@
 
     Die Finite-Elemente-Methode stellt eines der allgemeinsten Verfahren zum numerischen Lösen von partiellen Differentialgleichungen dar.
     Einer ihrer größten Vorteile besteht darin, komplexe Geometrien und Randbedingungen durch die Art der Diskretisierung beliebig genau beschreiben zu können.
-    Gerade deshalb tendiert die Finite-Elemente-Methode dazu, enorme Rechenleistungen zu benötigen, um die resultierenden algebraischen Gleichungen zu lösen.
+    Gerade deshalb tendiert die Finite-Elemente-Methode jedoch dazu, enorme Rechenleistungen zu benötigen, um die resultierenden algebraischen Gleichungen zu lösen.
     Allerdings konnte sie aufgrund ihrer im Vergleich zu anderen Verfahren späten Entwicklung durch ein mathematisches Vorgehen computergerecht formuliert werden, sodass Implementierungen dieser Methode die Hardware des Computers im Allgemeinen effizient ausnutzen.
-    Demnach ist die Anwendung der Finite-Elemente-Methode nicht auf ein konkretes physikalisches Gebiet beschränkt.
+    Zudem ist die Anwendung der Finite-Elemente-Methode nicht auf ein konkretes physikalisches Gebiet beschränkt.
     Obwohl sie zunächst nur für die Strukturberechnung von Flugzeugflügeln in der Luft- und Raumfahrtindustrie verwendet wurde, findet sie heute in vielen Bereichen der Physik, wie zum Beispiel bei der Berechnung des Wärmetransports, der Strömungssimulation, der Festigkeits- und Verformungsuntersuchung von Festkörpern, der gekoppelten Feldberechnung und bei Wettervorhersagen, ihre Anwendung.
     \cite{Logan2007,Cheney2008,Quarteroni2000}
 
@@ -72,7 +72,7 @@
     Folglich ist es erforderlich die Performance eines Programms immer weiter zu steigern.
     Dies erreicht man heutzutage durch dessen Parallelisierung.
     Aufgrund der computergerechten Formulierung der Finite-Elemente-Methode tritt bei ihr eine gewisse Datenparallelität auf.
-    Bei dieser Tatsache handelt sich um eine Eigenschaft, die durch die Verwendung des Grafikprozessors (GPU) eines Computers ausgenutzt werden kann.
+    Diese Eigenschaft kann sehr gut durch den Grafikprozessors (GPU) eines Computers ausgenutzt werden.
     Die GPU ist ein massiv-paralleler Prozessor, dessen Prozessorkerne auf die Ausnutzung von Datenparallelität innerhalb einer Gruppe von Threads spezialisiert sind.
     Ein Algorithmus der diese Parallelität nicht aufweist, lässt sich im Allgemeinen nur sehr ineffizient auf der GPU implementieren und sollte durch den Hauptprozessor (CPU) eines Computers, dessen Prozessorkerne für wesentlich komplexere Aufgaben designet wurden, ausgeführt werden.
     Umgekehrt ist die GPU in der Lage Algorithmen mit dieser Eigenschaft um ein Vielfaches zu beschleunigen.
