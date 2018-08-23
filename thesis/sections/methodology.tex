@@ -635,8 +635,17 @@
 
     \subsection{Numerische Methoden dünnbesetzter Matrizen} % (fold)
     \label{sub:sparse_matrix_methoden}
+      Dünnbesetzte Matrizen (engl.: \textit{sparse matrix}) treten in einem beträchtlichen Anteil numerischer Disziplinen auf und als ein Resultat sind Methoden, um diese effizient zu manipulieren, häufig ein kritischer Punkt der Performance vieler Anwendungen.
+      Vor allem die Matrix-Vektor-Multiplikation dünnbesetzter Systeme repräsentiert zumeist die dominanten Kosten vieler iterativer Lösungsmethoden linearer Systeme großen Ausmaßes \cite{Bell2008}.
+      Gerade bei der Finite-Elemente-Methode werden Mass und Stiffness Matrix im Computer durch ein Sparse-Matrix-Format dargestellt \cite{Bell2008,Logan2007,Alberty1998}.
+      Die Wahl der Speicherformate und Lösungsmethoden wirken sich dabei extrem auf die Performance der Anwendung aus \cite{Bell2008,Bell2009}.
+
       \subsubsection{Datenstrukturen und Speicherformate} % (fold)
       \label{ssub:datenstrukturen_und_speicherformate}
+        Eine Sparse-Matrix $M\in\setReal^{n\times n}$ mit $n\in\setNatural$, deren Anzahl von Elementen ungleich Null der Größenordnung $n$ entspricht, kann durch das Allozieren aller $n^2$ Speicherplätze nicht effizient dargestellt werden.
+        Häufig stellt dieses Unterfangen sogar eine physikalische Unmöglichkeit dar, weil ab einer bestimmten Größe von $n$ der Speicherplatz für die $n^2$ Elemente nicht einmal existiert.
+        Selbst wenn man den Speicher allozieren könnte, so wäre eine Iteration über alle Elemente, eine häufige Operation bei der Verwendung von Matrizen, reine Zeitverschwendung, da ein Großteil dieser Elemente Null wäre.
+        Offensichtlich müssen also gewisse indizierte Speicherschemen verwendet werden, um die Natur einer dünnbesetzten Matrix effizient zu beschreiben.
         \cite[S.~78]{Press2002}
 
         \paragraph{Dictionary of Keys} % (fold)
@@ -654,9 +663,57 @@
 
         % paragraph compressed_sparse_row_und_compressed_sparse_column (end)
 
-        \paragraph{ELLPACK} % (fold)
+        \paragraph{ELLPACK-Format} % (fold)
         \label{par:ellpack}
+        \hfill\\
+          Ein weiteres Speicherformat, welches sehr gut für Vektorarchitekturen geeignet ist, wird durch das sogenannte ELLPACK-Format (ELL) beschrieben \cite{Bell2008}.
+          Für eine Matrix $M\in\setReal^{n\times n}$ mit maximal $k\in\setNatural,k\leq n$ Einträgen in jeder Zeile, die nicht Null sind, speichert ELL diese Werte in einem Tupel $\boxBrackets{M}^{(k)}_\mathrm{ELL}$ zweier $n\times k$-Matrizen.
+          \[
+            \boxBrackets{M}^{(k)}_\mathrm{ELL} \define (D,C)
+            \separate
+            D \in \setReal^{n\times k}
+            \separate
+            C \in \set{i\in\setNatural_0}{i < n}^{n\times k}
+          \]
+          $D$ speichert dabei alle Werte ungleich Null, indem es diese so weit wie möglich innerhalb einer Zeile nach links bewegt.
+          Bei Zeilen, die mehr als $n-k$ Nullen beinhalten, werden überschüssige Einträge mit Nullen aufgefüllt.
+          Die Einträge der zweiten Matrix $C$ beschreiben den jeweiligen Spaltenindex eines Elementes ungleich Null.
+          Hier werden bei Zeilen, die mehr als $n-k$ Nullen beinhalten, überschüssige Einträge durch einen festgelegten Sentinel aufgefüllt.
+          Dieses Vorgehen soll durch das folgende Beispiel veranschaulicht werden.
+          \cite{Bell2008,Bell2009,Press2002}
+          \[
+            M =
+            \begin{pmatrix}
+              0 & 3 & 0 & 0 & 0 \\
+              22 & 0 & 0 & 0 & 17 \\
+              7 & 5 & 0 & 1 & 0 \\
+              0 & 0 & 0 & 0 & 0 \\
+              0 & 0 & 14 & 0 & 8
+            \end{pmatrix}
+            \separate
+            \boxBrackets{M}^{(3)}_\mathrm{ELL} =
+            \roundBrackets{
+              \begin{pmatrix}
+                3 & 0 & 0 \\
+                22 & 17 & 0 \\
+                7 & 5 & 1 \\
+                0 & 0 & 0 \\
+                14 & 8 & 0
+              \end{pmatrix}
+              ,
+              \begin{pmatrix}
+                1 & * & * \\
+                0 & 4 & * \\
+                0 & 1 & 3 \\
+                * & * & * \\
+                2 & 4 & *
+              \end{pmatrix}
+            }
+          \]
 
+          Unterscheidet sich die maximale Anzahl von Einträgen ungleich Null in einer Zeile nicht substantiell von der durchschnittlichen Anzahl von Einträgen ungleich Null einer Zeile, so stellt ELL eine sehr effiziente Sparse-Matrix-Datenstruktur dar.
+          In der Finite-Elemente-Methode würde demnach die Performance des Verfahrens von der Struktur des Gitters abhängen.
+          \cite{Bell2008}
         % paragraph ellpack (end)
 
         \paragraph{DIA} % (fold)
