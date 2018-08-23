@@ -186,7 +186,8 @@ void Viewer::loop_slot() {
     system3.solve();
   } else {
     system.dt() = 0.001f;
-    system.solve();
+    // system.solve();
+    system.gpu_solve();
   }
 }
 
@@ -477,6 +478,18 @@ void Viewer::paintGL() {
     vertex_buffer->bind();
     if (render_vertices_switch)
       glDrawArrays(GL_POINTS, 0, vertex_buffer_data.size());
+  }
+
+  const auto current_time = std::chrono::system_clock::now();
+  ++frame_count_;
+  const auto time_difference =
+      std::chrono::duration<float>(current_time - last_time_).count();
+  if (time_difference >= 3.0) {
+    const auto frame_time = time_difference / static_cast<float>(frame_count_);
+    last_time_ = current_time;
+    frame_count_ = 0;
+    std::cout << "frame time = " << frame_time << " s\t"
+              << "fps = " << 1.0f / frame_time << std::endl;
   }
 }
 

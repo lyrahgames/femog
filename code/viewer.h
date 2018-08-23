@@ -1,6 +1,7 @@
 #ifndef FEMOG_VIEWER_H_
 #define FEMOG_VIEWER_H_
 
+#include <chrono>
 #include <memory>
 #include <string>
 #include <vector>
@@ -85,6 +86,9 @@ class Viewer : public QOpenGLWidget {
   bool render_volume_force = false;
   bool render_vertices_switch = false;
   bool loop_switch = true;
+  int frame_count_ = 0;
+  std::chrono::time_point<std::chrono::system_clock> last_time_ =
+      std::chrono::system_clock::now();
 
   void compute_look_at();
   void compute_bounding_box();

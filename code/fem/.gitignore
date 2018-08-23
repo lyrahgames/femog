@@ -3,5 +3,6 @@
 
 !*.cc
 !*.h
+!*.cu
 !.gitignore
 !CMakeLists.txt
