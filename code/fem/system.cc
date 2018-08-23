@@ -1,7 +1,9 @@
 #include "system.h"
 #include <Eigen/Sparse>
+#include <iostream>
 #include <vector>
 
+#include "conjugate_gradient.h"
 #include "gpu_solver.h"
 
 namespace Femog::Fem {
@@ -111,13 +113,17 @@ System& System::solve() {
 
   const float c = 2.0f;
   const float gamma = 0.0f;
-
-  Eigen::ConjugateGradient<Eigen::SparseMatrix<float>> solver;
-  solver.compute(mass_matrix);
   Eigen::VectorXf rhs = (1.0f - dt() * gamma) * mass_matrix * y -
                         dt() * c * c * stiffness_matrix * x;
 
-  y = solver.solve(rhs);
+  // Eigen::ConjugateGradient<Eigen::SparseMatrix<float>> solver;
+  // solver.compute(mass_matrix);
+  // y = solver.solve(rhs);
+  // std::cout << "iterations = " << solver.iterations()
+  //           << "\terror = " << solver.error() << std::endl;
+
+  Cg::conjugate_gradient(mass_matrix, evolution().data(), rhs);
+
   x = x + dt() * y;
 
   return *this;

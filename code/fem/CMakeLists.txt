@@ -31,7 +31,7 @@ target_link_libraries(femog.fem.gpu PUBLIC Eigen3::Eigen)
 set_property(TARGET femog.fem.gpu PROPERTY CUDA_SEPARABLE_COMPILATION ON)
 
 
-add_library(femog.fem domain_field_base.cc io.cc system.cc)
+add_library(femog.fem domain_field_base.cc io.cc system.cc conjugate_gradient.cc)
 target_include_directories(femog.fem PUBLIC ..)
 target_link_libraries(femog.fem PUBLIC Eigen3::Eigen femog.fem.gpu)
 target_compile_features(femog.fem PUBLIC cxx_std_14)
