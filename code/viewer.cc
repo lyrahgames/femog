@@ -186,7 +186,8 @@ void Viewer::loop_slot() {
     system3.solve();
   } else {
     system.dt() = 0.001f;
-    system.solve();
+    // system.solve();
+    system.solve_custom();
     // system.gpu_solve();
   }
 }

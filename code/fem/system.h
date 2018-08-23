@@ -18,6 +18,7 @@ class System {
   auto& dt() { return dt_; }
 
   System& solve();
+  System& solve_custom();
   System& gpu_solve();
 
  private:
