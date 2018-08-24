@@ -20,6 +20,7 @@ class System {
   System& solve();
   System& solve_custom();
   System& gpu_solve();
+  System& gpu_wave_solve();
 
  private:
   Domain<Eigen::Vector2f> domain_;

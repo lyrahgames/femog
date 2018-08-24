@@ -120,12 +120,14 @@ void Viewer::set_analytic_volume_force() {
       // return 0;
     };
 
-    auto g = [](const Fem_field::vertex_type& vertex) {
-      const float sigma2 = 0.01;
-      return 0.1f *
-             std::exp(
-                 -(vertex - Fem_field::vertex_type{0.5, 0.5}).squaredNorm() /
-                 sigma2) /
+    auto g = [&](const Fem_field::vertex_type& vertex) {
+      const float sigma2 =
+          0.001 * 0.5f * (bounding_box_max - bounding_box_min).squaredNorm();
+      return 100.0f *
+             std::exp(-(vertex - 0.5f * (bounding_box_max + bounding_box_min)
+                                            .block<2, 1>(0, 0))
+                           .squaredNorm() /
+                      sigma2) /
              std::sqrt(sigma2);
 
       // return 0.1f *
@@ -187,7 +189,8 @@ void Viewer::loop_slot() {
   } else {
     system.dt() = 0.001f;
     // system.solve();
-    system.solve_custom();
+    // system.solve_custom();
+    system.gpu_wave_solve();
     // system.gpu_solve();
   }
 }
