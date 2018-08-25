@@ -122,8 +122,8 @@ void Viewer::set_analytic_volume_force() {
 
     auto g = [&](const Fem_field::vertex_type& vertex) {
       const float sigma2 =
-          0.001 * 0.5f * (bounding_box_max - bounding_box_min).squaredNorm();
-      return 100.0f *
+          0.01 * 0.5f * (bounding_box_max - bounding_box_min).squaredNorm();
+      return 0.05f * (bounding_box_max - bounding_box_min).squaredNorm() *
              std::exp(-(vertex - 0.5f * (bounding_box_max + bounding_box_min)
                                             .block<2, 1>(0, 0))
                            .squaredNorm() /
@@ -156,6 +156,8 @@ void Viewer::set_analytic_volume_force() {
       // 0.01f;
     }
   }
+
+  system.generate();
 
   // compute_automatic_view();
 }

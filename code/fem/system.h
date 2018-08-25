@@ -1,10 +1,11 @@
 #ifndef FEMOG_FEM_SYSTEM_H_
 #define FEMOG_FEM_SYSTEM_H_
 
-#include <Eigen/Dense>
+#include <Eigen/Eigen>
 
 #include "domain.h"
 #include "field.h"
+#include "gpu_wave_solver.h"
 
 namespace Femog::Fem {
 
@@ -22,11 +23,16 @@ class System {
   System& gpu_solve();
   System& gpu_wave_solve();
 
+  void generate();
+
  private:
   Domain<Eigen::Vector2f> domain_;
   Field<float> wave_;
   Field<float> evolution_;
   float dt_;
+  Eigen::SparseMatrix<float, Eigen::RowMajor> mass_matrix;
+  Eigen::SparseMatrix<float, Eigen::RowMajor> stiffness_matrix;
+  Wave_solver* wave_solver;
 };
 
 class System3 {

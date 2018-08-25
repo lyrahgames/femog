@@ -22,6 +22,8 @@ class Wave_solver {
   float* evolution;
   int dimension;
   int nnz;
+  int threads_per_block;
+  int blocks;
 
   float* tmp_p;
   float* tmp_r;

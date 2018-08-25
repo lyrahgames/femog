@@ -81,6 +81,38 @@ Wave_solver::Wave_solver(int n, float* mass, float* stiffness, int* row,
   cudaMalloc((void**)&tmp_p, dimension * sizeof(float));
   cudaMalloc((void**)&tmp_r, dimension * sizeof(float));
   cudaMalloc((void**)&tmp_y, dimension * sizeof(float));
+
+  cudaDeviceProp property;
+  // int count;
+  // cudaGetDeviceCount(&count);
+  // for (int i = 0; i < count; ++i){
+  cudaGetDeviceProperties(&property, 0);
+  // }
+
+  threads_per_block = property.maxThreadsPerBlock;
+  blocks = (dimension + threads_per_block - 1) / threads_per_block;
+
+  std::cout << "CUDA Device Name = " << property.name << std::endl
+            << "total global memory = " << property.totalGlobalMem << std::endl
+            << "shared memory per block = " << property.sharedMemPerBlock
+            << std::endl
+            << "total const memory = " << property.totalConstMem << std::endl
+            << "warp size = " << property.warpSize << std::endl
+            << "maximum threads per block = " << property.maxThreadsPerBlock
+            << std::endl;
+
+  std::cout << "maximum threads dimension = (";
+  std::copy(property.maxThreadsDim, property.maxThreadsDim + 3,
+            std::ostream_iterator<int>(std::cout, ","));
+  std::cout << ")" << std::endl;
+
+  std::cout << "maximum block dimension = (";
+  std::copy(property.maxGridSize, property.maxGridSize + 3,
+            std::ostream_iterator<int>(std::cout, ","));
+  std::cout << ")" << std::endl << std::endl;
+
+  std::cout << "used threads_per_block = " << threads_per_block << std::endl
+            << "used blocks = " << blocks << std::endl;
 }
 
 Wave_solver::~Wave_solver() {
@@ -107,14 +139,16 @@ void Wave_solver::operator()(float c, float dt) {
   // Eigen::VectorXf rhs =
   //     (1.0f - gamma * dt) * mass_matrix * y - dt * c * c * stiffness_matrix *
   //     x;
-  spmv_csr_kernel<<<dimension, 1>>>(dimension, 1.0f, mass_values, row_cdf,
-                                    col_index, evolution, 0.0f, tmp_y);
-  spmv_csr_kernel<<<dimension, 1>>>(dimension, -dt * c * c, stiffness_values,
-                                    row_cdf, col_index, wave, 1.0f, tmp_y);
+  spmv_csr_kernel<<<blocks, threads_per_block>>>(
+      dimension, 1.0f, mass_values, row_cdf, col_index, evolution, 0.0f, tmp_y);
+  spmv_csr_kernel<<<blocks, threads_per_block>>>(dimension, -dt * c * c,
+                                                 stiffness_values, row_cdf,
+                                                 col_index, wave, 1.0f, tmp_y);
 
   // Eigen::VectorXf r = A * x - b;
-  spmv_csr_kernel<<<dimension, 1>>>(dimension, 1.0f, mass_values, row_cdf,
-                                    col_index, evolution, -1.0f, tmp_y);
+  spmv_csr_kernel<<<blocks, threads_per_block>>>(dimension, 1.0f, mass_values,
+                                                 row_cdf, col_index, evolution,
+                                                 -1.0f, tmp_y);
   thrust::copy(dev_tmp_y, dev_tmp_y + dimension, dev_tmp_r);
 
   // Eigen::VectorXf p = -r;
@@ -130,8 +164,8 @@ void Wave_solver::operator()(float c, float dt) {
   // for (auto i = 0; i < dimension; ++i) {
   while ((it < 1 || res > 1e-6f) && it < dimension) {
     // y = A * p;
-    spmv_csr_kernel<<<dimension, 1>>>(dimension, 1.0f, mass_values, row_cdf,
-                                      col_index, tmp_p, 0.0f, tmp_y);
+    spmv_csr_kernel<<<blocks, threads_per_block>>>(
+        dimension, 1.0f, mass_values, row_cdf, col_index, tmp_p, 0.0f, tmp_y);
 
     // thrust::copy(dev_tmp_y, dev_tmp_y + dimension,
     //              std::ostream_iterator<float>(std::cout, " "));
