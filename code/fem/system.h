@@ -24,6 +24,7 @@ class System {
   System& gpu_wave_solve();
 
   void generate();
+  void generate_with_boundary();
 
  private:
   Domain<Eigen::Vector2f> domain_;
@@ -32,6 +33,9 @@ class System {
   float dt_;
   Eigen::SparseMatrix<float, Eigen::RowMajor> mass_matrix;
   Eigen::SparseMatrix<float, Eigen::RowMajor> stiffness_matrix;
+  Eigen::SparseMatrix<float, Eigen::RowMajor> boundary_mass_matrix;
+  Eigen::SparseMatrix<float, Eigen::RowMajor> boundary_stiffness_matrix;
+  std::vector<int> permutation;
   Wave_solver* wave_solver;
 };
 

@@ -2,6 +2,7 @@
 #define FEMOG_FEM_DOMAIN_H_
 
 #include <array>
+#include <iostream>
 #include <stdexcept>
 #include <unordered_map>
 #include <utility>
@@ -45,6 +46,9 @@ class Domain : public Domain_base {
   Domain& operator<<(const Quad& quad) { return this->add_quad(quad); }
 
   Domain& subdivide();
+
+  Domain& set_dirichlet_boundary(const Edge& edge);
+  Domain& set_neumann_boundary(const Edge& edge);
 
  private:
   std::vector<Vertex> vertex_data_;
@@ -162,7 +166,14 @@ Domain<Vertex>& Domain<Vertex>::subdivide() {
   decltype(primitive_data_) old_primitive_data;
   old_primitive_data.swap(primitive_data_);
 
+  std::vector<typename decltype(edge_map_)::value_type> boundary_edges;
+
   for (auto& pair : edge_subdivide_map) {
+    if (pair.second.insertions == 1) {
+      boundary_edges.push_back(pair);
+      boundary_edges.back().second.insertions = vertex_data_.size();
+    }
+
     pair.second.insertions = vertex_data_.size();
     add_vertex(0.5f *
                (vertex_data_[pair.first[0]] + vertex_data_[pair.first[1]]));
@@ -181,6 +192,37 @@ Domain<Vertex>& Domain<Vertex>::subdivide() {
     add_primitive(Primitive{index_01, primitive[1], index_12});
     add_primitive(Primitive{index_12, primitive[2], index_20});
   }
+
+  for (auto& pair : boundary_edges) {
+    if (pair.second.is_neumann_boundary) {
+      set_neumann_boundary(Edge{pair.first[0], pair.second.insertions});
+      set_neumann_boundary(Edge{pair.first[1], pair.second.insertions});
+    } else {
+      set_dirichlet_boundary(Edge{pair.first[0], pair.second.insertions});
+      set_dirichlet_boundary(Edge{pair.first[1], pair.second.insertions});
+    }
+  }
+
+  return *this;
+}
+
+template <typename Vertex>
+Domain<Vertex>& Domain<Vertex>::set_dirichlet_boundary(const Edge& edge) {
+  auto& info = edge_map_.at(edge);
+  if (info.insertions != 1)
+    throw std::invalid_argument(
+        "Could not set Dirichlet boundary! Given edge is an inner edge.");
+  info.is_neumann_boundary = false;
+  return *this;
+}
+
+template <typename Vertex>
+Domain<Vertex>& Domain<Vertex>::set_neumann_boundary(const Edge& edge) {
+  auto& info = edge_map_.at(edge);
+  if (info.insertions != 1)
+    throw std::invalid_argument(
+        "Could not set Dirichlet boundary! Given edge is an inner edge.");
+  info.is_neumann_boundary = true;
   return *this;
 }
 

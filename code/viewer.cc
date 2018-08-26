@@ -157,7 +157,7 @@ void Viewer::set_analytic_volume_force() {
     }
   }
 
-  system.generate();
+  system.generate_with_boundary();
 
   // compute_automatic_view();
 }
@@ -191,8 +191,8 @@ void Viewer::loop_slot() {
   } else {
     system.dt() = 0.001f;
     // system.solve();
-    // system.solve_custom();
-    system.gpu_wave_solve();
+    system.solve_custom();
+    // system.gpu_wave_solve();
     // system.gpu_solve();
   }
 }
@@ -208,7 +208,7 @@ void Viewer::initializeGL() {
   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glPointSize(5.0f);
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  glClearColor(1.0, 1.0, 1.0, 1.0);
+  glClearColor(0.95, 0.95, 0.95, 1.0);
 
   vertex_array = std::unique_ptr<Vertex_array>(new Vertex_array);
 

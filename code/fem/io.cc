@@ -73,6 +73,20 @@ void load_domain_from_file(Domain<Eigen::Vector2f>& domain,
         quad[i] -= 1;
       }
       domain << quad;
+    } else if (command == "n") {
+      std::array<int, 2> data;
+      for (int i = 0; i < 2; ++i) {
+        arguments >> data[i];
+        data[i] -= 1;
+      }
+      domain.set_neumann_boundary(Domain_t::Edge{data[0], data[1]});
+    } else if (command == "d") {
+      std::array<int, 2> data;
+      for (int i = 0; i < 2; ++i) {
+        arguments >> data[i];
+        data[i] -= 1;
+      }
+      domain.set_dirichlet_boundary(Domain_t::Edge{data[0], data[1]});
     }
   }
 }

@@ -54,6 +54,7 @@ struct Domain_base::Edge : public std::array<int, 2> {
 
   struct Info {
     int insertions = 0;
+    bool is_neumann_boundary = false;
   };
 
   Edge(int v1, int v2) {
