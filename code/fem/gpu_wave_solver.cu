@@ -51,6 +51,40 @@ __global__ void spmv_csr_kernel(int n, float alpha, const float* values,
   }
 }
 
+__global__ void spmv_csr_vector_kernel(int n, float alpha, const float* values,
+                                       const int* row_cdf, const int* col_index,
+                                       const float* input, float beta,
+                                       float* output) {
+  __shared__ float vals[1024];
+  const int thread_id = blockDim.x * blockIdx.x + threadIdx.x;
+  const int warp_id = thread_id / 32;
+  const int lane = thread_id & (32 - 1);
+  const int row = warp_id;
+
+  if (row < n) {
+    const int start = row_cdf[row];
+    const int end = row_cdf[row + 1];
+
+    vals[threadIdx.x] = 0;
+    for (int j = start + lane; j < end; j += 32)
+      vals[threadIdx.x] += values[j] * input[col_index[j]];
+
+    __syncthreads();
+    if (lane < 16) vals[threadIdx.x] += vals[threadIdx.x + 16];
+    __syncthreads();
+    if (lane < 8) vals[threadIdx.x] += vals[threadIdx.x + 8];
+    __syncthreads();
+    if (lane < 4) vals[threadIdx.x] += vals[threadIdx.x + 4];
+    __syncthreads();
+    if (lane < 2) vals[threadIdx.x] += vals[threadIdx.x + 2];
+    __syncthreads();
+    if (lane < 1) vals[threadIdx.x] += vals[threadIdx.x + 1];
+
+    __syncthreads();
+    if (lane == 0) output[row] = beta * output[row] + alpha * vals[threadIdx.x];
+  }
+}
+
 }  // namespace
 
 Wave_solver::Wave_solver(int n, float* mass, float* stiffness, int* row,
