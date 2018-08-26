@@ -85,6 +85,7 @@ class Viewer : public QOpenGLWidget {
   Eigen::Vector3f bounding_box_max;
   bool render_volume_force = false;
   bool render_vertices_switch = false;
+  bool render_wireframe_switch = false;
   bool loop_switch = true;
   int frame_count_ = 0;
   std::chrono::time_point<std::chrono::system_clock> last_time_ =

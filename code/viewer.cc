@@ -243,6 +243,12 @@ void Viewer::resizeGL(int width, int height) {
 }
 
 void Viewer::paintGL() {
+  if (render_wireframe_switch) {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  } else {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  }
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   program->use();
@@ -555,6 +561,8 @@ void Viewer::keyPressEvent(QKeyEvent* event) {
     loop_switch = !loop_switch;
   } else if (event->text() == "r") {
     set_analytic_volume_force();
+  } else if (event->text() == "w") {
+    render_wireframe_switch = !render_wireframe_switch;
   }
 
   compute_look_at();
