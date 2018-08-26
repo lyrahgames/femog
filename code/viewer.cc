@@ -189,10 +189,10 @@ void Viewer::loop_slot() {
     system3.dt() = 0.001f;
     system3.solve();
   } else {
-    system.dt() = 0.001f;
+    system.dt() = 0.0001f;
     // system.solve();
-    system.solve_custom();
-    // system.gpu_wave_solve();
+    // system.solve_custom();
+    system.gpu_wave_solve();
     // system.gpu_solve();
   }
 }

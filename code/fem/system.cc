@@ -328,10 +328,17 @@ void System::generate_with_boundary() {
   // std::cout << "boundary mass_matrix:\n" << boundary_mass_matrix <<
   // std::endl;
 
-  wave_solver = new Wave_solver(
-      inner_vertex_count, mass_matrix.valuePtr(), stiffness_matrix.valuePtr(),
-      mass_matrix.outerIndexPtr(), mass_matrix.innerIndexPtr(), wave().data(),
-      evolution().data());
+  Eigen::VectorXf x(mass_matrix.rows());
+  Eigen::VectorXf y(x.size());
+  for (int i = 0; i < mass_matrix.rows(); ++i) {
+    x[i] = wave()[permutation[i]];
+    y[i] = evolution()[permutation[i]];
+  }
+
+  wave_solver =
+      new Wave_solver(inner_vertex_count, mass_matrix.valuePtr(),
+                      stiffness_matrix.valuePtr(), mass_matrix.outerIndexPtr(),
+                      mass_matrix.innerIndexPtr(), x.data(), y.data());
 }
 
 System& System::gpu_wave_solve() {
@@ -339,12 +346,14 @@ System& System::gpu_wave_solve() {
   const float gamma = 0.0f;
 
   (*wave_solver)(c, dt());
-  // static int count = 0;
-  // ++count;
-  // if (count == 3) {
-  wave_solver->copy_wave(wave().data());
-  //   count = 0;
-  // }
+  static int count = 0;
+  ++count;
+  if (count == 5) {
+    Eigen::VectorXf x(mass_matrix.rows());
+    wave_solver->copy_wave(x.data());
+    for (int i = 0; i < x.size(); ++i) wave()[permutation[i]] = x[i];
+    count = 0;
+  }
 
   return *this;
 }
