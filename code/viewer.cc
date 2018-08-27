@@ -17,12 +17,15 @@ namespace Femog {
 Viewer::Viewer(QWidget* parent) : QOpenGLWidget(parent) {
   setMouseTracking(true);
   world = Isometry{{}, {0, -1, 0}, {0, 0, 1}};
-  eye_azimuth = eye_altitude = M_PI_4;
+  eye_azimuth = M_PI_4 * 0.9;
+  eye_altitude = M_PI_4 * 0.8;
 
   QTimer* timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(repaint()));
   connect(timer, SIGNAL(timeout()), this, SLOT(loop_slot()));
   timer->start(1000.0f / 60.0f);
+
+  resize(512, 512);
 }
 
 void Viewer::load(const std::string& file_path) {
@@ -147,8 +150,8 @@ void Viewer::set_analytic_volume_force() {
       // field.volume_force()[i] = g(field.vertex_data()[i]);
       // field.volume_force()[i] = 0;
 
-      system.wave()[i] = g(system.domain().vertex_data()[i]);
-      // system.wave()[i] = 0.0f;
+      // system.wave()[i] = g(system.domain().vertex_data()[i]);
+      system.wave()[i] = 0.0f;
       // system.evolution()[i] = -10.0f * g(system.domain().vertex_data()[i]);
       system.evolution()[i] = 0.0f;
       // (g(system.domain().vertex_data()[i] + Eigen::Vector2f{0.1f, 0.1f}) -
@@ -189,10 +192,10 @@ void Viewer::loop_slot() {
     system3.dt() = 0.001f;
     system3.solve();
   } else {
-    system.dt() = 0.0001f;
+    system.dt() = 0.001f;
     // system.solve();
     // system.solve_custom();
-    system.gpu_wave_solve();
+    // system.gpu_wave_solve();
     // system.gpu_solve();
   }
 }
@@ -208,7 +211,8 @@ void Viewer::initializeGL() {
   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glPointSize(5.0f);
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  glClearColor(0.95, 0.95, 0.95, 1.0);
+  // glClearColor(0.95, 0.95, 0.95, 1.0);
+  glClearColor(1.0, 1.0, 1.0, 1.0);
 
   vertex_array = std::unique_ptr<Vertex_array>(new Vertex_array);
 
@@ -450,12 +454,40 @@ void Viewer::paintGL() {
     //   color_buffer_data[3 * i + 2] = 0.0f;
     // }
     // color_buffer->set_data(color_buffer_data);
+
+    // std::vector<int> is_boundary(system.domain().vertex_data().size(), 0);
+    // for (const auto& pair : system.domain().edge_map()) {
+    //   if (pair.second.insertions != 1) continue;
+
+    //   if (pair.second.is_neumann_boundary) {
+    //     is_boundary[pair.first[0]] =
+    //         (is_boundary[pair.first[0]] == 1) ? (1) : (-1);
+    //     is_boundary[pair.first[1]] =
+    //         (is_boundary[pair.first[0]] == 1) ? (1) : (-1);
+    //   } else {
+    //     is_boundary[pair.first[0]] = 1;
+    //     is_boundary[pair.first[1]] = 1;
+    //   }
+    // }
+
     std::vector<float> color_buffer_data(system.domain().vertex_data().size() *
                                          3);
     for (auto i = 0; i < system.domain().vertex_data().size(); ++i) {
+      // if (is_boundary[i] == 1) {
+      //   color_buffer_data[3 * i + 0] = 1.0f;
+      //   color_buffer_data[3 * i + 1] = 0.0f;
+      //   color_buffer_data[3 * i + 2] = 0.0f;
+
+      // } else if (is_boundary[i] == -1) {
+      //   color_buffer_data[3 * i + 0] = 0.0f;
+      //   color_buffer_data[3 * i + 1] = 0.0f;
+      //   color_buffer_data[3 * i + 2] = 0.0f;
+
+      // } else {
       color_buffer_data[3 * i + 0] = (system.wave()[i] - min) / (max - min);
       color_buffer_data[3 * i + 1] = color_buffer_data[3 * i + 0];
       color_buffer_data[3 * i + 2] = 1.0f;
+      // }
     }
     color_buffer->set_data(color_buffer_data);
 

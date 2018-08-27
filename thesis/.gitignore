@@ -2,6 +2,9 @@
 !*/
 
 !sections/images/*.pdf
+!sections/code/*.cc
+!sections/code/*.h
+!sections/code/*.txt
 
 !*.tex
 !*.bib

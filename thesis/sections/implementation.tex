@@ -6,6 +6,93 @@
 
     \subsection{Repräsentation des Berechnungsgebietes} % (fold)
     \label{sub:repräsentation_des_berechnungsgebietes}
+      Es handle sich bei $[\domain]\define\roundBrackets{\domain,\dirichletBoundary,\neumannBoundary,ν}$ wieder um ein Berechnungsgebiet.
+      Die Implementierung einer Finite-Elemente-Methode verlangt die Diskretisierung von $[\domain]$, wie es in Abschnitt \ref{ssub:discretization-domain} beschrieben wurde.
+      Hierfür wurde eine Menge von Dreiecken $\mathscr{T}$ gewählt, die $\bar{\domain}$ bedeckt.
+      \[
+        \bar{\domain} = \bigcup_{\triangle\in\mathscr{T}} \triangle
+      \]
+      Dies ist hier exakt möglich, da $\domain$ einen polygonalen Rand $\partial\domain$ besitzt.
+      Jedes dieser Dreiecke wird durch seine drei Eckpunkte eindeutig beschrieben.
+
+      Die Triangulierung von $\bar\domain$ ist durch einen ungerichteten Graphen $(V,E)$ beschreibbar.
+      Es seien $V$ die Menge der Eckpunkte und $E$ die Menge der Kanten.
+
+      \inputCodeBlock[title=domain\_base]{code/domain_base.cc}
+      \inputCodeBlock[title=edge]{code/edge.cc}
+      \inputCodeBlock[title=primitive]{code/primitive.cc}
+      \inputCodeBlock[title=domain]{code/domain.cc}
+      \inputCodeBlock[title=domain implementation]{code/domain_implementation.cc}
+
+      % \inputCodeBlock{code/model-test.txt}
+
+      \begin{center}
+        \noindent
+        \begin{minipage}[b]{0.32\textwidth}
+          \begin{tcolorbox}[titlerule=0.1pt,boxrule=0.5pt,arc=5pt,title={Zeile 1-13}]
+            \lstinputlisting[style=standard,firstline=1,lastline=13]{code/model-test.txt}
+          \end{tcolorbox}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.32\textwidth}
+          \begin{tcolorbox}[titlerule=0.1pt,boxrule=0.5pt,arc=5pt,title={Zeile 14-26}]
+            \lstinputlisting[style=standard,firstline=14,lastline=26]{code/model-test.txt}
+          \end{tcolorbox}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.32\textwidth}
+          \begin{tcolorbox}[titlerule=0.1pt,boxrule=0.5pt,arc=5pt,title={Zeile 27-39}]
+            \lstinputlisting[style=standard,firstline=27,lastline=39]{code/model-test.txt}
+          \end{tcolorbox}
+        \end{minipage}
+      \end{center}
+
+      \begin{figure}[h]
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-quad-0.png}
+          \caption{Quad}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-ring-0.png}
+          \caption{Ring}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-circle-0.png}
+          \caption{Curved}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-test-0.png}
+          \caption{Test}
+        \end{subfigure}
+      \end{figure}
+
+      \begin{figure}[h]
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-quad-1.png}
+          \caption{Quad}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-ring-1.png}
+          \caption{Ring}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-circle-1.png}
+          \caption{Curved}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-test-1.png}
+          \caption{Test}
+        \end{subfigure}
+      \end{figure}
+
       Das Gebiet $\Omega$ kann nur in Dreiecke unterteilt werden.
       Wir trennen Eckpunkte und Primitive, wie im OBJ-Dateiformat.
       Weiterhin werden Kanten für Neumann- und Dirichlet-Randbedingungen extra aufgeführt.
