@@ -1,10 +1,12 @@
+namespace Fem {
+
 template <class T>
 class Domain : public Domain_base {
  public:
   using Vertex = T;
   using Edge = Domain_base::Edge;
   using Primitive = Domain_base::Primitive;
-  using Quad = Domain_base::Quad;
+  using Quad = std::array<int, 4>;
 
   Domain() = default;
   virtual ~Domain() = default;
@@ -23,18 +25,18 @@ class Domain : public Domain_base {
   void validate(const Primitive& primitive) const;
 
   Domain& add_vertex(const Vertex& vertex);
-  Domain& operator<<(const Vertex& vertex) { return this->add_vertex(vertex); }
+  Domain& operator<<(const Vertex& vertex) { return add_vertex(vertex); }
   Domain& add_primitive(const Primitive& primitive);
   Domain& operator<<(const Primitive& primitive) {
-    return this->add_primitive(primitive);
+    return add_primitive(primitive);
   }
   Domain& add_quad(const Quad& quad);
-  Domain& operator<<(const Quad& quad) { return this->add_quad(quad); }
-
-  Domain& subdivide();
+  Domain& operator<<(const Quad& quad) { return add_quad(quad); }
 
   Domain& set_dirichlet_boundary(const Edge& edge);
   Domain& set_neumann_boundary(const Edge& edge);
+
+  Domain& subdivide();
 
  private:
   std::vector<Vertex> vertex_data_;
@@ -44,3 +46,5 @@ class Domain : public Domain_base {
                      typename Primitive::Hash>
       primitive_map_;
 };
+
+}  // namespace Fem

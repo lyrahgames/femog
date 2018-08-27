@@ -150,8 +150,8 @@ void Viewer::set_analytic_volume_force() {
       // field.volume_force()[i] = g(field.vertex_data()[i]);
       // field.volume_force()[i] = 0;
 
-      // system.wave()[i] = g(system.domain().vertex_data()[i]);
-      system.wave()[i] = 0.0f;
+      system.wave()[i] = g(system.domain().vertex_data()[i]);
+      // system.wave()[i] = 0.0f;
       // system.evolution()[i] = -10.0f * g(system.domain().vertex_data()[i]);
       system.evolution()[i] = 0.0f;
       // (g(system.domain().vertex_data()[i] + Eigen::Vector2f{0.1f, 0.1f}) -
@@ -195,7 +195,7 @@ void Viewer::loop_slot() {
     system.dt() = 0.001f;
     // system.solve();
     // system.solve_custom();
-    // system.gpu_wave_solve();
+    system.gpu_wave_solve();
     // system.gpu_solve();
   }
 }

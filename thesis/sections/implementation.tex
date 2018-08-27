@@ -8,23 +8,24 @@
     \label{sub:repräsentation_des_berechnungsgebietes}
       Es handle sich bei $[\domain]\define\roundBrackets{\domain,\dirichletBoundary,\neumannBoundary,ν}$ wieder um ein Berechnungsgebiet.
       Die Implementierung einer Finite-Elemente-Methode verlangt die Diskretisierung von $[\domain]$, wie es in Abschnitt \ref{ssub:discretization-domain} beschrieben wurde.
-      Hierfür wurde eine Menge von Dreiecken $\mathscr{T}$ gewählt, die $\bar{\domain}$ bedeckt.
-      \[
-        \bar{\domain} = \bigcup_{\triangle\in\mathscr{T}} \triangle
-      \]
-      Dies ist hier exakt möglich, da $\domain$ einen polygonalen Rand $\partial\domain$ besitzt.
-      Jedes dieser Dreiecke wird durch seine drei Eckpunkte eindeutig beschrieben.
-
-      Die Triangulierung von $\bar\domain$ ist durch einen ungerichteten Graphen $(V,E)$ beschreibbar.
-      Es seien $V$ die Menge der Eckpunkte und $E$ die Menge der Kanten.
+      Es sei $(V,E,\mathscr{T})$ eine Triangulierung von $[\domain]$.
+      Die Implementierung der Basisstruktur für die Triangulierung des Berechnungsgebietes sei durch den folgenden Quelltext gegeben.
 
       \inputCodeBlock[title=domain\_base]{code/domain_base.cc}
+      Die Basisstruktur wird als \code{Domain\_base} im Namespace \code{Fem} konstruiert.
+      In ihr werden die Strukturen \code{Edge} und \code{Primitive} für die Beschreibung der Kanten und Dreiecke deklariert.
+      Die verschiedenen Konstruktoren und Zuweisungsoperatoren der Sprache C++ werden explizit durch den Compiler erzeugt.
+      Der Destruktor wurde mit \code{virtual} gekennzeichnet, wie es für polymorphe Basisklassen angebracht ist \cite[S.~40~ff]{Meyers2008}.
+
       \inputCodeBlock[title=edge]{code/edge.cc}
+
       \inputCodeBlock[title=primitive]{code/primitive.cc}
+
       \inputCodeBlock[title=domain]{code/domain.cc}
+
       \inputCodeBlock[title=domain implementation]{code/domain_implementation.cc}
 
-      % \inputCodeBlock{code/model-test.txt}
+      \inputCodeBlock[title=subdivide]{code/domain_implementation_subdivide.cc}
 
       \begin{center}
         \noindent

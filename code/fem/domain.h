@@ -37,10 +37,10 @@ class Domain : public Domain_base {
   void validate(const Primitive& primitive) const;
 
   Domain& add_vertex(const Vertex& vertex);
-  Domain& operator<<(const Vertex& vertex) { return this->add_vertex(vertex); }
+  Domain& operator<<(const Vertex& vertex) { return add_vertex(vertex); }
   Domain& add_primitive(const Primitive& primitive);
   Domain& operator<<(const Primitive& primitive) {
-    return this->add_primitive(primitive);
+    return add_primitive(primitive);
   }
   Domain& add_quad(const Quad& quad);
   Domain& operator<<(const Quad& quad) { return this->add_quad(quad); }
@@ -165,6 +165,7 @@ Domain<Vertex>& Domain<Vertex>::subdivide() {
 
   decltype(primitive_data_) old_primitive_data;
   old_primitive_data.swap(primitive_data_);
+  primitive_map_.clear();
 
   std::vector<typename decltype(edge_map_)::value_type> boundary_edges;
 
