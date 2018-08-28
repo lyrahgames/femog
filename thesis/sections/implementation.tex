@@ -105,6 +105,25 @@
     \subsection{Konstruktion der Mass und Stiffness Matrix} % (fold)
     \label{sub:konstruktion_der_mass_und_stiffness_matrix}
 
+      \inputCodeBlock[title=Wave system]{code/cpu_wave_system.cc}
+
+      \inputCodeBlock[title = GPU Wave system]{code/gpu_wave_system.cc}
+
+      \inputCodeBlock[title = System construction]{code/cpu_wave_system_constructor.cc}
+
+      \inputCodeBlock[title = System construction]{code/gpu_wave_system_constructor.cc}
+
+      \inputCodeBlock[title = System construction]{code/gpu_wave_system_destructor.cc}
+
+      \inputCodeBlock[title = System construction]{code/gpu_wave_system_accessors.cc}
+
+      \inputCodeBlock[title = CPU Wave System advance]{code/cpu_wave_system_advance.cc}
+
+      \inputCodeBlock[title = GPU Wave System advance]{code/gpu_wave_system_advance.cc}
+
+      \inputCodeBlock[title = Conjugate Gradient]{code/cpu_conjugate_gradient.cc}
+      \inputCodeBlock[title = GPU Kernel]{code/gpu_wave_system_kernel.cc}
+
     % subsection konstruktion_der_mass_und_stiffness_matrix (end)
 
     \subsection{Konstruktion des linearen Gleichungssystems} % (fold)
