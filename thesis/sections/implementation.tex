@@ -102,13 +102,15 @@
       \cite{Alberty1998}
     % subsection repräsentation_des_berechnungsgebietes (end)
 
-    \subsection{Konstruktion der Mass und Stiffness Matrix} % (fold)
-    \label{sub:konstruktion_der_mass_und_stiffness_matrix}
-
+    \subsection{Aufbau des Systems} % (fold)
+    \label{sub:aufbau_des_systems}
       \inputCodeBlock[title=Wave system]{code/cpu_wave_system.cc}
 
       \inputCodeBlock[title = GPU Wave system]{code/gpu_wave_system.cc}
+    % subsection aufbau_des_systems (end)
 
+    \subsection{Konstruktion der Systemmatrizen} % (fold)
+    \label{sub:konstruktion_der_mass_und_stiffness_matrix}
       \inputCodeBlock[title = System construction]{code/cpu_wave_system_constructor.cc}
 
       \inputCodeBlock[title = System construction]{code/gpu_wave_system_constructor.cc}
@@ -116,30 +118,17 @@
       \inputCodeBlock[title = System construction]{code/gpu_wave_system_destructor.cc}
 
       \inputCodeBlock[title = System construction]{code/gpu_wave_system_accessors.cc}
+    % subsection konstruktion_der_mass_und_stiffness_matrix (end)
 
+    \subsection{Berechnung eines Zeitschrittes} % (fold)
+    \label{sub:konstruktion_des_linearen_gleichungssystems}
       \inputCodeBlock[title = CPU Wave System advance]{code/cpu_wave_system_advance.cc}
 
       \inputCodeBlock[title = GPU Wave System advance]{code/gpu_wave_system_advance.cc}
 
       \inputCodeBlock[title = Conjugate Gradient]{code/cpu_conjugate_gradient.cc}
       \inputCodeBlock[title = GPU Kernel]{code/gpu_wave_system_kernel.cc}
-
-    % subsection konstruktion_der_mass_und_stiffness_matrix (end)
-
-    \subsection{Konstruktion des linearen Gleichungssystems} % (fold)
-    \label{sub:konstruktion_des_linearen_gleichungssystems}
-
     % subsection konstruktion_des_linearen_gleichungssystems (end)
-
-    \subsection{Lösen des Gleichungssystems} % (fold)
-    \label{sub:lösen_des_gleichungssystems}
-
-    % subsection lösen_des_gleichungssystems (end)
-
-    \subsection{Randbedingungen} % (fold)
-    \label{sub:randbedingungen}
-
-    % subsection randbedingungen (end)
 
     \subsection{Visualisierung} % (fold)
     \label{sub:visualisierung}

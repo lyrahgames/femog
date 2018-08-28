@@ -103,17 +103,20 @@ void Viewer::set_analytic_volume_force() {
       return 0.1f * std::exp(-(vertex).squaredNorm() / sigma2) /
              std::sqrt(sigma2);
     };
-    const float sigma2 =
-        0.05f * 0.5f * (bounding_box_max - bounding_box_min).norm();
+    const float sigma2 = 0.5f * (bounding_box_max - bounding_box_min).norm();
 
     for (auto i = 0; i < system3.domain().vertex_data().size(); ++i) {
       // system3.wave()[i] = g(system3.domain().vertex_data()[i]);
-      system3.wave()[i] = 0.1f *
+      system3.wave()[i] = 1.0f *
+                          std::cos(0.5 * (system3.domain().vertex_data()[i] -
+                                          system3.domain().vertex_data()[0])
+                                             .squaredNorm()) *
                           std::exp(-(system3.domain().vertex_data()[i] -
                                      system3.domain().vertex_data()[0])
                                         .squaredNorm() /
                                    sigma2) /
                           std::sqrt(sigma2);
+      // system3.wave()[i] = 0;
       system3.evolution()[i] = 0;
     }
   } else {
