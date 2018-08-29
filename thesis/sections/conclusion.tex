@@ -4,7 +4,28 @@
   \section{Fazit und Aussicht} % (fold)
   \label{sec:conclusion}
 
+    Aus den aufgeführten Ergebnissen können folgende Schlussfolgerungen gezogen werden.
+    Die Implementierung der Finite-Elemente-Methode auf der GPU durch die Sprache CUDA brachte einen enormen Performanceanstieg bereits bei kleinen Modellen mit sich.
+    Die Grafikkarte eines Computers ist demnach bei der Berechnung eines Zeitschrittes für die Finite-Elemente-Methode der CPU überlegen.
+    Die Konstruktion der Systemmatrizen dauert im Vergleich zur Zeitschrittberechnung zu lange.
+    Daher ist es empfehlenswert diesen Programmanteil ebenfalls zu parallelisieren.
+    Es ist jedoch zu prüfen, ob dieser Schritt auf der GPU oder auf der CPU vorgenommen werden sollte.
+    Bei der Konstruktion der Systemmatrizen handelt es um ein Reduktionsproblem, welches eine Reduzierung der Datenparallelität zur Folge hat.
+    Demzufolge besteht die Möglichkeit, dass eine parallelisierte Implementierung auf der CPU dieses Problem durch eine gesteigerte Taktfrequenz und einen größeren Cache besser löst.
 
+    Für die Wahl der numerischen Methoden ist eine genaue Analyse der Problemstellung von Nutzen.
+    Es gibt kein universelles Verfahren, welches alle Probleme gleichermaßen gut löst.
+    Je nach Struktur der dünnbesetzten Systemmatrizen oder der partiellen Differentialgleichungen kann die Wahl einer Methode unterschiedlich geeignet sein.
+    Auch hier stellt die Messung der Performance ein adäquates Mittel für die Auswahl der Verfahren dar.
+    Für eine detailliertere Behandlung weiterer Verfahren zur Darstellung komplexerer Probleme sei hier auf die Quellen \cite{Bell2008}, ... verwiesen.
+
+    Um die Effizienz des gesamten Verfahrens in der Praxis zu bewerten, sollte dieses anhand realistischer physikalischer Problemstellungen, wie zum Beispiel der Strömungssimulation, gemessen und analysiert werden.
+    Die Genauigkeit einer Voraussage hängt von der Diskretisierung des Berechnungsgebietes ab.
+    Daher ist es ratsam einen Algorithmus zur automatischen und adaptiven Gittergenerierung zu verwenden.
+
+    Eine Erweiterung des hier implementierten Verfahrens ist die Berechnung der Wellengleichung auf zweidimensionalen gekrümmten Oberflächen.
+    In den Abbildungen \ref{fig:torus-wave} und \ref{fig:sphere-wave} ist dies für einen Torus und eine Kugel veranschaulicht.
+    Dies demonstriert, dass die Finite-Elemente-Methode auch auf mathematisch motivierte Probleme anwendbar ist.
 
     \begin{figure}[h]
       \center
