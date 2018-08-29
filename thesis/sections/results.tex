@@ -1,11 +1,64 @@
 \documentclass{article}
 \usepackage{standalone}
-
+\usepackage{multirow}
 \begin{document}
   \section{Simulation und Ergebnisse} % (fold)
   \label{sec:simulation_und_ergebnisse}
 
+    Wie in den vorherigen Abschnitten gezeigt wurde, ist es möglich, eine Finite-Elemente-Methode sowohl auf der CPU als auch auf der GPU zu implementieren.
+    Der dafür erforderliche Aufwand ist annähernd vergleichbar und ist durch die Verwendung von externen Bibliotheken, wie zum Beispiel CUSP, optimierbar.
+    Die Entscheidung, welche der beiden Prozessorarten besser für ein solches Problem geeignet ist, kann anhand diverser Parameter getroffen werden.
+    Einer der aussagekräftigsten Parameter hierzu ist die Performance des Programms.
 
+    In Tabelle TABELLE werden diesbezüglich unter anderem die Zeiten für die Berechnung eines Zeitschrittes der beiden Prozessorarten für verschiedene Szenengrößen verglichen.
+    Dabei wurde festgestellt, dass die Implementierung auf der GPU für die betrachteten Modelle eine schnellere Berechnung ermöglicht im Vergleich zur CPU.
+    Dies basiert im Wesentlichen auf der hohen Datenparallelität und der Möglichkeit der GPU, diese durch ihre extrem hohe Anzahl an Kernen auszunutzen.
+    Zudem wurde die vollständige Auslastung der GPU erst für Szenen mit circa einer Million Eckpunkte und mehr erreicht.
+    Dies bedeutet wiederum, dass die GPU für kleine Modelle nicht ausgelastet ist, und eine parallelisierte Implementierung auf CPU das Problem unter Umständen effizienter lösen könnte.
+    Im Diagramm XY ist der Effizienzgewinn (engl.: \textit{speed up}) der GPU im vergleichbar zur CPU noch einmal dargestellt.
+
+    Tabelle TABELLE zeigt weiterhin die Zeit, die benötigt wird, um die Systemmatrizen auf der CPU zu konstruieren.
+    Der Zusammenhang zwischen Szenengröße und Konstruktionsdauer zeigt eine positive Korrelation.
+    Je feiner die Auflösung des Berechnungsgebietes, desto größer wird die benötigte Konstruktionszeit.
+    Diese simple Aussage ist der Tatsache geschuldet, dass die Konstruktion der Systemmatrizen auf der CPU nur seriell vollzogen wurde.
+    Ein vergleichbarer Zusammenhang auf der GPU ist anhand der Messwerte nicht ersichtlich.
+
+    Ein Vergleich der Konstruktionsdauer mit der Dauer der Zeitschrittberechnung auf der CPU zeigt, dass die Generierung der Systemmatrizen für große Modelle circa dreimal länger benötigt als die Berechnung des Zeitschrittes.
+    Kleinere Systeme weisen ein noch ungünstigeres Verhältnis auf, sodass die Konstruktion sogar bis 95\% der Gesamtrechenzeit einnimmt.
+    Dies stellt allerdings kein großes Problem dar, weil die Berechnung eines einzelnen Zeitschrittes beliebig oft wiederholt wird, während die Konstruktion nur einmalig ausgeführt wird.
+
+    Die ausgewählten numerischen Methoden, wie die Diskretisierung der Funktionenräume durch Hutfunktionen, das Speichern dünnbesetzter Matrizen im CSR-Format und das iterative Lösen des linearen Gleichungssystems durch Conjugate Gradient, stellen nur eine Möglichkeit für die Implementierung einer Finite-Elemente-Methode dar.
+    Dennoch zeigt sich, dass die Wahl dieser Methoden für die Simulation der Wellengleichung nicht nur ausreichend, sondern auch effizient waren.
+    Gerade bei den hier betrachteten zweidimensionalen Problemen stellen die Hutfunktionen die einfachste Form der Approximation dar und sind aus diesem Grund am schnellsten zu berechnen.
+    Für dünnbesetzte Matrizen existiert zwar eine Vielzahl von Speicherformaten, jedoch ist das verwendete CSR-Format eine der kompaktesten und einfachsten Varianten.
+    Die Effizienz der zugrundeliegenden Datenstruktur ist nicht von dem Muster der dünnbesetzten Matrix abhängig und liefert demzufolge eine konstante Performance für unterschiedliche Szenen.
+    Auch für die Lösung von linearen Gleichungssystemen existiert eine Vielzahl von Algorithmen.
+    Die hier verwendete Methode zeichnet sich durch ihren iterativen Charakter aus.
+    Sie benötigt während der Berechnung nur einen moderaten Speicherplatz und löst auch sehr große Systeme im zwei- und dreidimensionalen effizient unabhängig von der Permutation der Eckpunkte.
+    Die Systemmatrizen sind positiv definit und symmetrisch.
+    Das Verfahren nutzt diese Eigenschaften aus, um in wenigen Schritten zu einer Lösung zu gelangen.
+    Des Weiteren lässt es sich durch sogenannte Vorkonditionierer verbessern.
+
+    Jede hier beschriebene Methode wurde anhand der Wellengleichung implementiert.
+    Die Behandlung der Wellengleichung kann auf weitere partielle Differentialgleichungen übertragen werden, sodass dies keine Einschränkung darstellt.
+    Zu beachten ist dabei, dass die Genauigkeit der numerischen Approximation maßgeblich durch die Wahl des zugrundeliegenden Gitters und des Zeitschrittverfahrens beeinflusst wird.
+    Bekannte Symmetrieeigenschaften von Lösungen sollten sich im Gitter widerspiegeln.
+
+    \begin{table}[h]
+      \begin{tabular}{rrrr}
+        \hline
+        Subdivision & Scene Parameters & System Construction Time & System Advance Time \\
+        \hline
+        \hline
+        \multirow{3}{*}{0}
+          & test  \\
+          & 1 & \\
+          & 2 & \\
+        3 \\
+        4 \\
+        5
+      \end{tabular}
+    \end{table}
 
   % section simulation_und_ergebnisse (end)
 \end{document}
