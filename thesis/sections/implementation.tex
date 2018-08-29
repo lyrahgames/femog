@@ -164,17 +164,29 @@
 
     \subsection{Berechnung eines Zeitschrittes} % (fold)
     \label{sub:konstruktion_des_linearen_gleichungssystems}
+      Die Berechnung eines weiteren Zeitschrittes erfordert die Konstruktion der rechten Seite des linearen Gleichungssystems.
+      Mithilfe des in Eigen implementierten Conjugate Gradient Verfahren wird dann die Ableitung der Welle zum neuen Zeitpunkt berechnet.
+      Anschließend kann mit dieser Ableitung die neue Welle generiert werden.
       \inputCodeBlock[title = CPU Wave System advance]{code/cpu_wave_system_advance.cc}
 
-      \inputCodeBlock[title = GPU Wave System advance]{code/gpu_wave_system_advance.cc}
-
+      Um den Lösungsalgorithmus auf der GPU zu programmieren soll zunächst das Conjugate Gradient Verfahren auf der CPU implementiert werden.
+      Der folgende Quelltext zeigt dies.
       \inputCodeBlock[title = Conjugate Gradient]{code/cpu_conjugate_gradient.cc}
+      Innerhalb der GPU wird nun genau wie auf der CPU zuerst die rechte Seite des linearen Gleichungssystems konstruiert und dann ein Conjugate Gradient Verfahren angewendet.
+      Um die Implementierung einfacher zu gestalten, wurde Thrust verwendet.
+      \inputCodeBlock[title = GPU Wave System advance]{code/gpu_wave_system_advance.cc}
+      Innerhalb des Codes wird ein Kernel definiert, der die Matrix-Vektor-Multiplikation des CSR-Formates auf der GPU parallelisiert.
+      Des Weiteren wurden zwei Funktoren \code{saxpy\_functor} und \code{saxpby\_functor} verwendet, die die typischen BLAS Routinen darstellen.
       \inputCodeBlock[title = GPU Kernel]{code/gpu_wave_system_kernel.cc}
     % subsection konstruktion_des_linearen_gleichungssystems (end)
 
     \subsection{Visualisierung} % (fold)
     \label{sub:visualisierung}
 
+      Die Verwendung von OpenGL ermöglicht die dreidimensionale Darstellung von Objekten, die durch Dreiecke diskretisiert wurden.
+      Um die Darstellung der Wellenfunktion und des Berechnungsgebietes noch anschaulicher zu gestalten, wurde jedem Eckpunkt des Gebietes als dritte Koordinate die Werte der Welle zugewiesen.
+      Zudem wurde eine Farbverteilung berechnet.
+      Die folgenden Abbildungen zeigen mehrere Beispiele.
       \begin{figure}[h]
         \center
         \begin{subfigure}[b]{0.24\textwidth}
