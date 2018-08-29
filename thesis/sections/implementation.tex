@@ -18,15 +18,32 @@
       Der Destruktor wurde mit \code{virtual} gekennzeichnet, wie es für polymorphe Basisklassen angebracht ist \cite[S.~40~ff]{Meyers2008}.
 
       \inputCodeBlock[title=edge]{code/edge.cc}
-
+      Die Datenstruktur \code{Edge} der Basisklasse \code{Domain\_base} wird durch ein Array von zwei Integern dargestellt.
+      Diese verweisen später auf die Eckpunkte der Kante.
+      Der Konstruktor stellt sicher, dass die Indizes sortiert übergeben werden.
+      Innerhalb der Datenstruktur werden zwei weitere Datenstrukturen \code{Hash} und \code{Info} deklariert, die für die fehlerfreie Konstruktion eines Berechnungsgebietes verwendet werden.
+      Die Datenstruktur \code{Primitive} eines Dreiecks ist analog aufgebaut.
+      Um die drei Indizes für die Referenzierung auf die Eckpunkte zu sortieren wird hier ein einfaches Insertion sort verwendet.
       \inputCodeBlock[title=primitive]{code/primitive.cc}
 
+      Die eigentliche Datenstruktur \code{Domain} eines Berechnungsgebietes erbt von der Basisklasse \code{Domain\_base}.
+      Zudem wird der Datentyp der Eckpunkte durch ein Template variabel gehalten.
+      Das Interface der Klasse ergibt sich aus Funktionen, um Daten zu lesen und fehlerfrei hinzuzufügen.
+      Um dies auch in der Implementierung zu gewährleisten, werden für das Aufbewahren der Dreiecke und Kanten Hash Maps verwendet.
+      Diese speichern, wie oft eines der genannten Objekte zum Berechnungsgebiet hinzugefügt wurde.
+      Auf der Basis dieser Zahl ist die Klasse dann in der Lage zwischen Randkanten und inneren Kanten zu unterscheiden und fehlerhafte Berechnungsgebiete zu verhindern.
       \inputCodeBlock[title=domain]{code/domain.cc}
-
       \inputCodeBlock[title=domain implementation]{code/domain_implementation.cc}
 
+      Für die späteren Messungen ist es von großem Nutzen, die Triangulierung eines Gebietes zu verfeinern.
+      Hierfür enthält die Klasse \code{Domain} eine Funktion \code{subdivide}.
+      Sie ermittelt für jede vorhandene Kante einen neuen Eckpunkt und fügt dann auf der Basis der alten Dreiecke neue feinere Dreiecke hinzu.
+      Die unterteilten Kanten behalten dabei ihre Randeigenschaften.
       \inputCodeBlock[title=subdivide]{code/domain_implementation_subdivide.cc}
 
+      Um ein Berechnungsgebiet außerhalb des Quelltextes leicht zu beschreiben, wurde ein Dateiformat definiert.
+      Im folgenden ist ein Beispiel für blabla gezeigt.
+      Hierbei steht \code{v} für die Definition eines Eckpunktes, \code{p} für die Definition eines Dreiecks, \code{q} für die Definition eines Vierecks, \code{d} für eine Dirichlet-Kante und \code{n} für eine Neumann-Kante.
       \begin{center}
         \noindent
         \begin{minipage}[b]{0.32\textwidth}
@@ -93,30 +110,55 @@
           \caption{Test}
         \end{subfigure}
       \end{figure}
-
-      Das Gebiet $\Omega$ kann nur in Dreiecke unterteilt werden.
-      Wir trennen Eckpunkte und Primitive, wie im OBJ-Dateiformat.
-      Weiterhin werden Kanten für Neumann- und Dirichlet-Randbedingungen extra aufgeführt.
-      Dies ist möglich, da die Randbedingungen unabhängig von den Primitiven betrachtet werden können.
-      Die Primitive müssen demnach nicht auf die Ränder verweisen.
-      \cite{Alberty1998}
     % subsection repräsentation_des_berechnungsgebietes (end)
 
     \subsection{Aufbau des Systems} % (fold)
     \label{sub:aufbau_des_systems}
+      Ein System zur Lösung der Wellengleichung soll zunächst auf der CPU implementiert werden.
+      Hierfür wird die Klasse \code{Cpu\_wave\_system} eingeführt.
+      Sie verwendet die Bibliothek Eigen für alle grundlegenden Matrix-Vektor-Operationen.
       \inputCodeBlock[title=Wave system]{code/cpu_wave_system.cc}
+      Das Interface des Systems besteht grundlegend aus einer Funktion \code{initial\_state}, die es ermöglicht die Anfangsbedingungen zu setzen, und einer Funktion \code{advance}, die das gesamte System einen Zeitschritt voranbringt.
+      Systemmatrizen der Finite-Elemente-Methode sowie die Welle und deren Ableitungen werden zwischengespeichert, um unnötige Berechnungsschritte zu verhindern.
+      Des Weiteren sollen bei der Konstruktion des Systems Eckpunkte, die auf dem Rand des Gebietes liegen, von den inneren Eckpunkten separiert werden.
+      Hierfür wird das Array der Eckpunkte innerhalb des Systems permutiert.
+      Die Permutation wird für den Zugriff von außen gespeichert.
+
+      Auf der GPU ist die Verwendung von Eigen nicht möglich.
+      Aus diesem Grund ist eine explizite Implementierung des CSR-Formates auf dem DRAM der GPU nötig.
+      Um den Zugriff auf die Daten in CUDA zu ermöglichen, werden Zeiger definiert.
+      Das Interface der Klasse \code{Gpu\_wave\_system} unterscheidet sich im Wesentlichen nicht von dem der Klasse \code{Cpu\_wave\_system}.
+      Möchte man jedoch die Welle auslesen, so müssen deren Daten vom DRAM wieder in den RAM übertragen werden.
+      Eben deshalb wird eine Funktion \code{copy\_wave} deklariert.
 
       \inputCodeBlock[title = GPU Wave system]{code/gpu_wave_system.cc}
     % subsection aufbau_des_systems (end)
 
     \subsection{Konstruktion der Systemmatrizen} % (fold)
     \label{sub:konstruktion_der_mass_und_stiffness_matrix}
+      Die Konstruktion der Systemmatrizen muss in dieser für jedes Berechnungsgebiet nur ein einziges Mal ausgeführt werden.
+      Aus diesem Grund soll hier auf die Implementierung einer parallelisierten Methode auf der GPU verzichtet werden.
+
+      Für die Simulation der Wellengleichung werden vier Systemmatrizen benötigt.
+      Diese teilen sich auf in die inneren Matrizen, die die Wechselwirkung freier Eckpunkte untereinander beschreiben, und Randmatrizen, die die Wechselwirkung des Dirichlet-Randes mit inneren Eckpunkten beschreiben.
+      Zunächst werden die Eckpunkte auf einem Dirichlet-Rand markiert.
+      Auf der Basis dieser Markierung lässt sich die Permutation konstruieren.
+      In Anschluss daran, wird über die Dreiecke iteriert.
+      Jedes Dreieck liefert die Matrix eines finiten Elementes.
+      Diese Matrizen werden akkumuliert und zu den Systemmatrizen zusammengesetzt.
       \inputCodeBlock[title = System construction]{code/cpu_wave_system_constructor.cc}
 
+      Für die GPU müssen die auf der CPU konstruierten Daten der dünnbesetzten Matrizen noch auf den DRAM übertragen werden.
+      Dabei wird sich zu Nutze gemacht, dass die beiden inneren Matrizen das gleichen Muster besitzen.
+      Ebenso gilt dies für die beiden Randmatrizen.
+      Während der Konstruktion wird zudem die maximale Anzahl von Threads auf einem Block der verwendeten GPU ausgelesen.
+      Mithilfe dieses Wertes wird eine optimale Anzahl von Threads auf den verschiedenen Blocks der GPU generiert.
       \inputCodeBlock[title = System construction]{code/gpu_wave_system_constructor.cc}
 
+      Da die Daten auf dem DRAM über herkömmliche Zeiger verwaltet werden, muss der Destruktor der Klasse den allozierten Speicher auf dem DRAM wieder freigeben.
       \inputCodeBlock[title = System construction]{code/gpu_wave_system_destructor.cc}
 
+      Die Funktionen, um die Anfangsdaten zu setzen und die Wellendaten auszulesen, müssen ebenfalls die Daten zwischen dem RAM und dem DRAM transportieren.
       \inputCodeBlock[title = System construction]{code/gpu_wave_system_accessors.cc}
     % subsection konstruktion_der_mass_und_stiffness_matrix (end)
 
