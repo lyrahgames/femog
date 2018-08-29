@@ -107,10 +107,10 @@ void Viewer::set_analytic_volume_force() {
 
     for (auto i = 0; i < system3.domain().vertex_data().size(); ++i) {
       // system3.wave()[i] = g(system3.domain().vertex_data()[i]);
-      system3.wave()[i] = 1.0f *
-                          std::cos(0.5 * (system3.domain().vertex_data()[i] -
-                                          system3.domain().vertex_data()[0])
-                                             .squaredNorm()) *
+      system3.wave()[i] = 10.0f *
+                          std::cos(10.0 * (system3.domain().vertex_data()[i] -
+                                           system3.domain().vertex_data()[0])
+                                              .squaredNorm()) *
                           std::exp(-(system3.domain().vertex_data()[i] -
                                      system3.domain().vertex_data()[0])
                                         .squaredNorm() /
@@ -120,20 +120,24 @@ void Viewer::set_analytic_volume_force() {
       system3.evolution()[i] = 0;
     }
   } else {
-    auto f = [](const Fem_field::vertex_type& vertex) {
-      return std::cos(3.0f * vertex.x() * M_PI) *
-             std::cos(3.0f * vertex.y() * M_PI);
+    auto f = [&](const Fem_field::vertex_type& vertex) {
+      return std::cos(
+          3.0f *
+          (vertex -
+           0.5f * (bounding_box_max + bounding_box_min).block<2, 1>(0, 0))
+              .squaredNorm());
       // return 0;
     };
 
     auto g = [&](const Fem_field::vertex_type& vertex) {
       const float sigma2 =
-          0.01 * 0.5f * (bounding_box_max - bounding_box_min).squaredNorm();
-      return 0.05f * (bounding_box_max - bounding_box_min).squaredNorm() *
-             std::exp(-(vertex - 0.5f * (bounding_box_max + bounding_box_min)
-                                            .block<2, 1>(0, 0))
-                           .squaredNorm() /
-                      sigma2) /
+          0.001 * 0.5f * (bounding_box_max - bounding_box_min).squaredNorm();
+      // const Eigen::Vector2f center =
+      //     0.5f * (bounding_box_max + bounding_box_min).block<2, 1>(0, 0);
+      const Eigen::Vector2f center{0.5, 0.5};
+
+      return 0.005f * (bounding_box_max - bounding_box_min).squaredNorm() *
+             std::exp(-(vertex - center).squaredNorm() / sigma2) /
              std::sqrt(sigma2);
 
       // return 0.1f *
@@ -155,7 +159,8 @@ void Viewer::set_analytic_volume_force() {
 
       system.wave()[i] = g(system.domain().vertex_data()[i]);
       // system.wave()[i] = 0.0f;
-      // system.evolution()[i] = -10.0f * g(system.domain().vertex_data()[i]);
+      // system.evolution()[i] = -10.0f * f(system.domain().vertex_data()[i]) *
+      //                         g(system.domain().vertex_data()[i]);
       system.evolution()[i] = 0.0f;
       // (g(system.domain().vertex_data()[i] + Eigen::Vector2f{0.1f, 0.1f}) -
       //  g(system.domain().vertex_data()[i] - Eigen::Vector2f{0.1f, 0.1f})) /
