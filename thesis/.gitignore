@@ -5,6 +5,9 @@
 !sections/code/*.cc
 !sections/code/*.h
 !sections/code/*.txt
+!sections/plots/*.gp
+!sections/plots/*.tex
+!sections/plots/*.pdf
 
 !*.tex
 !*.bib
