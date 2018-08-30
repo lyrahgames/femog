@@ -1,6 +1,7 @@
 \documentclass{article}
 \usepackage{standalone}
 \usepackage{multirow}
+\usepackage{booktabs}
 \begin{document}
   \section{Simulation und Ergebnisse} % (fold)
   \label{sec:simulation_und_ergebnisse}
@@ -44,19 +45,49 @@
     Zu beachten ist dabei, dass die Genauigkeit der numerischen Approximation maßgeblich durch die Wahl des zugrundeliegenden Gitters und des Zeitschrittverfahrens beeinflusst wird.
     Bekannte Symmetrieeigenschaften von Lösungen sollten sich im Gitter widerspiegeln.
 
+
     \begin{table}[h]
-      \begin{tabular}{rrrr}
+      \renewcommand{\arraystretch}{1.3}
+      \footnotesize
+      \center
+      \caption{%
+        Die Tabelle stellt Messwerte der Szene \enquote{Circle} dar.
+        $s$ bezeichnet dabei, wie oft die Funktion \code{subdivision} angewendet wurde, $t_\mathrm{C}$ steht Konstruktionszeit der Systemmatrizen, $t_\mathrm{A}$ bezeichnet die Dauer der Berechnung eines Zeitschrittes.
+        Die Zeitspanne $t_\mathrm{A}$ wurde für die CPU und die GPU notiert.
+        Für jede Modellunterteilung bezeichnet $v$ die Anzahl der Eckpunkte, $p$ die Anzahl der Dreiecke und $e$ die Anzahl der Kanten.
+        Die Mass Matrix eines jeden Systems besitzt die Dimension $n$ und enthält $z$ Werte, die nicht Null sind.
+        Alle Messwerte wurden auf einem Computersystem mit einem Intel Core i7-7700K mit $4.2\appendUnit{GHz}$ als CPU und einer NVIDIA GeForce GTX 1070 mit $8\appendUnit{GB}$ DDR5 Speicher und PCIe 3.0 als GPU aufgenommen.
+      }
+      \label{tab:results}
+      \begin{tabular}{llllrr}
         \hline
-        Subdivision & Scene Parameters & System Construction Time & System Advance Time \\
+        $s$ & Modelparameter & Matrixparameter & & $t_\mathrm{C}\appendUnit{[ms]}$ & $t_\mathrm{A}\appendUnit{[ms]}$ \\
         \hline
         \hline
-        \multirow{3}{*}{0}
-          & test  \\
-          & 1 & \\
-          & 2 & \\
-        3 \\
-        4 \\
-        5
+        \multirow{3}{*}{$0$} & $v = 5\,185$ & \multirow{2}{*}{$n=5\,185$} & \multirow{2}{*}{CPU} & \multirow{2}{*}{$85\pm 5$} & \multirow{2}{*}{$3.0\pm 0.8$} \\
+          & $p = 10\,240$ & \multirow{2}{*}{$z = 36\,033$} & \multirow{2}{*}{GPU} & \multirow{2}{*}{---} & \multirow{2}{*}{$2.35\pm 0.05$} \\
+          & $e = 15\,424$ & & \\
+        \hline
+        \multirow{3}{*}{$1$} & $v = 20\,609$ & \multirow{2}{*}{$n=20\,609$} & \multirow{2}{*}{CPU} & \multirow{2}{*}{$100\pm 5$} & \multirow{2}{*}{$18\pm 3$} \\
+          & $p = 40\,960$ & \multirow{2}{*}{$z = 143\,745$} & \multirow{2}{*}{GPU} & \multirow{2}{*}{---} & \multirow{2}{*}{$2.35\pm 0.05$} \\
+          & $e = 61\,568$ & & \\
+        \hline
+        \multirow{3}{*}{$2$} & $v = 82\,177$ & \multirow{2}{*}{$n=82\,177$} & \multirow{2}{*}{CPU} & \multirow{2}{*}{$150\pm 10$} & \multirow{2}{*}{$45\pm 5$} \\
+          & $p = 163\,840$ & \multirow{2}{*}{$z = 574\,209$} & \multirow{2}{*}{GPU} & \multirow{2}{*}{---} & \multirow{2}{*}{$2.20\pm 0.05$} \\
+          & $e = 246\,016$ & & \\
+        \hline
+        \multirow{3}{*}{$3$} & $v = 328\,193$ & \multirow{2}{*}{$n=328\,193$} & \multirow{2}{*}{CPU} & \multirow{2}{*}{$435\pm 5$} & \multirow{2}{*}{$135\pm 5$} \\
+          & $p = 655\,360$ & \multirow{2}{*}{$z = 2\,295\,297$} & \multirow{2}{*}{GPU} & \multirow{2}{*}{---} & \multirow{2}{*}{$3.00\pm 0.50$} \\
+          & $e = 983\,552$ & & \\
+        \hline
+        \multirow{3}{*}{$4$} & $v = 1\,311\,745$ & \multirow{2}{*}{$n=1\,311\,745$} & \multirow{2}{*}{CPU} & \multirow{2}{*}{$2000\pm 50$} & \multirow{2}{*}{$600\pm 50$} \\
+          & $p = 2\,621\,440$ & \multirow{2}{*}{$z = 9\,178\,113$} & \multirow{2}{*}{GPU} & \multirow{2}{*}{---} & \multirow{2}{*}{$17.0\pm 0.5$} \\
+          & $e = 3\,933\,184$ & & \\
+        \hline
+        \multirow{3}{*}{$5$} & $v = 5\,244\,929$ & \multirow{2}{*}{$n=5\,244\,929$} & \multirow{2}{*}{CPU} & \multirow{2}{*}{$9500\pm 200$} & \multirow{2}{*}{$3000\pm 500$} \\
+          & $p = 10\,485\,760$ & \multirow{2}{*}{$z = 36\,706\,305$} & \multirow{2}{*}{GPU} & \multirow{2}{*}{---} & \multirow{2}{*}{$56\pm 1$} \\
+          & $e = 15\,730\,688$ & & \\
+        \hline
       \end{tabular}
     \end{table}
 
