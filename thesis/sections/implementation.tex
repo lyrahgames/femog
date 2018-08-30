@@ -195,7 +195,8 @@
       Die Verwendung von OpenGL ermöglicht die dreidimensionale Darstellung von Objekten, die durch Dreiecke diskretisiert wurden.
       Um die Darstellung der Wellenfunktion und des Berechnungsgebietes noch anschaulicher zu gestalten, wurde jedem Eckpunkt des Gebietes als dritte Koordinate die Werte der Welle zugewiesen.
       Zudem wurde eine Farbverteilung berechnet.
-      Die folgenden Abbildungen zeigen mehrere Beispiele.
+      Die Abbildungen \ref{fig:test-wave}, \ref{fig:quad-wave}, \ref{fig:ring-wave} und \ref{fig:circle-wave} zeigen die Visualisierung der berechneten Welle über dem entsprechenden Gebiet anhand ausgewählter Testmodelle.
+
       \begin{figure}[h]
         \center
         \begin{subfigure}[b]{0.24\textwidth}
@@ -239,7 +240,11 @@
           \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_7.png}
           \caption{}
         \end{subfigure}
-        \caption{}
+        \caption[Wellensimulation auf dem Testgebiet]{%
+          Die Abbildungen zeigen die Zeitevolution einer Simulation der Wellengleichung auf dem Gebiet \enquote{Test}.
+          Dieses Gebiet wurde in \cite{Alberty1998} beschrieben.
+          Es wurden dabei gemischte Randbedingungen gewählt.
+        }
         \label{fig:test-wave}
       \end{figure}
 
@@ -286,8 +291,11 @@
           \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_7.png}
           \caption{}
         \end{subfigure}
-        \caption{}
-        \label{fig:test-wave}
+        \caption[Wellensimulation auf einem quadratischen Gebiet]{%
+          Die Abbildungen zeigen die Zeitevolution einer Simulation der Wellengleichung auf dem Gebiet \enquote{Quad}.
+          Es handelt sich um ein quadratisches Berechnungsgebiet mit Dirichlet-Randbedingungen.
+        }
+        \label{fig:quad-wave}
       \end{figure}
 
       \begin{figure}[h]
@@ -333,7 +341,11 @@
           \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_7.png}
           \caption{}
         \end{subfigure}
-        \caption{}
+        \caption[Wellensimulation auf einem quadratischen Ring]{%
+          Die Abbildungen zeigen die Zeitevolution einer Simulation der Wellengleichung auf dem Gebiet \enquote{Ring}.
+          Es handelt sich dabei um einen quadratischen Ring mit Neumann-Randbedingungen.
+          Es lassen sich hier typische Effekte, wie Beugung und Interferenz, beobachten.
+        }
         \label{fig:ring-wave}
       \end{figure}
 
@@ -380,7 +392,12 @@
           \includegraphics[trim={1.5cm 3.05cm 1.5cm 5.2cm},clip,width=0.95\textwidth]{images/circle_wave_7.png}
           \caption{}
         \end{subfigure}
-        \caption{}
+        \caption[Wellensimulation auf einem Kreis]{%
+          Die Abbildungen zeigen die Zeitevolution einer Simulation der Wellengleichung auf dem Gebiet \enquote{Circle}.
+          Bei diesem Berechnungsgebiet handelt es sich um einen Kreis mit Neumann-Randbedingungen.
+          Die spezielle Art der Triangulierung verursacht hier in der Nähe des Mittelpunktes numerische Fehler.
+          Bereits im vierten Bild entsteht im Zentrum der Welle ein Knick, der das Ergebnis verfälscht.
+        }
         \label{fig:circle-wave}
       \end{figure}
 
