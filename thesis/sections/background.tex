@@ -5,9 +5,9 @@
   \section{Grundlagen} % (fold)
   \label{sec:background}
 
-    In den folgenden Abschnitten wird eine grundlegende Einführung und Definition der Strukturen und Verfahren gegeben, die für den weiteren Verlauf dieser Arbeit von Belang sind.
+    In den folgenden Abschnitten wird eine grundlegende Einführung und Definition der Strukturen und Verfahren gegeben, die für den weiteren Verlauf dieser Arbeit von Bedeutung sind.
     Viele dieser Themen können hier nur angerissen werden, da ihre komplette Behandlung den Rahmen und das Ziel des Themas sprengen würden.
-    Für eine genauere Einführung in die einzelnen Themengebiete, wird dem Leser geraten, sich mit den genannten Quellen auseinander zu setzen.
+    Für eine genauere Einführung in die einzelnen Themengebiete, wird dem Leser geraten, sich mit den genannten Quellen auseinanderzusetzen.
 
     \subsection{Modelprobleme} % (fold)
     \label{sub:modelprobleme}
@@ -19,7 +19,7 @@
       Für die Implementierung einer Finite-Elemente-Methode benötigt man zunächst ein mathematisches Modell, welches durch ein System partieller Differentialgleichungen beschrieben wird.
       Um sich jedoch nicht auf die Anwendung physikalischer Gesetze und auf das Verstehen in den darin resultierenden Modellen fokussieren zu müssen, werden in dieser Arbeit nur die einfachsten physikalisch basierten partiellen Differentialgleichungen als Grundlage vorausgesetzt.
       Die Poisson-, Wellen- und Wärmeleitungsgleichung beschreiben grundlegende Phänomene in der Elektrodynamik, Mechanik und Thermodynamik.
-      Bei diesen drei Gleichungen handelt sich um eine elliptische, eine hyperbolische und eine parabolische lineare partielle Differentialgleichung zweiter Ordnung in simpelster Form.
+      Bei diesen drei Gleichungen handelt es sich um eine elliptische, eine hyperbolische und eine parabolische lineare partielle Differentialgleichung zweiter Ordnung in simpelster Form.
       Gerade deswegen kann man durch diese Gleichungen Modelprobleme formulieren, an denen das Vorgehen der Finite-Elemente-Methode unkompliziert erläutert werden kann, die aber auch komplex genug sind, um das Verfahren auch auf schwierigere Modelle anwenden zu können.
       \cite{Schweizer2013,Alberty1998,Logan2007}
 
@@ -33,7 +33,7 @@
         Es wird sich hier auf \cite[S.~39~f]{Schweizer2013} und \cite{Alberty1998} bezogen.
         Die folgende Definition ist nicht im Sinne einer verallgemeinerten Theorie zu verstehen.
         Sie wurde in Hinsicht auf deren Verwendung für die hier gestellten Modelprobleme konstruiert und angepasst.
-        Für komplexere Probleme sollte es ein Leichtes sein, die Definition nach Belieben abzuändern, um sie für die Anwendung auf das entsprechende Problem zu optimieren.
+        Für komplexere Probleme lässt sich die Definition nach Belieben abändern, um sie für die Anwendung auf das entsprechende Problem zu optimieren.
 
         \begin{definition}[Berechnungsgebiet]
           Es sei $\domain\subset\setReal^2$ ein beschränktes Lipschitz-Gebiet mit einem polygonalen Rand $\boundary$.
@@ -87,7 +87,7 @@
         Da man dies auch getan hat, soll hier für eine detailliertere Behandlung des Themas auf \cite{Schweizer2013} verwiesen werden.
 
         Die folgende Definition gibt die erste verallgemeinerte Form des Poisson-Problems an.
-        Es wurde sich auch hier auf \cite{Alberty1998} und \cite{Schweizer2013} gestützt, wobei diverse Notation angepasst wurden.
+        Es wurde sich auch hier auf \cite{Alberty1998} und \cite{Schweizer2013} gestützt, wobei diverse Notationen angepasst wurden.
 
         \begin{definition}[Poisson-Problem]
           Es seien $\boxBrackets{\Omega} \define \roundBrackets{\domain,\dirichletBoundary, \neumannBoundary, ν}$ ein Berechnungsgebiet und die folgenden Funktionen gegeben.
@@ -137,55 +137,15 @@
         \]
       % subsubsection poisson_gleichung (end)
 
-      \subsubsection{Wärmeleitungsgleichung} % (fold)
-      \label{ssub:heat-equation}
-        Die einfachste zeitabhängige partielle Differentialgleichung ist die Wärmeleitungsgleichung \cite[S.~175]{Schweizer2013}.
-        Bei ihr handelt es sich um eine parabolische partielle Differentialgleichung zweiter Ordnung, die ein einfaches Modell für die Berechnung instationärer Temperaturfelder bildet.
-        Physikalisch basiert sie auf dem Energieerhaltungssatz.
-
-        Für die Einarbeitung eines Zeitparameters soll zunächst wieder ein räumliches Berechnungsgebiet gewählt werden, welches sich im Laufe der Zeit nicht verändert.
-        Auf diesem lassen sich die räumlichen Ableitungen zu allen Zeiten analog zur Poisson-Gleichung betrachten.
-        Um die Eindeutigkeit der Lösung auch nach dem Hinzufügen der Zeitableitungen zu gewährleisten, sind Anfangswerte von Nöten.
-        Mit diesen Betrachtung lässt sich die Wärmeleitungsgleichung nun ohne neue Erkenntnisse analog zur Poisson-Gleichung definieren.
-        \cite{Schweizer2013,Alberty1998}.
-
-        \begin{definition}[Wärmeleitungsgleichung]
-          Es seien $\boxBrackets{\Omega} \define \roundBrackets{\domain,\dirichletBoundary, \neumannBoundary, ν}$ ein Berechnungsgebiet und die folgenden Funktionen gegeben.
-          \begin{align*}
-            f&\in\setIntegrable^2(\domain\times[0,\infty))
-            &
-            u_\mathrm{D} &\in \setSobolev^1(\domain\times[0,\infty))
-            \\
-            u_0 &\in \setSobolev^1(\domain)
-            &
-            u_\mathrm{N} &\in \setIntegrable^2\roundBrackets{\neumannBoundary \times [0,\infty)}
-          \end{align*}
-          Eine Funktion $u\in\setSobolev^1(\domain\times[0,\infty))$ nennt man eine schwache Lösung der Wärmeleitungsgleichung, wenn die folgenden Gleichungen für alle $t\in[0,\infty)$ gelten.
-          \begin{align*}
-            \partial_t u - \laplacian u &= f & \text{(Wärmeleitungsgleichung)} \\
-            u(\cdot,0) &= u_0 & \text{(Anfangsbedingungen)}\\
-            u(\cdot,t)\vert_{\dirichletBoundary} &= u_\mathrm{D}(\cdot,t)\vert_{\dirichletBoundary} & \text{(Dirichlet-Randbedingungen)}\\
-            \scalarProduct{\nabla u(\cdot,t)\vert_{\neumannBoundary}}{ν} &= u_\mathrm{N}(\cdot,t) & \text{(Neumann-Randbedingungen)}
-          \end{align*}
-          Das Tupel $(\boxBrackets{\Omega},f,u_0,u_\mathrm{D}, u_\mathrm{N},u)$ wird dann auch Wärmeleitungsproblem genannt.
-        \end{definition}
-
-        Ebenfalls analog zur Poisson-Gleichung ist es auch möglich die Wärmeleitungsgleichung in eine schwache Formulierung zu transformieren.
-        Auch bei diesem Vorgang entstehen keine Überraschungen bei der mathematischen Vorgehensweise.
-        Zu bemerken sei hier, dass für die noch kommende Konstruktion der Finite-Elemente-Methode die rigorose schwache Formulierung der Wärmeleitungsgleichung keine direkte Rolle spielt.
-        Beim Übergang zur Diskretisierung erweist es sich als praktisches Vorgehen, jegliche Zeitableitung zuvor durch einen diskreten Differenzenquotienten zu ersetzen, sodass es sich bei dem resultierenden Gleichungssystem streng genommen nicht mehr um eine zeitabhängige Differentialgleichung handelt.
-        \cite{Schweizer2013,Alberty1998}
-      % subsubsection wärmeleitungsgleichung (end)
-
       \subsubsection{Wellengleichung} % (fold)
       \label{ssub:wellengleichung}
-        Wie schon bei den beiden zuvor genannten Gleichungen, ist auch die Wellengleichung die einfachste ihrer Art.
+        Wie schon die Poisson-Gleichung ist auch die Wellengleichung die einfachste ihrer Art.
         Sie ist eine zeitabhängige, hyperbolische, partielle Differentialgleichung zweiter Ordnung, die die Ausbreitung von Wellen auf dem zugrundeliegenden Berechnungsgebiet beschreibt.
         Die Wellengleichung, ob nun homogen oder inhomogen, spielt in praktisch jedem Teilgebiet der Physik eine große Rolle.
         Umso wichtiger ist die Fähigkeit, Wellen, die diese Gleichung lösen, auf komplexen Gebieten simulieren und berechnen zu können.
         Die Behandlung des zweidimensionalen Falls lässt sich mühelos auf den dreidimensionalen Fall ausweiten \cite[S.~229~ff]{Schweizer2013}.
 
-        Ähnlich der Wärmeleitungsgleichung wählen wir auch für die Wellengleichung den Ansatz eines zeitlich konstanten Berechnungsgebietes.
+        Für die Wellengleichung wählt man den Ansatz eines zeitlich konstanten Berechnungsgebietes.
         Hierbei sei bemerkt, dass die Länge des Dirichlet-Randes nicht notwendigerweise größer Null sein muss.
         Die Wellengleichung ist auch lösbar unter der Verwendung eines reinen Neumann-Randes.
         Um für die Wellengleichung eine eindeutige Lösung zu erlangen, müssen zwei Anfangsfunktionen vorgegeben werden.
@@ -217,43 +177,16 @@
           Das Tupel $(\boxBrackets{\Omega},f,u_0,u_1,u_\mathrm{D}, u_\mathrm{N},u)$ wird dann auch Wellenproblem genannt.
         \end{definition}
 
-        Auch diese Definition ist denen der Poisson- und Wärmeleitungsgleichung nicht unähnlich.
-        Demzufolge soll hier wieder auf die Angabe der schwachen Formulierung verzichtet werden, da diese für die Konstruktion der Finite-Elemente-Methode nicht im Vordergrund steht.
-        Nach \cite[S.~236~ff]{Schweizer2013} existiert für die hier angegebene Wellengleichung eine eindeutige Lösung, die durch das Galerkinverfahren beschrieben wird.
+        Zu bemerken sei hier, dass für die Konstruktion der Finite-Elemente-Methode die rigorose schwache Formulierung der Wellengleichung keine direkte Rolle spielt.
+        Beim Übergang zur Diskretisierung erweist es sich als praktisches Vorgehen, jegliche Zeitableitung zuvor durch einen diskreten Differenzenquotienten zu ersetzen, sodass es sich bei dem resultierenden Gleichungssystem streng genommen nicht mehr um eine zeitabhängige Differentialgleichung handelt \cite{Schweizer2013,Alberty1998}.
+        Demzufolge soll hier auf die Angabe der schwachen Formulierung verzichtet werden, da diese für die Konstruktion der Finite-Elemente-Methode nicht im Vordergrund steht.
+        Nach \cite[S.~236~ff]{Schweizer2013} existiert für die hier angegebene Wellengleichung eine eindeutige Lösung, die durch das Galerkin-Verfahren beschrieben wird.
 
         Ein typischer Spezialfall der Wellengleichung setzt alle Randterme und äußeren Einwirkungen identisch zu Null.
-        Stellt man sich die Welle im zweidimensionalen wie ein Tuch vor, so bedeutet ein Dirichlet-Rand mit dem Wert Null, dass das Tuch an diesem Rand festgehalten wird, und ein Neumann-Rand mit dem Wert Null, dass das Tuch an diesem Punkt frei schwingen kann.
+        Stellt man sich die Welle im Zweidimensionalen wie ein Tuch vor, so bedeutet ein Dirichlet-Rand mit dem Wert Null, dass das Tuch an diesem Rand festgehalten wird, und ein Neumann-Rand mit dem Wert Null, dass das Tuch an diesem Punkt frei schwingen kann.
 
       % subsubsection wellengleichung (end)
-
     % subsection modelprobleme (end)
-
-    \subsection{Finite-Elemente-Methode} % (fold)
-    \label{sub:finite_elemente_methode}
-      Die Finite-Elemente-Methode ist, wie bereits in Abschnitt \ref{sec:introduction} erwähnt, ein allgemeines numerisches Verfahren, um partielle Differentialgleichungen approximativ zu lösen.
-      Genauer gesagt, handelt es sich um eine spezielle Form des Ritz-Galerkin-Verfahrens.
-      Die Finite-Elemente-Formulierung eines Problems resultiert in einem System von algebraischen Gleichungen.
-      Um ein Problem zu lösen, unterteilt es das Berechnungsgebiet in kleinere und einfach zu behandelnde Teile (engl.: \textit{primitives}), die auch finite Elemente genannt werden.
-      Die einfachen Systeme von algebraischen Gleichungen der einzelnen finiten Elemente werden dann in ein großes System von Gleichungen, welches das gesamte Problem modelliert, assembliert.
-      Durch die Minimierung einer Fehlerfunktion mithilfe verschiedener Variationsmethoden ist die Finite-Elemente-Methode dann in der Lage, das Problem zu lösen.
-      Im Folgenden wird die grundlegende Vorgehensweise an den in Abschnitt \ref{sub:modelprobleme} beschriebenen Modelproblemen illustriert und in Abbildung \ref{fig:fem-scheme} zusammengefasst dargestellt.
-      \cite{Schweizer2013,Logan2007,Cheney2008,Quarteroni2000}
-
-      \begin{figure}[h]
-        \center
-        \includegraphics[width=0.3\textwidth]{images/fem_scheme.pdf}
-        \caption[Schematisches Vorgehen der Finite-Elemente-Methode]{%
-          Die Abbildung zeigt das schematische Vorgehen bei der Konstruktion der Finite-Elemente-Methode.
-          Das Vorgehen kann prinzipiell auf jedes partielle Differentialgleichungssystem angewendet werden, um einen Algorithmus zu generieren, der dieses unter Verwendung eines Computers numerisch approximiert.
-        }
-        \label{fig:fem-scheme}
-      \end{figure}
-
-      % \paragraph{Schritt 1: Konstruktion der schwachen Formulierung} % (fold)
-      % \label{par:schritt_1_konstruktion_der_schwachen_formulierung}
-        % \hfill\\
-
-    % subsection finite_elemente_methode (end)
 
     \subsection{Aufbau und Funktionsweise des Grafikprozessors} % (fold)
     \label{sub:aufbau_und_funktionsweise_des_grafikprozessors}
@@ -280,25 +213,20 @@
 
         Für einen CUDA-Programmierer besteht ein Computersystem aus dem sogenannten \enquote{Host}, welcher in den meisten Fällen die CPU darstellt, und mindestens einer \enquote{Device}, die die GPU repräsentiert \cite[S.~39]{Kirk2010}.
         Ein CUDA-Programm teilt sich nun in mehrere Phasen, in denen Code entweder auf dem Host oder der Device ausgeführt wird, ein.
-        Code der eine geringe Datenparallelität aufweist, wird dabei zumeist auf dem Host ausgeführt \cite{Kirk2010}.
+        Code, der eine geringe Datenparallelität aufweist, wird dabei zumeist auf dem Host ausgeführt \cite{Kirk2010}.
         Umgekehrt sollte Code mit einer hohen Datenparallelität auf der GPU beziehungsweise der Device ausgeführt werden, um deren Vorteile zu nutzen \cite{Kirk2010}.
         Um bei der Ausführung des Quelltextes zwischen Host und Device wechseln zu können, bietet CUDA diverse Schnittstellen an.
         Ein CUDA-Programm startet zunächst auf dem Host, der durch den Aufruf eines entsprechenden \enquote{Kernels} in die Lage versetzt wird, Code auf mehreren Prozessoren der GPU auszuführen.
         Daten die zunächst nur im Arbeitsspeicher (RAM, engl.: \textit{random-access memory}) lagen und damit nur durch die CPU verwendbar waren, können durch CUDA bereit gestellte Befehle über den \enquote{PCI-Express Bus} (PCIe), der eine Datenverbindung zwischen der CPU und GPU bildet, in den dynamischen Arbeitsspeicher (DRAM, engl.: \textit{dynamic random-access memory}) der GPU übertragen werden.
-        Zudem ist es dem Host auch möglich Daten vom DRAM der Device anzufordern.
+        Zudem ist es dem Host auch möglich, Daten vom DRAM der Device anzufordern.
         Auch diese werden dann über den PCIe in den RAM übertragen.
         \cite{Sanders2011}
       % subsubsection gpu_computing_mit_cuda (end)
 
       \subsubsection{Architektur einer modernen GPU} % (fold)
       \label{ssub:architektur_einer_modernen_gpu}
-        Vereinheitlichte GPU-Architekturen basieren auf einer parallelen Anordnung von vielen programmierbaren Prozessoren, die auch die typischen Berechnungen für visuelle Ausgaben vollführen.
-        Im Vergleich zu einer mehrkernigen CPU ist die Architektur einer GPU darauf ausgerichtet, extrem viele parallele Threads effizient auf einer großen Anzahl von Prozessorkernen auszuführen.
-        In einer GPU wird diese Effizienz erreicht, indem man einfachere Prozessorkerne als in der CPU verwendet.
-        Diese sind auf die Ausnutzung der Datenparallelität innerhalb einer Gruppe von Threads optimiert, sodass im Gegensatz zu einer CPU kleinere Caches und mehr Transistoren für arithmetische Einheiten verwendet werden können.
-        \cite[S.~A11]{Patterson2011}
 
-        \begin{figure}[h]
+        \begin{figure}
           \center
           \includegraphics[width=0.95\textwidth]{images/unified_gpu_architecture.png}
           \caption[Grundlegende Architektur einer CUDA-fähigen GPU]{%
@@ -309,12 +237,18 @@
           \label{fig:gpu-architecture}
         \end{figure}
 
+        Vereinheitlichte GPU-Architekturen basieren auf einer parallelen Anordnung von vielen programmierbaren Prozessoren, die auch die typischen Berechnungen für visuelle Ausgaben vollführen.
+        Im Vergleich zu einer mehrkernigen CPU ist die Architektur einer GPU darauf ausgerichtet, extrem viele parallele Threads effizient auf einer großen Anzahl von Prozessorkernen auszuführen.
+        In einer GPU wird diese Effizienz erreicht, indem man einfachere Prozessorkerne als in der CPU verwendet.
+        Diese sind auf die Ausnutzung der Datenparallelität innerhalb einer Gruppe von Threads optimiert, sodass im Gegensatz zu einer CPU kleinere Caches und mehr Transistoren für arithmetische Einheiten verwendet werden können.
+        \cite[S.~A11]{Patterson2011}
+
         Abbildung \ref{fig:gpu-architecture} skizziert die Architektur einer typischen CUDA-fähigen NVIDIA GPU.
         Sie besteht aus einem Feld von 112 \enquote{Streaming Processor Cores} (SP), die wiederum in 14 \enquote{Multithreaded Streaming Multiprocessors} (SM) eingeteilt sind.
-        Jeder SP ist dazu in der Lage bis zu 100 parallele Threads in seiner Hardware zu organisieren und speichern.
+        Jeder SP ist dazu in der Lage, bis zu 100 parallele Threads in seiner Hardware zu organisieren und zu speichern.
         Die Prozessoren sind über ein Verbindungsnetzwerk mit Partitionen des dynamischen Arbeitsspeichers (DRAM, engl.: \textit{dynamic random-access memory}) verbunden.
         Zudem besitzt jeder SM \enquote{Special Function Units} (SFU), \enquote{Instruction Caches}, \enquote{Constant Caches}, \enquote{Multithreaded Instruction Units} und \enquote{Shared Memory}.
-        Durch Hinzu- und Wegnahme von SMs und DRAM-Partitionen erhält man ein skalierbares Verfahren um schwächere und stärkere GPU-Konfigurationen zu konstruieren.
+        Durch Hinzu- und Wegnahme von SMs und DRAM-Partitionen erhält man ein skalierbares Verfahren, um schwächere und stärkere GPU-Konfigurationen zu konstruieren.
       % subsubsection architektur_einer_modernen_gpu (end)
     % subsection aufbau_und_funktionsweise_des_grafikprozessors (end)
 

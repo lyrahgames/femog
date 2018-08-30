@@ -19,19 +19,19 @@
 
       \inputCodeBlock[title=edge]{code/edge.cc}
       Die Datenstruktur \code{Edge} der Basisklasse \code{Domain\_base} wird durch ein Array von zwei Integern dargestellt.
-      Diese verweisen später auf die Eckpunkte der Kante.
+      Diese verweisen später auf die Eckpunkte der Kanten.
       Der Konstruktor stellt sicher, dass die Indizes sortiert übergeben werden.
       Innerhalb der Datenstruktur werden zwei weitere Datenstrukturen \code{Hash} und \code{Info} deklariert, die für die fehlerfreie Konstruktion eines Berechnungsgebietes verwendet werden.
       Die Datenstruktur \code{Primitive} eines Dreiecks ist analog aufgebaut.
-      Um die drei Indizes für die Referenzierung auf die Eckpunkte zu sortieren wird hier ein einfaches Insertion sort verwendet.
+      Um die drei Indizes für die Referenzierung auf die Eckpunkte zu sortieren, wird hier ein einfaches \enquote{Insertion Sort} verwendet.
       \inputCodeBlock[title=primitive]{code/primitive.cc}
 
       Die eigentliche Datenstruktur \code{Domain} eines Berechnungsgebietes erbt von der Basisklasse \code{Domain\_base}.
       Zudem wird der Datentyp der Eckpunkte durch ein Template variabel gehalten.
       Das Interface der Klasse ergibt sich aus Funktionen, um Daten zu lesen und fehlerfrei hinzuzufügen.
-      Um dies auch in der Implementierung zu gewährleisten, werden für das Aufbewahren der Dreiecke und Kanten Hash Maps verwendet.
+      Um dies auch in der Implementierung zu gewährleisten, werden für das Aufbewahren der Dreiecke und Kanten \enquote{Hash Maps} verwendet.
       Diese speichern, wie oft eines der genannten Objekte zum Berechnungsgebiet hinzugefügt wurde.
-      Auf der Basis dieser Zahl ist die Klasse dann in der Lage zwischen Randkanten und inneren Kanten zu unterscheiden und fehlerhafte Berechnungsgebiete zu verhindern.
+      Auf der Basis dieser Zahl ist die Klasse dann in der Lage, zwischen Randkanten und inneren Kanten zu unterscheiden und fehlerhafte Berechnungsgebiete zu verhindern.
       \inputCodeBlock[title=domain]{code/domain.cc}
       \inputCodeBlock[title=domain implementation]{code/domain_implementation.cc}
 
@@ -42,7 +42,7 @@
       \inputCodeBlock[title=subdivide]{code/domain_implementation_subdivide.cc}
 
       Um ein Berechnungsgebiet außerhalb des Quelltextes leicht zu beschreiben, wurde ein Dateiformat definiert.
-      Im folgenden ist ein Beispiel für blabla gezeigt.
+      Im folgenden ist ein Beispielmodell gezeigt.
       Hierbei steht \code{v} für die Definition eines Eckpunktes, \code{p} für die Definition eines Dreiecks, \code{q} für die Definition eines Vierecks, \code{d} für eine Dirichlet-Kante und \code{n} für eine Neumann-Kante.
       \begin{center}
         \noindent
@@ -116,17 +116,17 @@
     \label{sub:aufbau_des_systems}
       Ein System zur Lösung der Wellengleichung soll zunächst auf der CPU implementiert werden.
       Hierfür wird die Klasse \code{Cpu\_wave\_system} eingeführt.
-      Sie verwendet die Bibliothek Eigen für alle grundlegenden Matrix-Vektor-Operationen.
+      Sie verwendet die Bibliothek \enquote{Eigen} für alle grundlegenden Matrix-Vektor-Operationen \cite{Eigen2018}.
       \inputCodeBlock[title=Wave system]{code/cpu_wave_system.cc}
-      Das Interface des Systems besteht grundlegend aus einer Funktion \code{initial\_state}, die es ermöglicht die Anfangsbedingungen zu setzen, und einer Funktion \code{advance}, die das gesamte System einen Zeitschritt voranbringt.
-      Systemmatrizen der Finite-Elemente-Methode sowie die Welle und deren Ableitungen werden zwischengespeichert, um unnötige Berechnungsschritte zu verhindern.
+      Das Interface des Systems besteht grundlegend aus einer Funktion \code{initial\_state}, die es ermöglicht, die Anfangsbedingungen zu setzen, und einer Funktion \code{advance}, die das gesamte System einen Zeitschritt voranbringt.
+      Systemmatrizen der Finite-Elemente-Methode, sowie die Welle und deren Ableitungen, werden zwischengespeichert, um unnötige Berechnungsschritte zu verhindern.
       Des Weiteren sollen bei der Konstruktion des Systems Eckpunkte, die auf dem Rand des Gebietes liegen, von den inneren Eckpunkten separiert werden.
       Hierfür wird das Array der Eckpunkte innerhalb des Systems permutiert.
       Die Permutation wird für den Zugriff von außen gespeichert.
       Im weiteren Verlauf sollen die Neumann-Randbedingungen auf Null gesetzt werden, sodass die Konstruktion der Neumann-Rand-Matrix nicht notwendig ist.
       Die Neumann-Rand-Matrix ließe sich aber analog zu den anderen Systemmatrizen durch eine Iteration über alle Neumann-Kanten konstruieren.
 
-      Auf der GPU ist die Verwendung von Eigen nicht möglich.
+      Auf der GPU ist die Verwendung von \enquote{Eigen} nicht möglich.
       Aus diesem Grund ist eine explizite Implementierung des CSR-Formates auf dem DRAM der GPU nötig.
       Um den Zugriff auf die Daten in CUDA zu ermöglichen, werden Zeiger definiert.
       Das Interface der Klasse \code{Gpu\_wave\_system} unterscheidet sich im Wesentlichen nicht von dem der Klasse \code{Cpu\_wave\_system}.
@@ -138,27 +138,30 @@
 
     \subsection{Konstruktion der Systemmatrizen} % (fold)
     \label{sub:konstruktion_der_mass_und_stiffness_matrix}
-      Die Konstruktion der Systemmatrizen muss in dieser für jedes Berechnungsgebiet nur ein einziges Mal ausgeführt werden.
+      Die Konstruktion der Systemmatrizen muss in dieser Arbeit für jedes Berechnungsgebiet nur ein einziges Mal ausgeführt werden.
       Aus diesem Grund soll hier auf die Implementierung einer parallelisierten Methode auf der GPU verzichtet werden.
 
+      Für eine effiziente Berechnung des Zeitschrittes sollen vor der eigentlichen Konstruktion alle Eckpunkte durch \enquote{Counting Sort} sortiert werden.
+      Das folgende Schema veranschaulicht diese Überlegung und zeigt zudem die Bereiche der Indizes an, auf die die unterschiedlichen Systemmatrizen zugreifen.
+      Die Sortierung der Eckpunkte steigert die Performance des Matrix-Vektor-Produktes, welches nun bei der Berechnung linear auf dem Speicher arbeitet, und vereinfacht das Interface.
       \begin{align*}
         &\,\framebox[0.81\textwidth]{\footnotesize ungeordnete Eckpunkte} \\
         &\makebox[0.81\textwidth]{\hfill $\downarrow \text{\footnotesize Counting Sort} \downarrow$ \hfill}\\
         & \underbrace{\framebox[0.3\textwidth]{\footnotesize innere Eckpunkte}\underbrace{\framebox[0.25\textwidth]{\footnotesize Neumann-Eckpunkte}}_{\text{Neumann-Rand-Matrix}}}_{\text{innere Matrix}} \underbrace{\framebox[0.25\textwidth]{\footnotesize Dirichlet-Eckpunkte}}_{\text{Dirichlet-Rand-Matrix}}
       \end{align*}
-
-      Für die Simulation der Wellengleichung werden vier Systemmatrizen benötigt.
+      Für die Simulation der Wellengleichung mit natürlichem Neumann-Rand werden vier Systemmatrizen benötigt.
       Diese teilen sich auf in die inneren Matrizen, die die Wechselwirkung freier Eckpunkte untereinander beschreiben, und Randmatrizen, die die Wechselwirkung des Dirichlet-Randes mit inneren Eckpunkten beschreiben.
-      Zunächst werden die Eckpunkte auf einem Dirichlet-Rand markiert.
-      Auf der Basis dieser Markierung lässt sich die Permutation konstruieren.
-      In Anschluss daran, wird über die Dreiecke iteriert.
+      % Zunächst werden die Eckpunkte auf einem Dirichlet-Rand markiert.
+      % Auf der Basis dieser Markierung lässt sich die Permutation konstruieren.
+      Nach der Berechnung der Permutation durch \enquote{Counting Sort}, wird über alle Dreiecke iteriert.
       Jedes Dreieck liefert die Matrix eines finiten Elementes.
-      Diese Matrizen werden akkumuliert und zu den Systemmatrizen zusammengesetzt.
+      Diese Matrizen werden entsprechend dem Standardverfahren von \enquote{Eigen} akkumuliert und zu den Systemmatrizen zusammengesetzt \cite{Eigen2018}.
       \inputCodeBlock[title = System construction]{code/cpu_wave_system_constructor.cc}
 
       Für die GPU müssen die auf der CPU konstruierten Daten der dünnbesetzten Matrizen noch auf den DRAM übertragen werden.
-      Dabei wird sich zu Nutze gemacht, dass die beiden inneren Matrizen das gleichen Muster besitzen.
+      Nützlich dabei ist, dass die beiden inneren Matrizen das gleiche Muster aufweisen.
       Ebenso gilt dies für die beiden Randmatrizen.
+      Die vier CSR-Matrizen lassen sich also zu zwei kompletten CSR-Matrizen und zwei zusätzlichen Wertearrays komprimieren.
       Während der Konstruktion wird zudem die maximale Anzahl von Threads auf einem Block der verwendeten GPU ausgelesen.
       Mithilfe dieses Wertes wird eine optimale Anzahl von Threads auf den verschiedenen Blocks der GPU generiert.
       \inputCodeBlock[title = System construction]{code/gpu_wave_system_constructor.cc}
@@ -174,18 +177,18 @@
     \subsection{Berechnung eines Zeitschrittes} % (fold)
     \label{sub:konstruktion_des_linearen_gleichungssystems}
       Die Berechnung eines weiteren Zeitschrittes erfordert die Konstruktion der rechten Seite des linearen Gleichungssystems.
-      Mithilfe des in Eigen implementierten Conjugate Gradient Verfahren wird dann die Ableitung der Welle zum neuen Zeitpunkt berechnet.
+      Mithilfe des in \enquote{Eigen} implementierten CG-Verfahrens wird dann die Ableitung der Welle zum neuen Zeitpunkt berechnet.
       Anschließend kann mit dieser Ableitung die neue Welle generiert werden.
       \inputCodeBlock[title = CPU Wave System advance]{code/cpu_wave_system_advance.cc}
 
-      Um den Lösungsalgorithmus auf der GPU zu programmieren soll zunächst das Conjugate Gradient Verfahren auf der CPU implementiert werden.
+      Um den Lösungsalgorithmus auf der GPU zu programmieren, soll zunächst das CG-Verfahren auf der CPU implementiert werden.
       Der folgende Quelltext zeigt dies.
       \inputCodeBlock[title = Conjugate Gradient]{code/cpu_conjugate_gradient.cc}
-      Innerhalb der GPU wird nun genau wie auf der CPU zuerst die rechte Seite des linearen Gleichungssystems konstruiert und dann ein Conjugate Gradient Verfahren angewendet.
-      Um die Implementierung einfacher zu gestalten, wurde Thrust verwendet.
+      Innerhalb der GPU wird nun genau wie auf der CPU zuerst die rechte Seite des linearen Gleichungssystems konstruiert und dann ein CG-Verfahren angewendet.
+      Um die Implementierung einfacher zu gestalten, wurde \enquote{Thrust} verwendet \cite{cuda2018}.
       \inputCodeBlock[title = GPU Wave System advance]{code/gpu_wave_system_advance.cc}
       Innerhalb des Codes wird ein Kernel definiert, der die Matrix-Vektor-Multiplikation des CSR-Formates auf der GPU parallelisiert.
-      Des Weiteren wurden zwei Funktoren \code{saxpy\_functor} und \code{saxpby\_functor} verwendet, die die typischen BLAS Routinen darstellen.
+      Des Weiteren wurden zwei Funktoren \code{axpy\_functor} und \code{axpby\_functor} verwendet, die die typischen BLAS Routinen darstellen.
       \inputCodeBlock[title = GPU Kernel]{code/gpu_wave_system_kernel.cc}
     % subsection konstruktion_des_linearen_gleichungssystems (end)
 

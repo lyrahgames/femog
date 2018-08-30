@@ -5,6 +5,24 @@
   \label{sec:methoden}
     \subsection{Finite-Elemente-Methode} % (fold)
     \label{sub:finite_elemente_methode}
+      Die Finite-Elemente-Methode ist, wie bereits in Abschnitt \ref{sec:introduction} erwähnt, ein allgemeines numerisches Verfahren, um partielle Differentialgleichungen approximativ zu lösen.
+      Genauer gesagt, handelt es sich um eine spezielle Form des Ritz-Galerkin-Verfahrens.
+      Die Finite-Elemente-Formulierung eines Problems resultiert in einem System von algebraischen Gleichungen.
+      Um ein Problem zu lösen, unterteilt es das Berechnungsgebiet in kleinere und einfach zu behandelnde Teile, die auch finite Elemente genannt werden.
+      Die einfachen Systeme von algebraischen Gleichungen der einzelnen finiten Elemente werden dann in ein großes System von Gleichungen, welches das gesamte Problem modelliert, assembliert.
+      Durch die Minimierung einer Fehlerfunktion mithilfe verschiedener Variationsmethoden ist die Finite-Elemente-Methode dann in der Lage, das Problem zu lösen.
+      Im Folgenden wird die grundlegende Vorgehensweise an den in Abschnitt \ref{sub:modelprobleme} beschriebenen Modelproblemen illustriert und in Abbildung \ref{fig:fem-scheme} zusammengefasst dargestellt.
+      \cite{Schweizer2013,Logan2007,Cheney2008,Quarteroni2000}
+
+      \begin{figure}[h]
+        \center
+        \includegraphics[width=0.3\textwidth]{images/fem_scheme.pdf}
+        \caption[Schematisches Vorgehen der Finite-Elemente-Methode]{%
+          Die Abbildung zeigt das schematische Vorgehen bei der Konstruktion der Finite-Elemente-Methode.
+          Das Vorgehen kann prinzipiell auf jedes partielle Differentialgleichungssystem angewendet werden, um einen Algorithmus zu generieren, der dieses unter Verwendung eines Computers numerisch approximiert.
+        }
+        \label{fig:fem-scheme}
+      \end{figure}
 
       \subsubsection{Konstruktion der schwachen Formulierung}
         Wie in Abschnitt \ref{ssub:poisson_gleichung} erwähnt, ist es bereits in der Theorie sinnvoll, die Lösungen von partiellen Differentialgleichungen in einer abgeschwächten Form zu verstehen, da bereits nicht stetige Quellterme die Forderungen an eine klassische Lösung verletzen \cite[S.~46]{Schweizer2013}.
@@ -13,74 +31,18 @@
         In den Sobolevräumen werden dann die integrierbaren Funktionen zusammengefasst, die im Sinne einer Distribution wieder eine Ableitung in einem integrierbaren Raum besitzen \cite[S.~54~ff]{Schweizer2013}.
 
         Auf die Poisson-Gleichung wurde dieses Verfahren in Definition \ref{def:weak-formulation-poisson} bereits angewendet, sodass deren schwache Formulierung hier nicht noch einmal wiederholt werden soll.
-        Allerdings wurde in den Abschnitten \ref{ssub:wellengleichung} und \ref{ssub:heat-equation} erwähnt, dass die für die Finite-Elemente-Methode benötigte schwache Formulierung der Wellen- und Wärmeleitungsgleichung durch die separate Diskretisierung der Zeit erlangt wird \cite{Alberty1998,Logan2007}.
+        Allerdings wurde im Abschnitt \ref{ssub:wellengleichung} bereits erwähnt, dass die für die Finite-Elemente-Methode benötigte schwache Formulierung der Wellengleichung durch die separate Diskretisierung der Zeit erlangt wird \cite{Alberty1998,Logan2007}.
         Es sei angemerkt, dass dies nicht die einzige Möglichkeit beschreibt, die Zeit in die Finite-Elemente-Methode einzubauen.
         Auch diese ließe sich theoretisch gesehen wie die räumlichen Dimensionen durch die Finite-Elemente-Methode behandeln.
-        Dennoch erweist sich dieses Vorgehen der separaten Zeitdiskretisierung als sehr effizient sowohl bei der numerischen Behandlung als auch bei der Implementierung \cite{Logan2007}.
+        Dennoch erweist sich dieses Vorgehen der separaten Zeitdiskretisierung als sehr effizient, sowohl bei der numerischen Behandlung als auch bei der Implementierung \cite{Logan2007}.
         Eine detailliertere Betrachtung der Theorie ist dabei in \cite[S.~211~ff]{Schweizer2013} und \cite[S.~653~ff]{Logan2007} nachzulesen.
-
-        \paragraph{Wärmeleitungsgleichung} % (fold)
-        \label{par:heat-equation}
-        \hfill\\
-          Für die zeitliche Diskretisierung der Wärmeleitungsgleichung kann man die sogenannte Rothe-Methode, wie sie in \cite[S.~211~ff]{Schweizer2013} und \cite{Alberty1998} beschrieben ist, verwenden.
-          Sie basiert auf dem impliziten Euler-Verfahren und verhindert damit die Divergenz numerischer Lösungen \cite[S.~472~f]{Quarteroni2000}.
-          Auch andere Zeitschrittverfahren, wie die Crank-Nicolson-Methode oder die Familie der Runge-Kutta-Verfahren sind jedoch denkbar \cite{Quarteroni2000,Cheney2008}.
-
-          Es seien nun ein kleiner Zeitschritt $\infinitesimal{t}\in (0,\infty)$, ein Berechnungsgebiet $\boxBrackets{\domain} \define (\domain,\dirichletBoundary,\neumannBoundary,ν)$ und ein Wärmeleitungsproblem $(\boxBrackets{\domain},f,u_0,u^{(\mathrm{D})},u^{(\mathrm{N})},u)$ gegeben.
-          Durch $\infinitesimal{t}$ wird das Zeitintervall $T\define[0,\infty)$ diskretisiert und durch die Menge $\boxBrackets{T}\define\set{k\cdot\infinitesimal{t}}{k\in\setNatural_0}$ dargestellt.
-          Weiterhin bezeichne eine natürliche Zahl $n\in\setNatural$ als Index der zeitabhängigen Funktionen $f$, $u^{(\mathrm{D})}$, $u^{(\mathrm{N})}$ und $u$ deren Diskretisierung zum Zeitpunkt $n\cdot\infinitesimal{t}$.
-          Dieses Schema soll am Beispiel von $u$ demonstriert werden.
-          \[
-            u \longleftrightarrow (u_n)_{n\in\setNatural_0}
-            \separate
-            u(\cdot,n\infinitesimal{t}) \longleftrightarrow u_n
-          \]
-          Zu beachten ist hier, dass die Diskretisierung $u_n$ im Allgemeinen $u(\cdot,n\infinitesimal{t})$ nur annähert und nicht exakt beschreibt.
-          Für die Diskretisierung der zeitlichen Ableitung folgt durch die Anwendung des impliziten Euler-Verfahrens ein ähnliches Schema.
-          \[
-            \partial_t u \longleftrightarrow (\partial_t u_n)_{n\in\setNatural}
-            \separate
-            \partial_t u(\cdot,n\infinitesimal{t}) \longleftrightarrow \frac{u_{n} - u_{n-1}}{\infinitesimal{t}}
-          \]
-          Mit diesen Transformationen ist es jetzt möglich, die gesamte Wärmeleitungsgleichung zu diskretisieren, wie im folgenden Schema gezeigt.
-          \[
-            \partial_t u -\laplacian u = f
-            \qquad \longleftrightarrow \qquad
-            \frac{u_{n} - u_{n-1}}{\infinitesimal{t}} - \laplacian u_n = f_n
-          \]
-          Bei der Berechnung wird davon ausgegangen, dass $u_{n-1}$ entweder als Anfangswert $u_0$ gegeben ist oder durch einen vorherigen Zeitschritt berechnet wurde.
-          Die einzige Unbekannte in der diskretisierten Gleichung ist damit $u_{n}$, für die man den folgenden Ausdruck erhält.
-          \[
-            \roundBrackets{\identity - \infinitesimal{t}\laplacian}u_{n} = \infinitesimal{t} f_{n} + u_{n-1}
-          \]
-          Für jeden Zeitpunkt $t\in\boxBrackets{T}$ handelt es sich hier um eine zeitunabhängige partielle Differentialgleichung zweiter Ordnung, deren schwache Lösung analog zu der der Poisson-Gleichung konstruiert werden kann.
-          Zunächst werden die Dirichlet-Randbedingungen wieder über eine Transformation in die Gleichung eingearbeitet.
-          \[
-            s_n\in\setSobolev^1_\mathrm{D}(\domain)
-            \separate
-            s_n\define u_n - u_n^{(\mathrm{D})}
-          \]
-          Durch die Integration mit Testfunktionen und die Anwendung des Gaußschen Satzes erhält man nun für die schwachen Lösungen der Zeit-diskretisierten Wärmeleitungsgleichung die folgende etwas längliche Formulierung für alle $φ\in\setSobolev^1_\mathrm{D}(\domain)$.
-          \begin{align*}
-            &\integral{\domain}{}{s_nφ}{λ}
-            + \infinitesimal{t}\integral{\domain}{}{\scalarProduct{\nabla s_n}{\nabla φ}}{λ} \\
-            &= \infinitesimal{t}\boxBrackets{
-              \integral{\domain}{}{f_n φ}{λ}
-              + \integral{\neumannBoundary}{}{u_n^{(\mathrm{N})}φ}{σ}
-              - \integral{\domain}{}{\scalarProduct{\nabla u_n^{(\mathrm{D)}}}{\nabla φ}}{λ}
-            }
-            \\
-            &+ \integral{\domain}{}{u_{n-1} φ}{λ}
-            - \integral{\domain}{}{u^{(\mathrm{D})}_{n}φ}{λ}
-          \end{align*}
-        % paragraph wärmeleitungsgleichung (end)
 
         \paragraph{Wellengleichung} % (fold)
         \label{par:wave-equation}
         \hfill\\
           Das Vorkommen der zweiten zeitlichen Ableitung in der Wellengleichung ermöglicht die Anwendung des symplektischen Euler-Verfahrens.
           Diese Methode erhält, abgesehen von kleinen Schwankungen, die Gesamtenergie eines Systems und führt damit nicht, wie beim expliziten Euler-Verfahren, zur Divergenz der Lösungen.
-          Analog zur Wärmeleitungsgleichung könnte man auch hier andere Zeitschrittverfahren verwenden.
+          Alternativ ließen sich auch andere Zeitschrittverfahren verwenden.
 
           Zunächst überführt man die Wellengleichung durch die Einführung einer neuen Variable in ein System partieller Differentialgleichungen, in der die zeitliche Ableitung nur in erster Ordnung vorkommt.
           Es seien also $\boxBrackets{\domain} \define (\domain,\dirichletBoundary,\neumannBoundary,ν)$ ein Berechnungsgebiet und $(\boxBrackets{\domain},f,φ_0, ϑ_0,φ^{(\mathrm{D})},φ^{(\mathrm{N})},φ)$ ein Wellenproblem.
@@ -96,7 +58,7 @@
               ϑ \\ \laplacian φ + f
             \end{pmatrix}
           \]
-          Des Weiteren gelten die folgenden für die Dirichlet-Randbedingungen wichtigen Zusammenhänge für alle $t\in T$.
+          Des Weiteren gelten die folgenden für die Dirichlet-Randbedingungen wichtigen Zusammenhänge für alle $t\in T\define[0,\infty)$.
           \[
             φ(\cdot,0) = φ_0
             \separate
@@ -104,15 +66,17 @@
             \separate
             \appendValue{ϑ(\cdot,t)}{\dirichletBoundary} = \appendValue{\partial_t φ^\mathrm{(D)}(\cdot,t)}{\dirichletBoundary}
           \]
-          Wie zuvor bei der Wärmeleitungsgleichung soll auch hier ein kleiner Zeitschritt $\infinitesimal{t}\in(0,\infty)$ gewählt werden, der das Zeitintervall $T$ durch $\boxBrackets{T}$ diskretisiert.
-          Des Weiteren soll für ein $n\in\setNatural$ die gleiche Notation für die Diskretisierung der zeitabhängigen Funktionen $f$, $φ^\mathrm{(D)}$, $φ^\mathrm{(N)}$, $φ$ und $ϑ$ verwendet werden, deren Schema noch einmal am Beispiel von φ gezeigt werden soll.
+          Es soll nun ein kleiner Zeitschritt $\infinitesimal{t}\in(0,\infty)$ gewählt werden, der das Zeitintervall $T$ durch $\boxBrackets{T}\define\set{k\cdot\infinitesimal{t}}{k\in\setNatural_0}$ diskretisiert.
+          Weiterhin bezeichne eine natürliche Zahl $n\in\setNatural$ als Index der zeitabhängigen Funktionen $f$, $φ^{(\mathrm{D})}$, $φ^{(\mathrm{N})}$, $φ$ und $ϑ$ deren Diskretisierung zum Zeitpunkt $n\cdot\infinitesimal{t}$.
+          Dieses Schema soll im Folgenden am Beispiel von $φ$ demonstriert werden.
+          % Des Weiteren soll für ein $n\in\setNatural$ die gleiche Notation für die Diskretisierung der zeitabhängigen Funktionen $f$, $φ^\mathrm{(D)}$, $φ^\mathrm{(N)}$, $φ$ und $ϑ$ verwendet werden, deren Schema noch einmal am Beispiel von φ gezeigt werden soll.
           \[
             φ\longleftrightarrow (φ_n)_{n\in\setNatural_0}
             \separate
             φ(\cdot,n\infinitesimal{t}) \longleftrightarrow φ_n
           \]
           Für die Dirichlet-Randbedingungen von $ϑ_n$ soll auch hier ein einfaches Euler-Verfahren verwendet werden.
-          Da die Randbedingungen von Vornherein bekannt sind, wäre hier auch die Wahl eines analytischen Verfahrens möglich.
+          Da die Randbedingungen von vornherein bekannt sind, wäre hier auch die Wahl eines analytischen Verfahrens möglich.
           \[
             \appendValue{ϑ(\cdot,n\infinitesimal{t})}{\dirichletBoundary} = \appendValue{\partial_t φ^\mathrm{(D)}(\cdot,n\infinitesimal{t})}{\dirichletBoundary}
             \qquad \longleftrightarrow \qquad
@@ -158,7 +122,7 @@
               ϑ_{n+1} \\ \laplacian φ_{n} + f_{n}
             \end{pmatrix}
           \]
-          Die Konstruktion der schwachen Formulierung erfolgt wieder analog zur Wärmeleitungsgleichung.
+          Die Konstruktion der schwachen Formulierung kann nun durch dieselbe Vorgehensweise wie bei der Poisson-Gleichung erreicht werden.
           Zunächst werden wieder durch Hilfsvariablen die Randbedingungen eingearbeitet.
           \begin{align*}
             φ^\circ_{n+1} &\define φ_{n+1} - φ_{n+1}^\mathrm{(D)}
@@ -201,7 +165,7 @@
         Dabei wird die Anzahl, der Typ und die Größe dieser Elemente durch den Modellierer festgelegt.
         Für zwei Raumdimensionen werden zumeist Dreiecke und Vierecke gewählt.
         Die Abbildungen \ref{fig:domain-example} und \ref{fig:domain-discretization} veranschaulichen dieses Vorgehen im ein- und zweidimensionalen Fall anhand schematischer Beispiele.
-        Das weitere Vorgehen der nächsten Paragraphen wird am Beispiel des eindimensionalen Berechnungsgebiet aus Abbildung \ref{fig:domain-example} gezeigt werden.
+        Das weitere Vorgehen der nächsten Paragraphen wird am Beispiel des eindimensionalen Berechnungsgebiet aus Abbildung \ref{fig:domain-example} gezeigt.
         \cite{Logan2007,Alberty1998,Cheney2008,Quarteroni2000}
 
         \begin{figure}[h]
@@ -236,7 +200,7 @@
         Im zweidimensionalen Fall sollen in dieser Arbeit als finite Elemente nur Dreiecke gewählt werden.
         Andere Arten von finiten Elementen können vollkommen analog zu diesen eingeführt werden.
         Auch die Dreiecke definieren auf der Menge der Eckpunkte eine Art Nachbarschaft.
-        Wichtig daran ist, dass sich nur die Kanten der Dreiecke schneiden dürfen, nicht aber die Dreiecke selbst, da sonst ein Teil des Berechnungsgebietes durch mehr als ein Dreieck beschrieben werden würde.
+        Wichtig dabei ist, dass sich nur die Kanten der Dreiecke schneiden dürfen, nicht aber die Dreiecke selbst, da sonst ein Teil des Berechnungsgebietes durch mehr als ein Dreieck beschrieben werden würde.
 
         Für den weiteren Verlauf beschreibe $V$ die endliche nichtleere Menge der gewählten Eckpunkte in einem Berechnungsgebiet.
         Um einfacher mit der Diskretisierung von Randwerten und -integralen umzugehen, soll zudem $V^\circ$ die Menge aller Eckpunkte, die nicht auf dem Dirichlet-Rand $\dirichletBoundary$ liegen, $V_\mathrm{D}$ die Menge aller Eckpunkte, die auf dem Dirichlet-Rand $\dirichletBoundary$ liegen, und $V_\mathrm{N}$ die Menge aller Eckpunkte, die auf dem Neumann-Rand $\neumannBoundary$ liegen, bezeichnen.
@@ -250,15 +214,15 @@
         \]
         Die Menge der Dreiecke beziehungsweise Kanten soll hier nicht weiter beschrieben werden, weil diese auch durch die Wahl der Basisfunktionen im nächsten Abschnitt gegeben ist.
 
-        Hierfür wurde eine Menge von Dreiecken $\mathscr{T}$ gewählt, die $\bar{\domain}$ bedeckt.
-        \[
-          \bar{\domain} = \bigcup_{\triangle\in\mathscr{T}} \triangle
-        \]
-        Dies ist hier exakt möglich, da $\domain$ einen polygonalen Rand $\partial\domain$ besitzt.
-        Jedes dieser Dreiecke wird durch seine drei Eckpunkte eindeutig beschrieben.
+        % Hierfür wurde eine Menge von Dreiecken $\mathscr{T}$ gewählt, die $\bar{\domain}$ bedeckt.
+        % \[
+        %   \bar{\domain} = \bigcup_{\triangle\in\mathscr{T}} \triangle
+        % \]
+        % Dies ist hier exakt möglich, da $\domain$ einen polygonalen Rand $\partial\domain$ besitzt.
+        % Jedes dieser Dreiecke wird durch seine drei Eckpunkte eindeutig beschrieben.
 
-        Die Triangulierung von $\bar\domain$ ist durch einen ungerichteten Graphen $(V,E)$ beschreibbar.
-        Es seien $V$ die Menge der Eckpunkte und $E$ die Menge der Kanten.
+        % Die Triangulierung von $\bar\domain$ ist durch einen ungerichteten Graphen $(V,E)$ beschreibbar.
+        % Es seien $V$ die Menge der Eckpunkte und $E$ die Menge der Kanten.
       % paragraph schritt_2_diskretisierung_des_berechnungsgebietes (end)
 
       \subsubsection{Wahl der Basisfunktionen}
@@ -493,10 +457,10 @@
           Die Matrix $\boxBrackets{\laplacian}$ wird auch \enquote{Stiffness Matrix} und $\boxBrackets{M}$ auch \enquote{Mass Matrix} genannt.
           In der einfacheren Matrix-Vektor-Notation lässt sich das System linearer Gleichungen nun wie folgt schreiben.
           \[
-            [\laplacian][v] = [M][f] + [N][u^\mathrm{(N)}] - [\laplacian][u^\mathrm{(D)}]
+            [\laplacian][v] = [M][f] + [N]\boxBrackets{u^\mathrm{(N)}} - [\laplacian]\boxBrackets{u^\mathrm{(D)}}
           \]
           Bei $[\laplacian]$ handelt es sich um eine symmetrische, positiv-definite Matrix \cite{Alberty1998}.
-          Für das System linearer Gleichungen existiert damit eine eindeutige Lösung.
+          Für das System linearer Gleichungen existiert damit eine eindeutige Lösung \cite{Alberty1998,Schweizer2013}.
 
           Ein letzter Schritt für die Formulierung des linearen Gleichungssystems kümmert sich nun darum, die komplexen Systemmatrizen aus den einfachen Matrizen der finiten Elemente zu konstruieren.
           Es sei $\mathscr{T}$ die Menge der finiten Elemente, die das Berechnungsgebiet diskretisieren.
@@ -541,7 +505,7 @@
               -1 & 1
             \end{pmatrix}
           \]
-          Die Addition der einzelnen Finite-Elemente-Matrizen jeder Kanten ergibt dann die komplette Stiffness und Mass Matrix.
+          Aus der Addition der einzelnen Finite-Elemente-Matrizen ergeben sich dann die kompletten System-Matrizen.
           \[
             \roundBrackets{ \integral{\domain}{}{η_i η_j}{λ} }_{i\in V^\circ,j\in V} = \frac{h}{6}
             \begin{pmatrix}
@@ -602,6 +566,11 @@
 
         \paragraph{Konstruktion der Matrizen im Zweidimensionalen} % (fold)
         \label{par:konstruktion_der_matrizen_im_zweidimensionalen}
+        \hfill\\
+          Für die Berechnung der System-Matrizen eines zweidimensionalen Berechnungsgebietes ist ein analoges Vorgehen möglich.
+          Die Integrale des vorigen Abschnittes müssen auch hier über den finiten Elementen ausgewertet und zu einer Systemmatrix zusammengesetzt werden.
+          Für die Implementierung des Algorithmus reicht es demnach, die Finite-Elemente-Matrizen anzugeben.
+          Die Berechnung dieser soll aufgrund des Umfanges ihrer Herleitungen nicht angegeben werden.
           \[
             \roundBrackets{ \integral{\triangle}{}{η_pη_q}{λ} }_{p,q\in\set{i,j,k}{}}
             = \frac{λ(\triangle)}{12}
@@ -634,12 +603,10 @@
       % paragraph schritt_4_konstruktion_der_algebraischen_formulierung (end)
 
       \subsubsection{Lösung des algebraischen Systems}
-        Die erhaltenen algebraischen Gleichungen sind äquivalent zu der schwachen Formulierung des diskretisierten Problems.
-        In den hier betrachteten Fällen existieren eindeutige Lösungen.
-
-        Das Einsetzen der Diskretisierung in die ursprüngliche schwache Formulierung der partiellen Differentialgleichung führt zu einem System von algebraischen Gleichungen.
-        Die in dieser Arbeit besprochenen Fälle resultieren in linearen Gleichungssystemen mit dünnbesetzten Matrizen.
-        Diese hängen zudem stark von der gewählten Diskretisierung ab.
+        Die erhaltenen linearen Gleichungssysteme sind äquivalent zu der schwachen Formulierung des diskretisierten Problems und werden durch dünnbesetzte Matrizen charakterisiert.
+        Zudem sind die hier konstruierten inneren Systemmatrizen symmetrisch und positiv definit.
+        Daraus folgt, dass für die linearen Gleichungssysteme eine eindeutige Lösung existiert \cite{Schweizer2013,Alberty1998}.
+        Für die Lösung dieser Systeme ist eine Vielzahl an unterschiedlichen Methoden, wie zum Beispiel das CG-Verfahren, welches in Abschnitt \ref{ssub:cg-method} erläutert wird, dokumentiert.
       % paragraph schritt_5_lösen_des_algebraischen_systems (end)
 
     % subsection finite_elemente_methode (end)
@@ -725,7 +692,7 @@
       % subsubsection datenstrukturen_und_speicherformate (end)
 
       \subsubsection{Lösung dünnbesetzter Systeme und das CG-Verfahren} % (fold)
-      \label{ssub:lösung_dünnbesetzter_systeme}
+      \label{ssub:cg-method}
         Das CG-Verfahren (engl.: \textit{conjugate gradient method}) ist eine iterative Methode, um das folgende lineare Gleichungssystem zu lösen, welches durch eine symmetrische, positiv definite Matrix $A\in\setReal^{n\times n}$, einen Vektor $b\in\setReal^n$ und eine eindeutige Lösung $x\in\setReal^n$ für $n\in\setNatural$ beschrieben wird.
         \[
           Ax = b

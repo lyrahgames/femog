@@ -69,13 +69,13 @@
     \cite{Logan2007,Cheney2008,Quarteroni2000}
 
     Das allgemeine Ziel besteht nun darin immer komplexer werdende Probleme zu lösen, indem man in das zugrundeliegende Modell neue physikalische Effekte mit einbezieht oder die Diskretisierung des Modells verfeinert, um die genannten Effekte besser aufzulösen.
-    Folglich ist es erforderlich die Performance eines Programms immer weiter zu steigern.
+    Folglich ist es erforderlich, die Performance eines Programms immer weiter zu steigern.
     Dies erreicht man heutzutage durch dessen Parallelisierung.
     Aufgrund der computergerechten Formulierung der Finite-Elemente-Methode tritt bei ihr eine gewisse Datenparallelität auf.
     Diese Eigenschaft kann sehr gut durch den Grafikprozessors (GPU) eines Computers ausgenutzt werden.
     Die GPU ist ein massiv-paralleler Prozessor, dessen Prozessorkerne auf die Ausnutzung von Datenparallelität innerhalb einer Gruppe von Threads spezialisiert sind.
-    Ein Algorithmus der diese Parallelität nicht aufweist, lässt sich im Allgemeinen nur sehr ineffizient auf der GPU implementieren und sollte durch den Hauptprozessor (CPU) eines Computers, dessen Prozessorkerne für wesentlich komplexere Aufgaben designet wurden, ausgeführt werden.
-    Umgekehrt ist die GPU in der Lage Algorithmen mit dieser Eigenschaft um ein Vielfaches zu beschleunigen.
+    Ein Algorithmus, der diese Parallelität nicht aufweist, lässt sich im Allgemeinen nur sehr ineffizient auf der GPU implementieren und sollte durch den Hauptprozessor (CPU) eines Computers, dessen Prozessorkerne für wesentlich komplexere Aufgaben entwickelt wurden, ausgeführt werden.
+    Umgekehrt ist die GPU in der Lage, Algorithmen mit dieser Eigenschaft um ein Vielfaches zu beschleunigen.
     Gerade bei der Finite-Elemente-Methode sollte also die Implementierung auf der GPU diverse Vorteile mit sich bringen.
     \cite{Patterson2011,Kirk2010,Sanders2011}
 
