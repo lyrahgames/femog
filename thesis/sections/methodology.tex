@@ -651,7 +651,7 @@
       Gerade bei der Finite-Elemente-Methode werden Mass und Stiffness Matrix im Computer durch ein Sparse-Matrix-Format dargestellt \cite{Bell2008,Logan2007,Alberty1998}.
       Die Wahl der Speicherformate und Lösungsmethoden wirken sich dabei extrem auf die Performance der Anwendung aus \cite{Bell2008,Bell2009}.
 
-      \subsubsection{Datenstrukturen und Speicherformate} % (fold)
+      \subsubsection{Datenstrukturen und das CSR-Format} % (fold)
       \label{ssub:datenstrukturen_und_speicherformate}
         Eine Sparse-Matrix $M\in\setReal^{n\times n}$ mit $n\in\setNatural$, deren Anzahl von Elementen ungleich Null der Größenordnung $n$ entspricht, kann durch das Allozieren aller $n^2$ Speicherplätze nicht effizient dargestellt werden.
         Häufig stellt dieses Unterfangen sogar eine physikalische Unmöglichkeit dar, weil ab einer bestimmten Größe von $n$ der Speicherplatz für die $n^2$ Elemente nicht einmal existiert.
@@ -659,83 +659,71 @@
         Offensichtlich müssen also gewisse indizierte Speicherschemen verwendet werden, um die Natur einer dünnbesetzten Matrix effizient zu beschreiben.
         \cite[S.~78]{Press2002}
 
-        \paragraph{Dictionary of Keys} % (fold)
-        \label{par:dictionary_of_keys}
+        Typische Datenstukturen für die Verwendung dünnbesetzter Matrizen werden durch die Formate COO (engl.: \textit{coordinate list}), CSR (engl.: \textit{compressed sparse row}) und ELLPACK (ELL) dargestellt \cite{Bell2008,Bell2009}.
+        Allerdings existieren wesentlich mehr Formate, die im Rahmen dieser Arbeit nicht erwähnt werden können.
+        Untersuchungen über die Implementierung der genannten Formate auf der GPU sind in \cite{Bell2008} und \cite{Bell2009} zu finden.
+        Jedes Format besitzt Vor- und Nachteile.
+        Bis auf das COO-Format scheint die Effizienz zudem vom genauen Muster der dünnbesetzten Matrix abzuhängen.
+        Es stellte sich heraus, dass das CSR-Format eine sehr gute durchschnittliche Performance ermöglicht.
+        Aus diesem Grund beschränkt sich diese Arbeit auf die Beschreibung und Implementierung dessen.
+        Eine genauere Erläuterung des ELL-Formates ist im Anhang zu finden.
 
-        % paragraph dictionary_of_keys (end)
-
-        \paragraph{Coordinate List} % (fold)
-        \label{par:coordinate_list}
-
-        % paragraph coordinate_list (end)
-
-        \paragraph{Compressed Sparse Row und Compressed Sparse Column} % (fold)
-        \label{par:compressed_sparse_row_und_compressed_sparse_column}
-
-        % paragraph compressed_sparse_row_und_compressed_sparse_column (end)
-
-        \paragraph{ELLPACK-Format} % (fold)
-        \label{par:ellpack}
-        \hfill\\
-          Ein weiteres Speicherformat, welches sehr gut für Vektorarchitekturen geeignet ist, wird durch das sogenannte ELLPACK-Format (ELL) beschrieben \cite{Bell2008}.
-          Für eine Matrix $M\in\setReal^{n\times n}$ mit maximal $k\in\setNatural,k\leq n$ Einträgen in jeder Zeile, die nicht Null sind, speichert ELL diese Werte in einem Tupel $\boxBrackets{M}^{(k)}_\mathrm{ELL}$ zweier $n\times k$-Matrizen.
-          \[
-            \boxBrackets{M}^{(k)}_\mathrm{ELL} \define (D,C)
-            \separate
-            D \in \setReal^{n\times k}
-            \separate
-            C \in \set{i\in\setNatural_0}{i < n}^{n\times k}
-          \]
-          $D$ speichert dabei alle Werte ungleich Null, indem es diese so weit wie möglich innerhalb einer Zeile nach links bewegt.
-          Bei Zeilen, die mehr als $n-k$ Nullen beinhalten, werden überschüssige Einträge mit Nullen aufgefüllt.
-          Die Einträge der zweiten Matrix $C$ beschreiben den jeweiligen Spaltenindex eines Elementes ungleich Null.
-          Hier werden bei Zeilen, die mehr als $n-k$ Nullen beinhalten, überschüssige Einträge durch einen festgelegten Sentinel aufgefüllt.
-          Dieses Vorgehen soll durch das folgende Beispiel veranschaulicht werden.
-          \cite{Bell2008,Bell2009,Press2002}
-          \[
-            M =
+        Für eine Matrix $M\in\setReal^{n\times n}$ mit $k\in\setNatural,k\leq n^2$ Einträgen ungleich Null speichert das CSR-Format diese in einem Tupel $\boxBrackets{M}_\mathrm{CSR}$ dreier Vektoren.
+        \[
+          \boxBrackets{M}_\mathrm{CSR} \define (V,R,C)
+          \separate
+          V \in \setReal^{k}
+          \separate
+          R \in \setNatural_0^{n+1}
+          \separate
+          C \in \setNatural_0^{k}
+        \]
+        In $V$ werden dabei alle Werte ungleich Null gespeichert, indem Zeile für Zeile alle Spalten von links nach rechts ausgelesen werden.
+        Dies bedeutet, dass alle Werte $a_{ij}$ von $M$ mit $(i,j)\in\setNatural^2$ und $i,j\leq n$, die ungleich Null sind, anhand von $m(i-1,j-1)$ geordnet werden.
+        \[
+          \function{m}{\set{p\in\setNatural_0}{p< n}^2}{\setNatural_0}
+          \separate
+          m(i,j) \define n\cdot i + j
+        \]
+        Für jedes $i\in\setNatural$ mit $i\leq n+1$ speichert $R_{i}$ die Anzahl der Werte ungleich Null, die bis zur Zeile $i$ von $M$ vorkommen.
+        $R_0$ wird dabei immer auf Null gesetzt.
+        Demnach kann $R$ als kumulative Verteilungsfunktion der Einträge ungleich Null über die Zeilen verstanden werden.
+        In $C$ werden die Spaltenindizes eines jeden Wertes aus $V$ gespeichert.
+        Dieses Vorgehen soll an dem folgenden Beispiel gezeigt werden \cite{Eigen2018}.
+        \[
+          M =
+          \begin{pmatrix}
+            0 & 3 & 0 & 0 & 0 \\
+            22 & 0 & 0 & 0 & 17 \\
+            7 & 5 & 0 & 1 & 0 \\
+            0 & 0 & 0 & 0 & 0 \\
+            0 & 0 & 14 & 0 & 8
+          \end{pmatrix}
+          \separate
+          \boxBrackets{M}_\mathrm{CSR} = \roundBrackets{
             \begin{pmatrix}
-              0 & 3 & 0 & 0 & 0 \\
-              22 & 0 & 0 & 0 & 17 \\
-              7 & 5 & 0 & 1 & 0 \\
-              0 & 0 & 0 & 0 & 0 \\
-              0 & 0 & 14 & 0 & 8
+              3 \\ 22 \\ 17 \\ 7 \\ 5 \\ 1 \\ 14 \\ 8
+            \end{pmatrix},
+            \begin{pmatrix}
+              0 \\ 1 \\ 3 \\ 6 \\ 6 \\ 8
+            \end{pmatrix},
+            \begin{pmatrix}
+              1 \\ 0 \\ 4 \\ 0 \\ 1 \\ 3 \\ 2 \\ 4
             \end{pmatrix}
-            \separate
-            \boxBrackets{M}^{(3)}_\mathrm{ELL} =
-            \roundBrackets{
-              \begin{pmatrix}
-                3 & 0 & 0 \\
-                22 & 17 & 0 \\
-                7 & 5 & 1 \\
-                0 & 0 & 0 \\
-                14 & 8 & 0
-              \end{pmatrix}
-              ,
-              \begin{pmatrix}
-                1 & * & * \\
-                0 & 4 & * \\
-                0 & 1 & 3 \\
-                * & * & * \\
-                2 & 4 & *
-              \end{pmatrix}
-            }
-          \]
+          }
+        \]
 
-          Unterscheidet sich die maximale Anzahl von Einträgen ungleich Null in einer Zeile nicht substantiell von der durchschnittlichen Anzahl von Einträgen ungleich Null einer Zeile, so stellt ELL eine sehr effiziente Sparse-Matrix-Datenstruktur dar.
-          In der Finite-Elemente-Methode würde demnach die Performance des Verfahrens von der Struktur des Gitters abhängen.
-          \cite{Bell2008}
-        % paragraph ellpack (end)
+        Für Berechnung des Matrix-Vektor-Produktes eines Vektors $x\in\setReal^n$ mit der Matrix $M \reverseDefine (a_{ij})_{i,j}$, gespeichert durch $[M]_\mathrm{CSR}$, wird im einfachsten Fall zunächst zeilenweise gearbeitet.
+        Für jede Zeile $i\in\setNatural$ mit $i\leq n$ muss ein einfaches Skalarprodukt ausgewertet werden.
+        \[
+          \roundBrackets{Mx}_i = \sum_{j=1}^n a_{ij} x_j = \sum_{j=R_i+1}^{R_{i+1}} V_j x_{C_{j}+1} = \roundBrackets{[M]_\mathrm{CSR}x}_i
+        \]
 
-        \paragraph{DIA} % (fold)
-        \label{par:dia}
+        Ein analoges Verfahren ist das sogenannten CSC-Format (engl.: \textit{compressed sparse column}).
+        Hier wird die kumulative Verteilungsfunktion im Bezug auf die Spalten und nicht auf die Zeilen gebildet.
+        \cite{Bell2008}
 
-        % paragraph dia (end)
 
-        \paragraph{Hybrid} % (fold)
-        \label{par:hybrid}
-          ELL + COO
-        % paragraph hybrid (end)
 
         \paragraph{Vergleich der Anwendbarkeit} % (fold)
         \label{par:vergleich_der_anwendbarkeit}

@@ -1,0 +1,51 @@
+\section{ELLPACK-Format} % (fold)
+\label{sec:ellpack_format}
+  Ein weiteres Speicherformat, welches sehr gut für Vektorarchitekturen geeignet ist, wird durch das sogenannte ELLPACK-Format (ELL) beschrieben \cite{Bell2008}.
+  Für eine Matrix $M\in\setReal^{n\times n}$ mit maximal $k\in\setNatural,k\leq n$ Einträgen in jeder Zeile, die nicht Null sind, speichert ELL diese Werte in einem Tupel $\boxBrackets{M}^{(k)}_\mathrm{ELL}$ zweier $n\times k$-Matrizen.
+  \[
+    \boxBrackets{M}^{(k)}_\mathrm{ELL} \define (D,C)
+    \separate
+    D \in \setReal^{n\times k}
+    \separate
+    C \in \set{i\in\setNatural_0}{i < n}^{n\times k}
+  \]
+  $D$ speichert dabei alle Werte ungleich Null, indem es diese so weit wie möglich innerhalb einer Zeile nach links bewegt.
+  Bei Zeilen, die mehr als $n-k$ Nullen beinhalten, werden überschüssige Einträge mit Nullen aufgefüllt.
+  Die Einträge der zweiten Matrix $C$ beschreiben den jeweiligen Spaltenindex eines Elementes ungleich Null.
+  Hier werden bei Zeilen, die mehr als $n-k$ Nullen beinhalten, überschüssige Einträge durch einen festgelegten Sentinel aufgefüllt.
+  Dieses Vorgehen soll durch das folgende Beispiel veranschaulicht werden.
+  \cite{Bell2008,Bell2009,Press2002}
+  \[
+    M =
+    \begin{pmatrix}
+      0 & 3 & 0 & 0 & 0 \\
+      22 & 0 & 0 & 0 & 17 \\
+      7 & 5 & 0 & 1 & 0 \\
+      0 & 0 & 0 & 0 & 0 \\
+      0 & 0 & 14 & 0 & 8
+    \end{pmatrix}
+    \separate
+    \boxBrackets{M}^{(3)}_\mathrm{ELL} =
+    \roundBrackets{
+      \begin{pmatrix}
+        3 & 0 & 0 \\
+        22 & 17 & 0 \\
+        7 & 5 & 1 \\
+        0 & 0 & 0 \\
+        14 & 8 & 0
+      \end{pmatrix}
+      ,
+      \begin{pmatrix}
+        1 & * & * \\
+        0 & 4 & * \\
+        0 & 1 & 3 \\
+        * & * & * \\
+        2 & 4 & *
+      \end{pmatrix}
+    }
+  \]
+
+  Unterscheidet sich die maximale Anzahl von Einträgen ungleich Null in einer Zeile nicht substantiell von der durchschnittlichen Anzahl von Einträgen ungleich Null einer Zeile, so stellt ELL eine sehr effiziente Sparse-Matrix-Datenstruktur dar.
+  In der Finite-Elemente-Methode würde demnach die Performance des Verfahrens von der Struktur des Gitters abhängen.
+  \cite{Bell2008}
+% paragraph ellpack (end)
