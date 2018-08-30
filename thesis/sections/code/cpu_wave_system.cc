@@ -11,13 +11,11 @@ class Cpu_wave_system {
   Cpu_wave_system(const Domain& domain);
   ~Cpu_wave_system();
 
-  const Field& wave() const { return wave_; }
-  const Field& evolution() const { return evolution_; }
   const Permutation& permutation() const { return permutation_; }
-
+  template <typename Iterator>
+  Cpu_wave_system& copy_wave(Iterator wave_begin) const;
   template <typename Iterator>
   Cpu_wave_system& initial_state(Iterator wave_begin, Iterator evolution_begin);
-
   Cpu_wave_system& advance(value_type dt);
 
  private:

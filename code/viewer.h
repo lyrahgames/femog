@@ -83,7 +83,7 @@ class Viewer : public QOpenGLWidget {
   bool obj_switch = false;
   Eigen::Vector3f bounding_box_min;
   Eigen::Vector3f bounding_box_max;
-  bool render_volume_force = false;
+  bool render_switch = true;
   bool render_vertices_switch = false;
   bool render_wireframe_switch = false;
   bool loop_switch = true;

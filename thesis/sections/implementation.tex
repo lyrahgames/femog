@@ -123,6 +123,8 @@
       Des Weiteren sollen bei der Konstruktion des Systems Eckpunkte, die auf dem Rand des Gebietes liegen, von den inneren Eckpunkten separiert werden.
       Hierfür wird das Array der Eckpunkte innerhalb des Systems permutiert.
       Die Permutation wird für den Zugriff von außen gespeichert.
+      Im weiteren Verlauf sollen die Neumann-Randbedingungen auf Null gesetzt werden, sodass die Konstruktion der Neumann-Rand-Matrix nicht notwendig ist.
+      Die Neumann-Rand-Matrix ließe sich aber analog zu den anderen Systemmatrizen durch eine Iteration über alle Neumann-Kanten konstruieren.
 
       Auf der GPU ist die Verwendung von Eigen nicht möglich.
       Aus diesem Grund ist eine explizite Implementierung des CSR-Formates auf dem DRAM der GPU nötig.
@@ -159,7 +161,8 @@
       \inputCodeBlock[title = System construction]{code/gpu_wave_system_destructor.cc}
 
       Die Funktionen, um die Anfangsdaten zu setzen und die Wellendaten auszulesen, müssen ebenfalls die Daten zwischen dem RAM und dem DRAM transportieren.
-      \inputCodeBlock[title = System construction]{code/gpu_wave_system_accessors.cc}
+      Dies funktioniert analog wieder mit \code{cudaMemcpy} oder \code{thrust::copy}.
+      % \inputCodeBlock[title = System construction]{code/gpu_wave_system_accessors.cc}
     % subsection konstruktion_der_mass_und_stiffness_matrix (end)
 
     \subsection{Berechnung eines Zeitschrittes} % (fold)

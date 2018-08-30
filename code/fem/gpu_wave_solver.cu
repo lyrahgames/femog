@@ -51,6 +51,29 @@ __global__ void spmv_csr_kernel(int n, float alpha, const float* values,
   }
 }
 
+__global__ void rhs_kernel(int n, const float* mass_values,
+                           const float* stiffness_values, const int* row_cdf,
+                           const int* col_index, const float* wave_values,
+                           const float* evolution_values, float dt,
+                           float* output) {
+  const int row = blockDim.x * blockIdx.x + threadIdx.x;
+
+  if (row < n) {
+    float mass_dot = 0;
+    float stiffness_dot = 0;
+
+    const int start = row_cdf[row];
+    const int end = row_cdf[row + 1];
+
+    for (int j = start; j < end; ++j) {
+      mass_dot += mass_values[j] * evolution_values[col_index[j]];
+      stiffness_dot += stiffness_values[j] * wave_values[col_index[j]];
+    }
+
+    output[row] = mass_dot - dt * stiffness_dot;
+  }
+}
+
 __global__ void spmv_csr_vector_kernel(int n, float alpha, const float* values,
                                        const int* row_cdf, const int* col_index,
                                        const float* input, float beta,
@@ -173,17 +196,22 @@ void Wave_solver::operator()(float c, float dt) {
   // Eigen::VectorXf rhs =
   //     (1.0f - gamma * dt) * mass_matrix * y - dt * c * c * stiffness_matrix *
   //     x;
-  spmv_csr_kernel<<<blocks, threads_per_block>>>(
-      dimension, 1.0f, mass_values, row_cdf, col_index, evolution, 0.0f, tmp_y);
-  spmv_csr_kernel<<<blocks, threads_per_block>>>(dimension, -dt * c * c,
-                                                 stiffness_values, row_cdf,
-                                                 col_index, wave, 1.0f, tmp_y);
+  // spmv_csr_kernel<<<blocks, threads_per_block>>>(
+  //     dimension, 1.0f, mass_values, row_cdf, col_index, evolution, 0.0f,
+  //     tmp_y);
+  // spmv_csr_kernel<<<blocks, threads_per_block>>>(dimension, -dt * c * c,
+  //                                                stiffness_values, row_cdf,
+  //                                                col_index, wave, 1.0f,
+  //                                                tmp_y);
+  rhs_kernel<<<blocks, threads_per_block>>>(
+      dimension, mass_values, stiffness_values, row_cdf, col_index, wave,
+      evolution, c * c * dt, tmp_r);
 
   // Eigen::VectorXf r = A * x - b;
   spmv_csr_kernel<<<blocks, threads_per_block>>>(dimension, 1.0f, mass_values,
                                                  row_cdf, col_index, evolution,
-                                                 -1.0f, tmp_y);
-  thrust::copy(dev_tmp_y, dev_tmp_y + dimension, dev_tmp_r);
+                                                 -1.0f, tmp_r);
+  // thrust::copy(dev_tmp_y, dev_tmp_y + dimension, dev_tmp_r);
 
   // Eigen::VectorXf p = -r;
   thrust::transform(dev_tmp_r, dev_tmp_r + dimension, dev_tmp_p,

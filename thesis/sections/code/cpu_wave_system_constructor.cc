@@ -2,19 +2,22 @@ namespace Fem {
 
 template <typename Domain>
 Cpu_wave_system<Domain>::Cpu_wave_system(const Domain& domain) {
-  // mark boundary vertices
-  std::vector<int> is_boundary(domain().vertex_data().size(), 0);
-  for (const auto& pair : domain().edge_map()) {
+  using Vertex = typename Domain::Vertex;
+
+  // mark Dirichlet vertices
+  std::vector<int> is_boundary(domain.vertex_data().size(), 0);
+  for (const auto& pair : domain.edge_map()) {
     if (pair.second.insertions != 1 || pair.second.is_neumann_boundary)
       continue;
     is_boundary[pair.first[0]] = 1;
     is_boundary[pair.first[1]] = 1;
   }
-  // construct the permutation to separate boundary vertices
-  // counting sort: count
+
+  // construct the permutation to separate Dirichlet vertices
+  // count inner and Dirichlet vertices
   int vertex_count[2] = {0, 0};
   for (auto i = 0; i < is_boundary.size(); ++i) ++vertex_count[is_boundary[i]];
-  // counting sort: move
+  // move indices to right position
   int inner_vertex_count = vertex_count[0];
   int boundary_vertex_count = vertex_count[1];
   vertex_count[0] = 0;
@@ -36,17 +39,18 @@ Cpu_wave_system<Domain>::Cpu_wave_system(const Domain& domain) {
   std::vector<Eigen::Triplet<value_type>> mass_triplets;
   std::vector<Eigen::Triplet<value_type>> boundary_mass_triplets;
 
-  for (const auto& primitive : domain().primitive_data()) {
-    Eigen::Vector2f edge[3];
-
+  for (const auto& primitive : domain.primitive_data()) {
+    Vertex edge[3];
     for (auto i = 0; i < 3; ++i) {
-      edge[i] = domain().vertex_data()[primitive[(i + 1) % 3]] -
-                domain().vertex_data()[primitive[i]];
+      edge[i] = domain.vertex_data()[primitive[(i + 1) % 3]] -
+                domain.vertex_data()[primitive[i]];
     }
 
-    const value_type area =
-        0.5 * std::abs(-edge[0].x() * edge[2].y() + edge[0].y() * edge[2].x());
-    const value_type inverse_area_4 = 0.25 / area;
+    const float dot_product = edge[0].dot(edge[2]);
+    const float area =
+        0.5 * std::sqrt(edge[0].squaredNorm() * edge[2].squaredNorm() -
+                        dot_product * dot_product);
+    const float inverse_area_4 = 0.25 / area;
 
     // diagonal entries
     for (auto i = 0; i < 3; ++i) {
@@ -58,6 +62,7 @@ Cpu_wave_system<Domain>::Cpu_wave_system(const Domain& domain) {
       stiffness_triplets.push_back({index, index, stiffness_value});
       mass_triplets.push_back({index, index, mass_value});
     }
+
     // lower triangle
     for (unsigned int i = 0; i < 3; ++i) {
       if (is_boundary[primitive[i]]) continue;

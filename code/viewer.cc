@@ -21,8 +21,11 @@ Viewer::Viewer(QWidget* parent) : QOpenGLWidget(parent) {
   eye_altitude = M_PI_4 * 0.8;
 
   QTimer* timer = new QTimer(this);
-  connect(timer, SIGNAL(timeout()), this, SLOT(repaint()));
   connect(timer, SIGNAL(timeout()), this, SLOT(loop_slot()));
+  timer->start(0.0f);
+
+  QTimer* update_timer = new QTimer(this);
+  connect(timer, SIGNAL(timeout()), this, SLOT(update()));
   timer->start(1000.0f / 60.0f);
 
   resize(512, 512);
@@ -168,7 +171,12 @@ void Viewer::set_analytic_volume_force() {
     }
   }
 
+  const auto start = std::chrono::system_clock::now();
   system.generate_with_boundary();
+  const auto end = std::chrono::system_clock::now();
+  std::cout << "system matrix construction time = "
+            << std::chrono::duration<float>(end - start).count() << " s"
+            << std::endl;
 
   // compute_automatic_view();
 }
@@ -200,11 +208,35 @@ void Viewer::loop_slot() {
     system3.dt() = 0.001f;
     system3.solve();
   } else {
-    system.dt() = 0.001f;
+    system.dt() = 0.0001f;
+    const auto start = std::chrono::system_clock::now();
     // system.solve();
     // system.solve_custom();
     system.gpu_wave_solve();
     // system.gpu_solve();
+    const auto end = std::chrono::system_clock::now();
+    static float time = 0.0f;
+    static int count = 0;
+    time += std::chrono::duration<float>(end - start).count();
+    ++count;
+
+    if (count >= 100 || time >= 1.0f) {
+      std::cout << "time step time = " << time / count << " s" << std::endl;
+      time = 0.0f;
+      count = 0;
+    }
+  }
+
+  const auto current_time = std::chrono::system_clock::now();
+  ++frame_count_;
+  const auto time_difference =
+      std::chrono::duration<float>(current_time - last_time_).count();
+  if (time_difference >= 3.0) {
+    const auto frame_time = time_difference / static_cast<float>(frame_count_);
+    last_time_ = current_time;
+    frame_count_ = 0;
+    std::cout << "frame time = " << frame_time << " s\t"
+              << "fps = " << 1.0f / frame_time << std::endl;
   }
 }
 
@@ -255,6 +287,19 @@ void Viewer::resizeGL(int width, int height) {
 }
 
 void Viewer::paintGL() {
+  // const auto current_time = std::chrono::system_clock::now();
+  // ++frame_count_;
+  // const auto time_difference =
+  //     std::chrono::duration<float>(current_time - last_time_).count();
+  // if (time_difference >= 3.0) {
+  //   const auto frame_time = time_difference /
+  //   static_cast<float>(frame_count_); last_time_ = current_time; frame_count_
+  //   = 0; std::cout << "frame time = " << frame_time << " s\t"
+  //             << "fps = " << 1.0f / frame_time << std::endl;
+  // }
+
+  if (!render_switch) return;
+
   if (render_wireframe_switch) {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   } else {
@@ -531,18 +576,6 @@ void Viewer::paintGL() {
     if (render_vertices_switch)
       glDrawArrays(GL_POINTS, 0, vertex_buffer_data.size());
   }
-
-  const auto current_time = std::chrono::system_clock::now();
-  ++frame_count_;
-  const auto time_difference =
-      std::chrono::duration<float>(current_time - last_time_).count();
-  if (time_difference >= 3.0) {
-    const auto frame_time = time_difference / static_cast<float>(frame_count_);
-    last_time_ = current_time;
-    frame_count_ = 0;
-    std::cout << "frame time = " << frame_time << " s\t"
-              << "fps = " << 1.0f / frame_time << std::endl;
-  }
 }
 
 void Viewer::mousePressEvent(QMouseEvent* event) {}
@@ -594,7 +627,7 @@ void Viewer::keyPressEvent(QKeyEvent* event) {
     world = Isometry{
         0.5f * (bounding_box_min + bounding_box_max), {0, 0, 1}, {0, 1, 0}};
   } else if (event->text() == "f") {
-    render_volume_force = !render_volume_force;
+    render_switch = !render_switch;
   } else if (event->text() == "v") {
     render_vertices_switch = !render_vertices_switch;
   } else if (event->key() == Qt::Key_Space) {

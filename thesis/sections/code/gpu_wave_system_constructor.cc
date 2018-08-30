@@ -2,37 +2,56 @@ namespace Fem {
 
 template <typename Domain>
 Gpu_wave_system<Domain>::Gpu_wave_system(const Domain& domain) {
-  // construct mass and stiffness matrix
+  // construct system matrice and permutation
+  // as done in Cpu_wave_system
   // ...
 
   // allocate memory on DRAM of GPU
-  cudaMalloc((void**)&mass_values, nnz * sizeof(float));
-  cudaMalloc((void**)&stiffness_values, nnz * sizeof(float));
-  cudaMalloc((void**)&wave, dimension * sizeof(float));
-  cudaMalloc((void**)&evolution, dimension * sizeof(float));
-  cudaMalloc((void**)&row_cdf, (dimension + 1) * sizeof(int));
-  cudaMalloc((void**)&col_index, nnz * sizeof(int));
+  cudaMalloc((void**)&mass_values_, nnz_ * sizeof(value_type));
+  cudaMalloc((void**)&stiffness_values_, nnz_ * sizeof(value_type));
+  cudaMalloc((void**)&row_cdf_, (inner_dimension_ + 1) * sizeof(int));
+  cudaMalloc((void**)&col_index_, nnz_ * sizeof(int));
 
-  cudaMemcpy(mass_values, mass, nnz * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(stiffness_values, stiffness, nnz * sizeof(float),
-             cudaMemcpyHostToDevice);
-  cudaMemcpy(wave, wave_data, dimension * sizeof(float),
-             cudaMemcpyHostToDevice);
-  cudaMemcpy(evolution, evolution_data, dimension * sizeof(float),
-             cudaMemcpyHostToDevice);
-  cudaMemcpy(row_cdf, row, (dimension + 1) * sizeof(int),
-             cudaMemcpyHostToDevice);
-  cudaMemcpy(col_index, col, nnz * sizeof(int), cudaMemcpyHostToDevice);
+  cudaMalloc((void**)&boundary_mass_values_,
+             boundary_nnz_ * sizeof(value_type));
+  cudaMalloc((void**)&boundary_stiffness_values_,
+             boundary_nnz_ * sizeof(value_type));
+  cudaMalloc((void**)&boundary_row_cdf_, (inner_dimension_ + 1) * sizeof(int));
+  cudaMalloc((void**)&boundary_col_index_, boundary_nnz_ * sizeof(int));
 
-  cudaMalloc((void**)&tmp_p, dimension * sizeof(float));
-  cudaMalloc((void**)&tmp_r, dimension * sizeof(float));
-  cudaMalloc((void**)&tmp_y, dimension * sizeof(float));
+  cudaMalloc((void**)&wave_,
+             (inner_dimension_ + boundary_dimension_) * sizeof(value_type));
+  cudaMalloc((void**)&evolution_,
+             (inner_dimension_ + boundary_dimension_) * sizeof(value_type));
 
+  cudaMalloc((void**)&tmp_p_, inner_dimension_ * sizeof(value_type));
+  cudaMalloc((void**)&tmp_r_, inner_dimension_ * sizeof(value_type));
+  cudaMalloc((void**)&tmp_y_, inner_dimension_ * sizeof(value_type));
+
+  // transfer data from RAM to DRAM
+  cudaMemcpy(mass_values_, mass_matrix.valuePtr(), nnz_ * sizeof(value_type),
+             cudaMemcpyHostToDevice);
+  cudaMemcpy(stiffness_values_, stiffness_matrix.valuePtr(),
+             nnz_ * sizeof(value_type), cudaMemcpyHostToDevice);
+  cudaMemcpy(row_cdf_, mass_matrix.outerIndexPtr(),
+             (inner_dimension_ + 1) * sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(col_index_, mass_matrix.innerIndexPtr(), nnz_ * sizeof(int),
+             cudaMemcpyHostToDevice);
+
+  cudaMemcpy(boundary_mass_values_, boundary_mass_matrix.valuePtr(),
+             boundary_nnz_ * sizeof(value_type), cudaMemcpyHostToDevice);
+  cudaMemcpy(boundary_stiffness_values_, boundary_stiffness_matrix.valuePtr(),
+             boundary_nnz_ * sizeof(value_type), cudaMemcpyHostToDevice);
+  cudaMemcpy(boundary_row_cdf_, boundary_mass_matrix.outerIndexPtr(),
+             (inner_dimension_ + 1) * sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(boundary_col_index_, boundary_mass_matrix.innerIndexPtr(),
+             boundary_nnz_ * sizeof(int), cudaMemcpyHostToDevice);
+
+  // get properties of GPU to compute blocks and threads_per_block
   cudaDeviceProp property;
   cudaGetDeviceProperties(&property, 0);
-
-  threads_per_block = property.maxThreadsPerBlock;
-  blocks = (dimension + threads_per_block - 1) / threads_per_block;
+  threads_per_block_ = property.maxThreadsPerBlock;
+  blocks_ = (inner_dimension + threads_per_block - 1) / threads_per_block;
 }
 
 }  // namespace Fem
