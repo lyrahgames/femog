@@ -10,11 +10,11 @@
     \medskip
     \begin{abstract}
       \itshape
-      Der Gegenstand dieser Arbeit ist es, die Finite-Elemente-Methode (FEM) effizient auf dem Grafikprozessor (GPU) eines Computers am Beispiel der zweidimensionalen Wellen- und Wärmeleitungsgleichung zu implementieren.
+      Der Gegenstand dieser Arbeit ist es, die Finite-Elemente-Methode (FEM) effizient auf dem Grafikprozessor (GPU) eines Computers am Beispiel der zweidimensionalen Wellengleichung zu implementieren.
       Zugrundeliegende Berechnungsgebiete werden dabei durch eine ausreichend große Anzahl von Dreiecken, deren Eckpunkten und deren Kanten diskretisiert.
       Das daraus folgende zu lösende System von algebraischen Gleichungen stellt für praxisnahe Probleme jedoch eine Herausforderung dar.
       Durch die Art der erforderlichen Berechnungen und durch die notwendige Rechenleistung ermöglicht die Verwendung der GPU allerdings einen extremen Anstieg der Performance.
-      Für die Implementierung der FEM auf der GPU wird die Effizienz von verschiedene Formaten für dünnbesetzte Matrizen und von numerischen Methoden zur Lösung von linearen Gleichungssystemen verglichen.
+      Für die Programmierung der FEM auf der GPU werden das CSR-Format für dünnbesetzte Matrizen und die iterative CG-Methode zur Lösung von linearen Gleichungssystemen implementiert.
       Unter Zuhilfenahme von CUDA werden die angegeben Datenstrukturen und Algorithmen sowohl auf einer NVIDIA Grafikkarte als auch auf der CPU konstruiert.
       Die erhaltenen Lösungen werden zudem visualisiert und getestet.
     \end{abstract}
