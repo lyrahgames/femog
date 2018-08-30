@@ -141,6 +141,12 @@
       Die Konstruktion der Systemmatrizen muss in dieser für jedes Berechnungsgebiet nur ein einziges Mal ausgeführt werden.
       Aus diesem Grund soll hier auf die Implementierung einer parallelisierten Methode auf der GPU verzichtet werden.
 
+      \begin{align*}
+        &\,\framebox[0.81\textwidth]{\footnotesize ungeordnete Eckpunkte} \\
+        &\makebox[0.81\textwidth]{\hfill $\downarrow \text{\footnotesize Counting Sort} \downarrow$ \hfill}\\
+        & \underbrace{\framebox[0.3\textwidth]{\footnotesize innere Eckpunkte}\underbrace{\framebox[0.25\textwidth]{\footnotesize Neumann-Eckpunkte}}_{\text{Neumann-Rand-Matrix}}}_{\text{innere Matrix}} \underbrace{\framebox[0.25\textwidth]{\footnotesize Dirichlet-Eckpunkte}}_{\text{Dirichlet-Rand-Matrix}}
+      \end{align*}
+
       Für die Simulation der Wellengleichung werden vier Systemmatrizen benötigt.
       Diese teilen sich auf in die inneren Matrizen, die die Wechselwirkung freier Eckpunkte untereinander beschreiben, und Randmatrizen, die die Wechselwirkung des Dirichlet-Randes mit inneren Eckpunkten beschreiben.
       Zunächst werden die Eckpunkte auf einem Dirichlet-Rand markiert.
