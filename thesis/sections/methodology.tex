@@ -722,26 +722,42 @@
         Ein analoges Verfahren ist das sogenannten CSC-Format (engl.: \textit{compressed sparse column}).
         Hier wird die kumulative Verteilungsfunktion im Bezug auf die Spalten und nicht auf die Zeilen gebildet.
         \cite{Bell2008}
-
-
-
-        \paragraph{Vergleich der Anwendbarkeit} % (fold)
-        \label{par:vergleich_der_anwendbarkeit}
-          \begin{figure}[h]
-            \center
-            \includegraphics[width=0.8\textwidth]{images/comparison_sparse_matrix_formats.png}
-          \end{figure}
-        % paragraph vergleich_der_anwendbarkeit (end)
       % subsubsection datenstrukturen_und_speicherformate (end)
 
-      \subsubsection{Assemblierung dünnbesetzter Matrizen} % (fold)
-      \label{ssub:assemblierung_dünnbesetzter_matrizen}
-
-      % subsubsection assemblierung_dünnbesetzter_matrizen (end)
-
-      \subsubsection{Lösung dünnbesetzter Systeme} % (fold)
+      \subsubsection{Lösung dünnbesetzter Systeme und das CG-Verfahren} % (fold)
       \label{ssub:lösung_dünnbesetzter_systeme}
-        \cite[S.~101~ff]{Nocedal2006}
+        Das CG-Verfahren (engl.: \textit{conjugate gradient method}) ist eine iterative Methode, um das folgende lineare Gleichungssystem zu lösen, welches durch eine symmetrische, positiv definite Matrix $A\in\setReal^{n\times n}$, einen Vektor $b\in\setReal^n$ und eine eindeutige Lösung $x\in\setReal^n$ für $n\in\setNatural$ beschrieben wird.
+        \[
+          Ax = b
+        \]
+        Eine äquivalente Formulierung ist dabei durch das folgende Optimierungsproblem zusammen mit dessen Residuum gegeben.
+        \[
+          \min_{x\in\setReal^n} φ(x) \define \transpose{x}Ax - \transpose{b}x
+          \separate
+          \nabla φ(x) = Ax-b \reverseDefine r(x)
+        \]
+        Das CG-Verfahren konvergiert nach spätestens $n$ Schritten zur korrekten Lösung.
+        Insbesondere nimmt mit jeder Iteration der Gesamtfehler der approximierten Lösung ab, sodass das Verfahren bereits nach einer geringeren Anzahl an Iterationen abgebrochen werden kann.
+
+        Grundsätzlich basiert das Verfahren auf der Konstruktion von $n$ zueinander paarweise $A$-konjugierten Vektoren $p_i$ für $i\in\setNatural$ mit $i\leq n$.
+        Auf der Grundlage dieser Vektoren kann dann in jeder Iteration ein neuer Lösungsvektor konstruiert werden, dessen Gesamtfehler reduziert wurde.
+        Der folgende Algorithmus wurde \cite{Nocedal2006} entnommen und beschreibt das Verfahren zur Berechnung des Lösungsvektors $x$, sofern ein beliebiger Startwert $x_0\in\setReal^n$ gegeben ist.
+        Für eine detailliertere Behandlung des CG-Verfahrens sei hier auf \cite{Nocedal2006} verwiesen.
+        Dort wird auch die Möglichkeit des sogenannten Vorkonditionierens beschrieben, die die Konvergenzgeschwindigkeit des Verfahrens noch erhöht.
+        \cite{Nocedal2006}
+        \begin{align*}
+          &r_0 \leftarrow Ax_0 - b \\
+          &p_0 \leftarrow -r_0 \\
+          &k \leftarrow 0 \\
+          &\text{\textbf{while} } r_k\neq 0 \\
+          &\qquad α_k \leftarrow \frac{\transpose{r_k}r_k}{\transpose{p_k}Ap_k} \\
+          &\qquad x_{k+1} \leftarrow x_k + α_kp_k \\
+          &\qquad r_{k+1} \leftarrow r_k + α_kAp_k \\
+          &\qquad β_{k+1} \leftarrow \frac{\transpose{r_{k+1}}r_{k+1}}{\transpose{r_k}r_k} \\
+          &\qquad p_{k+1} \leftarrow -r_{k+1} + β_{k+1}p_k \\
+          &\qquad k \leftarrow k+1 \\
+          &\text{\textbf{end}}
+        \end{align*}
       % subsubsection lösung_dünnbesetzter_systeme (end)
     % subsection sparse_matrix_methoden (end)
   % section methoden (end)
