@@ -397,6 +397,7 @@
       % paragraph schritt_3_wahl_der_basisfunktionen (end)
 
       \subsubsection{Konstruktion der algebraischen Formulierung}
+      \label{ssub:system-matrix-construction}
         Nachdem sowohl das Berechnungsgebiet als auch die Funktionenräume diskretisiert wurden, ist es nun möglich, darauf aufbauend aus den schwachen Formulierungen der partiellen Differentialgleichungen ein System algebraischer Gleichungen zu erlangen.
         Grundsätzlich ersetzt das Vorgehen alle Funktionen aus den Räumen $\setSobolev^1_\mathrm{D}(\domain)$ und $\setSobolev^1(\domain)$ durch die stückweisen linearen Funktionen der Räume $\mathrm{S}_\mathrm{D}$ und $\mathrm{S}$.
         Das Verfahren soll zunächst anhand des Poisson-Problems demonstriert werden.
@@ -468,6 +469,29 @@
           Bei $[\laplacian]$ handelt es sich um eine symmetrische, positiv-definite Matrix \cite{Alberty1998}.
           Für das System linearer Gleichungen existiert damit eine eindeutige Lösung \cite{Alberty1998,Schweizer2013}.
 
+          \paragraph{Wellenproblem}
+          \hfill\\
+            Für die Wellengleichung wird ein analoges Verfahren verwendet.
+            Es sollen jedoch die Dirichlet-Randpunkte von den restlichen Punkten separiert werden.
+            Es sei also $(\boxBrackets{\Omega},f,u_0,u_1,u_\mathrm{D}, u_\mathrm{N},u)$ ein Wellenproblem.
+            Dann lässt sich ein Matrix-Vektor-Produkt in der folgenden Form schreiben.
+            \[
+              [M][ϑ_n] \reverseDefine \underbrace{[M]^\circ [ϑ_n]^\circ}_{\text{innere Eckpunkte}} + \underbrace{[M]^\mathrm{(D)}[ϑ_n]^\mathrm{(D)}}_{\text{Dirichlet-Eckpunkte}}
+            \]
+            Dieses Verfahren wird nun auf die schwache Formulierung der zeit-diskretisierten Wellengleichung angewendet, wodurch man das folgende lineare Gleichungssystem erhält.
+            Auffallend ist, dass in der Finite-Elemente-Formulierung der Wellengleichung dieselben Matrizen, wie in der Finite-Elemente-Formulierung der Poisson-Gleichung vorkommen.
+            \begin{align*}
+              [M]^\circ [ϑ_{n+1}]^\circ &= [M]^\circ [ϑ_n]^\circ + [M]^\mathrm{(D)}[ϑ_n]^\mathrm{(D)} \\
+              &- \frac{1}{\infinitesimal{t}} \roundBrackets{
+                [M]^\mathrm{(D)}[φ_{n+1}]^\mathrm{(D)} - [M]^\mathrm{(D)}[φ_n]^\mathrm{(D)}
+              } \\
+              &+ \infinitesimal{t}\left(
+                [M]^\circ [f_n]^\circ + [M]^\mathrm{(D)}[f_n]^\mathrm{(D)} + [N][φ_n]^\mathrm{(N)} \right. \\
+              &\left. - [\laplacian]^\circ [φ_n]^\circ - [\laplacian]^\mathrm{(D)}[φ_n]^\mathrm{(D)} \right)
+            \end{align*}
+
+          \paragraph{Finite-Elemente-Matrizen}
+          \hfill\\
           Ein letzter Schritt für die Formulierung des linearen Gleichungssystems kümmert sich nun darum, die komplexen Systemmatrizen aus den einfachen Matrizen der finiten Elemente zu konstruieren.
           Es sei $\mathscr{T}$ die Menge der finiten Elemente, die das Berechnungsgebiet diskretisieren.
           Das Integral über $\domain$ lässt sich für eine beliebige Funktion damit als Summe der Integrale über die finiten Elemente darstellen.
@@ -723,6 +747,11 @@
         Für eine detailliertere Behandlung des CG-Verfahrens sei hier auf \cite{Nocedal2006} verwiesen.
         Dort wird auch die Möglichkeit des sogenannten Vorkonditionierens beschrieben, die die Konvergenzgeschwindigkeit des Verfahrens noch erhöht.
         \cite{Nocedal2006}
+
+        In Abschnitt \ref{sub:time-step-computation} wurde das hier beschriebene CG-Verfahren in der Sprache C++ auf der CPU und auf der GPU unter Zuhilfenahme der Sprache CUDA, der Bibliothek \enquote{Eigen} und der Bibliothek \enquote{Thrust} implementiert \cite{cuda2018,Eigen2018}.
+
+        \newpage
+
         \begin{center}
           \begin{tcolorbox}[%
             colframe=black,
@@ -753,7 +782,6 @@
             \end{align*}
           \end{tcolorbox}
         \end{center}
-        In Abschnitt \ref{sub:time-step-computation} ist das hier beschriebene CG-Verfahren in der Sprache C++ auf CPU und auf der GPU unter Zuhilfenahme der Sprache CUDA, der Bibliothek \enquote{Eigen} und der Bibliothek \enquote{Thrust} implementiert worden \cite{cuda2018,Eigen2018}.
       % subsubsection lösung_dünnbesetzter_systeme (end)
     % subsection sparse_matrix_methoden (end)
   % section methoden (end)

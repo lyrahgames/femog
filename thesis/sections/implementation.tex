@@ -66,42 +66,50 @@
           \caption{Test}
         \end{subfigure}
         \caption[Beispiele verschiedener Berechnungsgebiete]{%
-          Die Abbildungen zeigen verschiedene Beispiele für Berechnungsgebiete die mithilfe der Klasse \code{Domain} eingelesen und verarbeitet wurden.
+          Die Abbildungen zeigen verschiedene Beispiele für Berechnungsgebiete, die mithilfe der Klasse \code{Domain} eingelesen und verarbeitet wurden.
         }
         \label{fig:model-examples}
       \end{figure}
 
       Für die späteren Messungen ist es von großem Nutzen, die Triangulierung eines Gebietes zu verfeinern.
-      Hierfür enthält die Klasse \code{Domain} eine Funktion \code{subdivide}.
-      Sie ermittelt für jede vorhandene Kante einen neuen Eckpunkt und fügt dann auf der Basis der alten Dreiecke neue feinere Dreiecke hinzu.
+      Hierfür enthält die Klasse \code{Domain} eine Funktion \code{subdivide} die eine Subdivision des Berechnungsgebietes durchführt.
+      Dabei ermittelt sie für jede vorhandene Kante einen neuen Eckpunkt und fügt dann auf der Basis der alten Dreiecke neue feinere Dreiecke hinzu.
       Die unterteilten Kanten behalten dabei ihre Randeigenschaften.
-      \inputCodeBlock[title=subdivide]{code/domain_implementation_subdivide.cc}
+      In Abbildung \ref{fig:scheme-subdivision} wird dieses Verfahren schematisch noch einmal an einem Dreieck demonstriert.
 
-      Um ein Berechnungsgebiet außerhalb des Quelltextes leicht zu beschreiben, wurde ein Dateiformat definiert.
-      Im folgenden ist ein Beispielmodell gezeigt.
-      Hierbei steht \code{v} für die Definition eines Eckpunktes, \code{p} für die Definition eines Dreiecks, \code{q} für die Definition eines Vierecks, \code{d} für eine Dirichlet-Kante und \code{n} für eine Neumann-Kante.
-      \begin{center}
-        \noindent
-        \begin{minipage}[b]{0.32\textwidth}
-          \begin{tcolorbox}[titlerule=0.1pt,boxrule=0.5pt,arc=5pt,title={Zeile 1-13}]
-            \lstinputlisting[style=standard,firstline=1,lastline=13]{code/model-test.txt}
-          \end{tcolorbox}
-        \end{minipage}
-        \hfill
-        \begin{minipage}[b]{0.32\textwidth}
-          \begin{tcolorbox}[titlerule=0.1pt,boxrule=0.5pt,arc=5pt,title={Zeile 14-26}]
-            \lstinputlisting[style=standard,firstline=14,lastline=26]{code/model-test.txt}
-          \end{tcolorbox}
-        \end{minipage}
-        \hfill
-        \begin{minipage}[b]{0.32\textwidth}
-          \begin{tcolorbox}[titlerule=0.1pt,boxrule=0.5pt,arc=5pt,title={Zeile 27-39}]
-            \lstinputlisting[style=standard,firstline=27,lastline=39]{code/model-test.txt}
-          \end{tcolorbox}
-        \end{minipage}
-      \end{center}
+      \begin{figure}[h]
+        \begin{subfigure}[t]{0.32\textwidth}
+          \center
+          \includegraphics{images/irr_map_ds-order_1.pdf}
+          \caption{\parbox[t]{0.5\textwidth}{Subdivision: $0$ \\ Eckpunkte: $3$}}
+          \label{subfig:scheme-irr-map-order1}
+        \end{subfigure}
+        \begin{subfigure}[t]{0.32\textwidth}
+          \center
+          \includegraphics{images/irr_map_ds-order_2.pdf}
+          \caption{\parbox[t]{0.5\textwidth}{Subdivision: $1$ \\ Eckpunkte: $6$}}
+          \label{subfig:scheme-irr-map-order2}
+        \end{subfigure}
+        \begin{subfigure}[t]{0.32\textwidth}
+          \center
+          \includegraphics{images/irr_map_ds-order_4.pdf}
+          \caption{\parbox[t]{0.5\textwidth}{Subdivision: $2$ \\ Eckpunkte: $15$}}
+          \label{subfig:scheme-irr-map-order4}
+        \end{subfigure}
+        \caption[Subdivision-Schema]{%
+          Die Skizzen zeigen unterschiedliche Subdivisions eines Dreiecks, definiert durch die Eckpunkte $A$, $B$ und $C$.
+          Zunächst wird jede Kante unterteilt.
+          Danach können die Dreiecke durch feinere Dreiecke ersetzt werden.
+        }
+        \label{fig:scheme-subdivision}
+      \end{figure}
 
+      Im folgenden Quelltext wird sich bereits auf das existierende Interface der Klasse \code{Domain} gestützt.
+      Die Funktion \code{subdivide} bedingt, dass es sich bei dem gegebenen Template-Parameter um eine Klasse handeln muss, die einfache Vektorarithmetik unterstützt.
+      Der Algorithmus stellt nicht sicher, dass Eckpunkte, die nah beieinander liegen, auch im Speicher nah beieinander liegen, wodurch dessen Formulierung simpler ausfällt.
+      Die Anwendung von \code{subdivide} auf die Szenen aus Abbildung \ref{fig:model-examples} ist in Abbildung \ref{fig:model-subdivide} zu sehen.
 
+      \inputCodeBlock[title=\code{subdivide}]{code/domain_implementation_subdivide.cc}
 
       \begin{figure}[h]
         \begin{subfigure}[b]{0.24\textwidth}
@@ -124,28 +132,87 @@
           \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-test-1.png}
           \caption{Test}
         \end{subfigure}
+        \caption[Subdivision von Testgebieten]{%
+          Die Abbildungen zeigen verschiedene Beispiele für Berechnungsgebiete, die mithilfe der Klasse \code{Domain} eingelesen und dann durch die Funktion \code{subdivide} verfeinert wurden.
+        }
+        \label{fig:model-subdivide}
       \end{figure}
+
+      Um ein Berechnungsgebiet außerhalb des Quelltextes leicht zu beschreiben, wurde ein einfaches ASCII-basiertes Dateiformat definiert.
+      Im Folgenden wird es anhand eins Beispielmodells, welches \cite{Alberty1998} entnommen wurde, demonstriert.
+      Hierbei steht \code{v} für die Definition eines Eckpunktes, \code{p} für die Definition eines Dreiecks, \code{q} für die Definition eines Vierecks, \code{d} für eine Dirichlet-Kante und \code{n} für eine Neumann-Kante.
+      Beim Einlesen einer Datei wird durch das Interface der Klasse \code{Domain} sicher gestellt, dass es sich um korrekt konstruierte Gebiete handelt.
+
+      \begin{center}
+        \noindent
+        \begin{minipage}[b]{0.32\textwidth}
+          \begin{tcolorbox}[colframe=black,
+                            colbacktitle=white,
+                            coltitle=black,
+                            attach boxed title to top center={yshift=-2mm},
+                            enhanced,
+                            titlerule=0.1pt,
+                            boxrule=0.5pt,
+                            arc=5pt,
+                            breakable,title={Zeile 1-13}]
+            \lstinputlisting[style=standard,firstline=1,lastline=13]{code/model-test.txt}
+          \end{tcolorbox}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.32\textwidth}
+          \begin{tcolorbox}[colframe=black,
+                            colbacktitle=white,
+                            coltitle=black,
+                            attach boxed title to top center={yshift=-2mm},
+                            enhanced,
+                            titlerule=0.1pt,
+                            boxrule=0.5pt,
+                            arc=5pt,
+                            breakable,
+                            title={Zeile 14-26}]
+            \lstinputlisting[style=standard,firstline=14,lastline=26]{code/model-test.txt}
+          \end{tcolorbox}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.32\textwidth}
+          \begin{tcolorbox}[colframe=black,
+                            colbacktitle=white,
+                            coltitle=black,
+                            attach boxed title to top center={yshift=-2mm},
+                            enhanced,
+                            titlerule=0.1pt,
+                            boxrule=0.5pt,
+                            arc=5pt,
+                            breakable,title={Zeile 27-39}]
+            \lstinputlisting[style=standard,firstline=27,lastline=39]{code/model-test.txt}
+          \end{tcolorbox}
+        \end{minipage}
+      \end{center}
     % subsection repräsentation_des_berechnungsgebietes (end)
 
     \subsection{Aufbau des Systems} % (fold)
     \label{sub:aufbau_des_systems}
-      Ein System zur Lösung der Wellengleichung soll zunächst auf der CPU implementiert werden.
+      Nachdem nun eine robuste Struktur für das Einlesen, Bearbeiten und Speichern eines Berechnungsgebietes entwickelt wurde, ist ein System nötig, welches die Finite-Elemente-Methode anwendet und die Lösung der Wellengleichung für gegebene Rand- und Anfangsdaten simuliert.
+
+      Ein solches System soll zunächst auf der CPU implementiert werden, um die Anschaulichkeit zu gewährleisten.
       Hierfür wird die Klasse \code{Cpu\_wave\_system} eingeführt.
-      Sie verwendet die Bibliothek \enquote{Eigen} für alle grundlegenden Matrix-Vektor-Operationen \cite{Eigen2018}.
-      \inputCodeBlock[title=Wave system]{code/cpu_wave_system.cc}
-      Das Interface des Systems besteht grundlegend aus einer Funktion \code{initial\_state}, die es ermöglicht, die Anfangsbedingungen zu setzen, und einer Funktion \code{advance}, die das gesamte System einen Zeitschritt voranbringt.
+      Sie verwendet die Bibliothek \enquote{Eigen}, die ein abstraktes und leicht verständliches Interface für alle grundlegenden Matrix-Vektor-Operationen anbietet \cite{Eigen2018}.
+
+      \inputCodeBlock[title=\code{Cpu\_wave\_system}]{code/cpu_wave_system.cc}
+
+      Das Interface der Klasse \code{Cpu\_wave\_system} besteht grundlegend aus der Funktion \code{initial\_state}, die es ermöglicht, die Anfangs- und Randbedingungen zu setzen, und einer Funktion \code{advance}, die das gesamte System einen Zeitschritt voranbringt.
       Systemmatrizen der Finite-Elemente-Methode, sowie die Welle und deren Ableitungen, werden zwischengespeichert, um unnötige Berechnungsschritte zu verhindern.
       Des Weiteren sollen bei der Konstruktion des Systems Eckpunkte, die auf dem Rand des Gebietes liegen, von den inneren Eckpunkten separiert werden.
       Hierfür wird das Array der Eckpunkte innerhalb des Systems permutiert.
       Die Permutation wird für den Zugriff von außen gespeichert.
       Im weiteren Verlauf sollen die Neumann-Randbedingungen auf Null gesetzt werden, sodass die Konstruktion der Neumann-Rand-Matrix nicht notwendig ist.
-      Die Neumann-Rand-Matrix ließe sich aber analog zu den anderen Systemmatrizen durch eine Iteration über alle Neumann-Kanten konstruieren.
+      Diese ließe sich aber analog zu den anderen Systemmatrizen durch eine Iteration über alle Neumann-Kanten konstruieren.
 
       Auf der GPU ist die Verwendung von \enquote{Eigen} nicht möglich.
       Aus diesem Grund ist eine explizite Implementierung des CSR-Formates auf dem DRAM der GPU nötig.
-      Um den Zugriff auf die Daten in CUDA zu ermöglichen, werden Zeiger definiert.
       Das Interface der Klasse \code{Gpu\_wave\_system} unterscheidet sich im Wesentlichen nicht von dem der Klasse \code{Cpu\_wave\_system}.
-      Möchte man jedoch die Welle auslesen, so müssen deren Daten vom DRAM wieder in den RAM übertragen werden.
+      Um den Zugriff auf die Daten im DRAM der GPU zu ermöglichen, werden Zeiger deklariert, die später einem Kernel der GPU übergeben werden.
+      Möchte man die Wellenfunktion auslesen, so müssen deren Daten vom DRAM wieder in den RAM übertragen werden.
       Eben deshalb wird eine Funktion \code{copy\_wave} deklariert.
 
       \inputCodeBlock[title = GPU Wave system]{code/gpu_wave_system.cc}
@@ -158,7 +225,7 @@
 
       Für eine effiziente Berechnung des Zeitschrittes sollen vor der eigentlichen Konstruktion alle Eckpunkte durch \enquote{Counting Sort} sortiert werden.
       Das folgende Schema veranschaulicht diese Überlegung und zeigt zudem die Bereiche der Indizes an, auf die die unterschiedlichen Systemmatrizen zugreifen.
-      Die Sortierung der Eckpunkte steigert die Performance des Matrix-Vektor-Produktes, welches nun bei der Berechnung linear auf dem Speicher arbeitet, und vereinfacht das Interface.
+      Die Sortierung der Eckpunkte steigert die Performance des Matrix-Vektor-Produktes, welches nun bei der Berechnung linear auf dem Speicher arbeitet, und vereinfacht zudem das Interface.
       \begin{align*}
         &\,\framebox[0.81\textwidth]{\footnotesize ungeordnete Eckpunkte} \\
         &\makebox[0.81\textwidth]{\hfill $\downarrow \text{\footnotesize Counting Sort} \downarrow$ \hfill}\\
@@ -169,41 +236,64 @@
       % Zunächst werden die Eckpunkte auf einem Dirichlet-Rand markiert.
       % Auf der Basis dieser Markierung lässt sich die Permutation konstruieren.
       Nach der Berechnung der Permutation durch \enquote{Counting Sort}, wird über alle Dreiecke iteriert.
-      Jedes Dreieck liefert die Matrix eines finiten Elementes.
+      Jedes Dreieck liefert die Matrix eines finiten Elementes, wie in Abschnitt \ref{ssub:system-matrix-construction} beschrieben wurde.
       Diese Matrizen werden entsprechend dem Standardverfahren von \enquote{Eigen} akkumuliert und zu den Systemmatrizen zusammengesetzt \cite{Eigen2018}.
-      \inputCodeBlock[title = System construction]{code/cpu_wave_system_constructor.cc}
+
+      \inputCodeBlock[title = \code{Cpu\_wave\_system} Constructor]{code/cpu_wave_system_constructor.cc}
 
       Für die GPU müssen die auf der CPU konstruierten Daten der dünnbesetzten Matrizen noch auf den DRAM übertragen werden.
       Nützlich dabei ist, dass die beiden inneren Matrizen das gleiche Muster aufweisen.
       Ebenso gilt dies für die beiden Randmatrizen.
       Die vier CSR-Matrizen lassen sich also zu zwei kompletten CSR-Matrizen und zwei zusätzlichen Wertearrays komprimieren.
+      Möchte man die Neumann-Rand-Matrix implementieren, so muss eine weitere komplette CSR-Matrix eingeführt werden, da diese ein anderes Muster als die zuvor genannten Matrizen aufweist.
+
       Während der Konstruktion wird zudem die maximale Anzahl von Threads auf einem Block der verwendeten GPU ausgelesen.
       Mithilfe dieses Wertes wird eine optimale Anzahl von Threads auf den verschiedenen Blocks der GPU generiert.
-      \inputCodeBlock[title = System construction]{code/gpu_wave_system_constructor.cc}
+      Die Aufteilung von Threads auf verschiedene Blöcke wird in \cite{cuda2018,Kirk2010,Sanders2011} diskutiert.
+      In \cite{Bell2008} werden für verschiedene Problemstellungen zudem diverse Vorteile durch die Verwendung der \enquote{Shared Memory} innerhalb eines Blocks für diese Methode erläutert.
 
-      Da die Daten auf dem DRAM über herkömmliche Zeiger verwaltet werden, muss der Destruktor der Klasse den allozierten Speicher auf dem DRAM wieder freigeben.
-      \inputCodeBlock[title = System construction]{code/gpu_wave_system_destructor.cc}
+      \inputCodeBlock[title = \code{Gpu\_wave\_system} Constructor]{code/gpu_wave_system_constructor.cc}
 
+      Da fast die gesamten Daten auf dem DRAM der GPU über herkömmliche Zeiger verwaltet werden, sollte der Destruktor der Klasse \code{Gpu\_wave\_system} nach dem RAII-Prinzip den allozierten Speicher wieder freigeben \cite{Stroustrup2014}.
+      Der folgende Codeausschnitt zeigt dies.
       Die Funktionen, um die Anfangsdaten zu setzen und die Wellendaten auszulesen, müssen ebenfalls die Daten zwischen dem RAM und dem DRAM transportieren.
-      Dies funktioniert analog wieder mit \code{cudaMemcpy} oder \code{thrust::copy}.
+
+      \inputCodeBlock[title = \code{Gpu\_wave\_system} Destructor]{code/gpu_wave_system_destructor.cc}
+
       % \inputCodeBlock[title = System construction]{code/gpu_wave_system_accessors.cc}
     % subsection konstruktion_der_mass_und_stiffness_matrix (end)
 
     \subsection{Berechnung eines Zeitschrittes} % (fold)
     \label{sub:time-step-computation}
-      Die Berechnung eines weiteren Zeitschrittes erfordert die Konstruktion der rechten Seite des linearen Gleichungssystems.
+      Die Berechnung eines Zeitschrittes erfordert die Konstruktion der rechten Seite des linearen Gleichungssystems, die sich nach Abschnitt \ref{ssub:system-matrix-construction} aus vier Matrix-Vektor-Produkten zusammensetzt.
+      Die Bibliothek \enquote{Eigen} ist in der Lage, diese Berechnungen durch ein abstraktes Vorgehen in anschaulicher Weise darzustellen.
       Mithilfe des in \enquote{Eigen} implementierten CG-Verfahrens wird dann die Ableitung der Welle zum neuen Zeitpunkt berechnet.
       Anschließend kann mit dieser Ableitung die neue Welle generiert werden.
-      \inputCodeBlock[title = CPU Wave System advance]{code/cpu_wave_system_advance.cc}
+      Der folgende Codeausschnitt demonstriert dieses Vorgehen.
+      Zu beachten ist, dass die Daten der Vektoren \code{wave\_} und \code{evolution\_} in der sortierten Form vorliegen und so eine einfache Verarbeitung durch \code{Eigen::Map} ermöglichen.
+      Die Implementierung auf der CPU ist jedoch nicht vollständig optimiert, da das eigentliche Ziel darin besteht das Verfahren auf der GPU zu implementieren.
 
-      Um den Lösungsalgorithmus auf der GPU zu programmieren, soll zunächst das CG-Verfahren auf der CPU implementiert werden.
-      Der folgende Quelltext zeigt dies.
-      \inputCodeBlock[title = Conjugate Gradient]{code/cpu_conjugate_gradient.cc}
-      Innerhalb der GPU wird nun genau wie auf der CPU zuerst die rechte Seite des linearen Gleichungssystems konstruiert und dann ein CG-Verfahren angewendet.
-      Um die Implementierung einfacher zu gestalten, wurde \enquote{Thrust} verwendet \cite{cuda2018}.
-      \inputCodeBlock[title = GPU Wave System advance]{code/gpu_wave_system_advance.cc}
-      Innerhalb des Codes wird ein Kernel definiert, der die Matrix-Vektor-Multiplikation des CSR-Formates auf der GPU parallelisiert.
-      Des Weiteren wurden zwei Funktoren \code{axpy\_functor} und \code{axpby\_functor} verwendet, die die typischen BLAS Routinen darstellen.
+      \inputCodeBlock[title = \code{Cpu\_wave\_system::advance}]{code/cpu_wave_system_advance.cc}
+
+      Um die Ausführung der Funktion \code{advance} auf der GPU zu verstehen, soll zunächst das CG-Verfahren aus Abschnitt \ref{ssub:cg-method} auf der CPU implementiert werden.
+      Der Quelltext der Funktion \code{Gpu\_wave\_system::advance} beschreibt genau das gleiche Vorgehen, ist aber durch die Anwendung zweier GPU-Kernel und weiteren Funktionen der Bibliothek \enquote{Thrust} komplizierter notiert \cite{cuda2018}.
+      Der folgende Codeausschnitt beschreibt das CG-Verfahren unter Verwendung dreier temporärer Vektoren, um die Berechnung zu beschleunigen.
+      Die Template-Parameter beschreiben hier Konzepte einer Matrix und eines Vektors, sodass dieser Algorithmus auf verschiedene Datentypen angewandt werden könnte.
+
+      \inputCodeBlock[title = \code{conjugate\_gradient}]{code/cpu_conjugate_gradient.cc}
+
+      Auf der GPU wird nun mithilfe von CUDA und \enquote{Thrust} genau wie auf der CPU zuerst die rechte Seite des linearen Gleichungssystems konstruiert und dann das CG-Verfahren angewendet.
+      Im folgenden Quelltext werden für diese Aufgaben zudem zwei verschiedene Kernel \code{spmv\_csr\_kernel} und \code{rhs\_kernel} verwendet.
+      Der erste Kernel berechnet das Matrix-Vektor-Produkt einer im CSR-Format gespeicherten Matrix.
+      Der zweite Kernel berechnet mit einem einzigen Aufruf die rechte Seite des linearen Gleichungssystems, um temporäre Speicherbewegungen.
+
+      \inputCodeBlock[title = \code{Gpu\_wave\_system::advance}]{code/gpu_wave_system_advance.cc}
+
+      Die GPU-Kernel parallelisieren die Matrix-Vektor-Produkte, indem sie für jede Zeile der Matrix einen Thread verwenden, der ein Skalarprodukt bildet.
+      Für das hier betrachtete zweidimensionale Wellenproblem ist dieser skalare Kernel ausreichend und effizient \cite{Bell2008,Bell2009}.
+      Systeme zur Lösung komplexerer Probleme können von der Verwendung eines Vektor-Kernels, wie in \cite{Bell2008} beschrieben, profitieren.
+      Des Weiteren wurden zwei Funktoren \code{axpy\_functor} und \code{axpby\_functor} verwendet, die die typischen BLAS Routinen darstellen und aus der \enquote{Thrust}-Dokumentation entnommen wurden \cite{cuda2018}.
+
       \inputCodeBlock[title = GPU Kernel]{code/gpu_wave_system_kernel.cc}
     % subsection konstruktion_des_linearen_gleichungssystems (end)
 
