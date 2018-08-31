@@ -8,32 +8,68 @@
     \label{sub:repräsentation_des_berechnungsgebietes}
       Es handle sich bei $[\domain]\define\roundBrackets{\domain,\dirichletBoundary,\neumannBoundary,ν}$ wieder um ein Berechnungsgebiet.
       Die Implementierung einer Finite-Elemente-Methode verlangt die Diskretisierung von $[\domain]$, wie es in Abschnitt \ref{ssub:discretization-domain} beschrieben wurde.
-      Es sei $(V,E,\mathscr{T})$ eine Triangulierung von $[\domain]$.
-      Die Implementierung der Basisstruktur für die Triangulierung des Berechnungsgebietes sei durch den folgenden Quelltext gegeben.
+      Das Ziel besteht darin, eine Klasse zu erstellen, die es ermöglicht, Berechnungsgebiete durch ein einfaches Dateiformat einzulesen, zu überprüfen und unter Umständen zu verfeinern.
+      Eine weitere Klasse wird sich dann um die Konstruktion der Systemmatrizen und um die Berechnung des Zeitschrittes kümmern.
+      Zunächst werden hierfür die grundlegendsten Strukturen eingeführt.
+      Die simple Basisklasse \code{Domain\_base} im folgenden Quelltext definiert Kanten und Dreiecke, die auf Eckpunkte referenzieren.
 
-      \inputCodeBlock[title=domain\_base]{code/domain_base.cc}
-      Die Basisstruktur wird als \code{Domain\_base} im Namespace \code{Fem} konstruiert.
+      \inputCodeBlock[title=\code{Domain\_base}]{code/domain_base.cc}
+
+      Die Basisstruktur \code{Domain\_base} wird im Namespace \code{Fem}, der auch für alle weiteren Codeausschnitte verwendet werden soll, konstruiert.
       In ihr werden die Strukturen \code{Edge} und \code{Primitive} für die Beschreibung der Kanten und Dreiecke deklariert.
       Die verschiedenen Konstruktoren und Zuweisungsoperatoren der Sprache C++ werden explizit durch den Compiler erzeugt.
       Der Destruktor wurde mit \code{virtual} gekennzeichnet, wie es für polymorphe Basisklassen angebracht ist \cite[S.~40~ff]{Meyers2008}.
+      In den folgenden beiden Codeausschnitten werden die Strukturen \code{Edge} und \code{Primitive} implementiert.
 
-      \inputCodeBlock[title=edge]{code/edge.cc}
-      Die Datenstruktur \code{Edge} der Basisklasse \code{Domain\_base} wird durch ein Array von zwei Integern dargestellt.
-      Diese verweisen später auf die Eckpunkte der Kanten.
-      Der Konstruktor stellt sicher, dass die Indizes sortiert übergeben werden.
-      Innerhalb der Datenstruktur werden zwei weitere Datenstrukturen \code{Hash} und \code{Info} deklariert, die für die fehlerfreie Konstruktion eines Berechnungsgebietes verwendet werden.
-      Die Datenstruktur \code{Primitive} eines Dreiecks ist analog aufgebaut.
-      Um die drei Indizes für die Referenzierung auf die Eckpunkte zu sortieren, wird hier ein einfaches \enquote{Insertion Sort} verwendet.
-      \inputCodeBlock[title=primitive]{code/primitive.cc}
+      \inputCodeBlock[title=\code{Edge}]{code/edge.cc}
+      \inputCodeBlock[title=\code{Primitive}]{code/primitive.cc}
 
-      Die eigentliche Datenstruktur \code{Domain} eines Berechnungsgebietes erbt von der Basisklasse \code{Domain\_base}.
-      Zudem wird der Datentyp der Eckpunkte durch ein Template variabel gehalten.
+      \code{Edge} und \code{Primitive} sind analog zueinander aufgebaut.
+      Bei beiden handelt es sich um eine Spezialisierung von \code{std::array<int,...>} mit zwei oder drei Indizes.
+      Diese Indizes werden später auf die Eckpunkte des Berechnungsgebietes verweisen.
+      Die Konstruktoren stellen sicher, dass die Indizes sortiert übergeben werden.
+      In beiden Fällen wird dabei eine explizite Formulierung des \enquote{Insertion Sort}-Verfahrens verwendet.
+      Innerhalb der Datenstrukturen werden zwei weitere Datenstrukturen \code{Hash} und \code{Info} deklariert, die für die Verwendung mit der \enquote{Hash Map} \code{std::unordered\_map} vorgesehen sind.
+      Eine \enquote{Hash Map} ist eine der effizientesten Varianten, um die Ränder eines Gebietes automatisch zu bestimmen.
+      Zudem lässt sich durch diese sicher stellen, dass das konstruierte Gebiet fehlerfrei ist.
+
+      Die eigentliche Datenstruktur \code{Domain} eines Berechnungsgebietes ist dann eine Spezialisierung der Basisklasse \code{Domain\_base} und nutzt demnach deren Kanten und Dreiecke.
+      Der Datentyp der Eckpunkte wird durch ein \enquote{Template} variabel gehalten, sodass zum Beispiel der Austausch von Gleitkommazahlen mit einfacher Genauigkeit durch Gleitkommazahlen mit doppelter Genauigkeit kein Problem darstellt.
       Das Interface der Klasse ergibt sich aus Funktionen, um Daten zu lesen und fehlerfrei hinzuzufügen.
-      Um dies auch in der Implementierung zu gewährleisten, werden für das Aufbewahren der Dreiecke und Kanten \enquote{Hash Maps} verwendet.
-      Diese speichern, wie oft eines der genannten Objekte zum Berechnungsgebiet hinzugefügt wurde.
+      Um dies auch in der Implementierung zu gewährleisten, speichert jede \enquote{Hash Map}, wie oft ein Dreieck oder eine Kante bereits hinzugefügt wurde.
       Auf der Basis dieser Zahl ist die Klasse dann in der Lage, zwischen Randkanten und inneren Kanten zu unterscheiden und fehlerhafte Berechnungsgebiete zu verhindern.
-      \inputCodeBlock[title=domain]{code/domain.cc}
-      \inputCodeBlock[title=domain implementation]{code/domain_implementation.cc}
+      Die folgenden beiden Codeausschnitte zeigen eine genaue Implementierung der wichtigsten Funktionen.
+      In Abbildung \ref{fig:model-examples} sind als Beispiel verschiedene Testgebiete durch die Klasse \code{Domain} eingelesen und verarbeitet worden.
+
+      \inputCodeBlock[title=\code{Domain}]{code/domain.cc}
+      \inputCodeBlock[title=\code{Domain} Implementation]{code/domain_implementation.cc}
+
+      \begin{figure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-quad-0.png}
+          \caption{Quad}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-ring-0.png}
+          \caption{Ring}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-circle-0.png}
+          \caption{Curved}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-test-0.png}
+          \caption{Test}
+        \end{subfigure}
+        \caption[Beispiele verschiedener Berechnungsgebiete]{%
+          Die Abbildungen zeigen verschiedene Beispiele für Berechnungsgebiete die mithilfe der Klasse \code{Domain} eingelesen und verarbeitet wurden.
+        }
+        \label{fig:model-examples}
+      \end{figure}
 
       Für die späteren Messungen ist es von großem Nutzen, die Triangulierung eines Gebietes zu verfeinern.
       Hierfür enthält die Klasse \code{Domain} eine Funktion \code{subdivide}.
@@ -65,28 +101,7 @@
         \end{minipage}
       \end{center}
 
-      \begin{figure}[h]
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-quad-0.png}
-          \caption{Quad}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-ring-0.png}
-          \caption{Ring}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-circle-0.png}
-          \caption{Curved}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={0 0 0 2cm},clip,width=0.95\textwidth]{images/model-test-0.png}
-          \caption{Test}
-        \end{subfigure}
-      \end{figure}
+
 
       \begin{figure}[h]
         \begin{subfigure}[b]{0.24\textwidth}
@@ -175,7 +190,7 @@
     % subsection konstruktion_der_mass_und_stiffness_matrix (end)
 
     \subsection{Berechnung eines Zeitschrittes} % (fold)
-    \label{sub:konstruktion_des_linearen_gleichungssystems}
+    \label{sub:time-step-computation}
       Die Berechnung eines weiteren Zeitschrittes erfordert die Konstruktion der rechten Seite des linearen Gleichungssystems.
       Mithilfe des in \enquote{Eigen} implementierten CG-Verfahrens wird dann die Ableitung der Welle zum neuen Zeitpunkt berechnet.
       Anschließend kann mit dieser Ableitung die neue Welle generiert werden.
@@ -195,164 +210,7 @@
     \subsection{Visualisierung} % (fold)
     \label{sub:visualisierung}
 
-      Die Verwendung von OpenGL ermöglicht die dreidimensionale Darstellung von Objekten, die durch Dreiecke diskretisiert wurden.
-      Um die Darstellung der Wellenfunktion und des Berechnungsgebietes noch anschaulicher zu gestalten, wurde jedem Eckpunkt des Gebietes als dritte Koordinate die Werte der Welle zugewiesen.
-      Zudem wurde eine Farbverteilung berechnet.
-      Die Abbildungen \ref{fig:test-wave}, \ref{fig:quad-wave}, \ref{fig:ring-wave} und \ref{fig:circle-wave} zeigen die Visualisierung der berechneten Welle über dem entsprechenden Gebiet anhand ausgewählter Testmodelle.
-
-      \begin{figure}[h]
-        \center
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_0.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_1.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_2.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_3.png}
-          \caption{}
-        \end{subfigure}
-
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_4.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_5.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_6.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_7.png}
-          \caption{}
-        \end{subfigure}
-        \caption[Wellensimulation auf dem Testgebiet]{%
-          Die Abbildungen zeigen die Zeitevolution einer Simulation der Wellengleichung auf dem Gebiet \enquote{Test}.
-          Dieses Gebiet wurde in \cite{Alberty1998} beschrieben.
-          Es wurden dabei gemischte Randbedingungen gewählt.
-        }
-        \label{fig:test-wave}
-      \end{figure}
-
-      \begin{figure}[h]
-        \center
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_0.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_1.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_2.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_3.png}
-          \caption{}
-        \end{subfigure}
-
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_4.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_5.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_6.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_7.png}
-          \caption{}
-        \end{subfigure}
-        \caption[Wellensimulation auf einem quadratischen Gebiet]{%
-          Die Abbildungen zeigen die Zeitevolution einer Simulation der Wellengleichung auf dem Gebiet \enquote{Quad}.
-          Es handelt sich um ein quadratisches Berechnungsgebiet mit Dirichlet-Randbedingungen.
-        }
-        \label{fig:quad-wave}
-      \end{figure}
-
-      \begin{figure}[h]
-        \center
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_0.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_1.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_2.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_3.png}
-          \caption{}
-        \end{subfigure}
-
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_4.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_5.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_6.png}
-          \caption{}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.24\textwidth}
-          \center
-          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_7.png}
-          \caption{}
-        \end{subfigure}
-        \caption[Wellensimulation auf einem quadratischen Ring]{%
-          Die Abbildungen zeigen die Zeitevolution einer Simulation der Wellengleichung auf dem Gebiet \enquote{Ring}.
-          Es handelt sich dabei um einen quadratischen Ring mit Neumann-Randbedingungen.
-          Es lassen sich hier typische Effekte, wie Beugung und Interferenz, beobachten.
-        }
-        \label{fig:ring-wave}
-      \end{figure}
-
-      \begin{figure}[h]
+      \begin{figure}[p]
         \center
         \begin{subfigure}[b]{0.24\textwidth}
           \center
@@ -403,6 +261,175 @@
         }
         \label{fig:circle-wave}
       \end{figure}
+
+      Für die Simulation der Wellengleichung reicht es an sich aus, das CG-Verfahren zu verwenden und das lineare Gleichungssystem zu lösen.
+      Bei der berechneten Lösung handelt es sich um einen Vektor, der die Werte der Wellenfunktion über den einzelnen Eckpunkten speichert.
+      Durch automatisierte Testverfahren ist der Computer teilweise in der Lage, die Ergebnisse auf Fehler zu überprüfen.
+      Allerdings verändert sich eine Welle auf einem berandeten Gebiet mit fortschreitender Zeit auf immer komplexere Art und Weise.
+      Aus diesem Grund stellt das subjektive Empfinden des Programmierers beziehungsweise Modellierers, welches bei der Betrachtung der Welle entsteht, ein weiteres Testverfahren dar, um die Korrektheit des Algorithmus unter gewissen Einschränkungen zu gewährleisten.
+      Die Eigenschaften einer visualisierten Wellenfunktion sind für einen Menschen leichter nachzuvollziehen als eine reine Ansammlung von Daten.
+      Abbildung \ref{fig:circle-wave} zeigt zum Beispiel numerische Fehler einer Wellensimulation, die durch die spezielle Form des Gitters auftreten und schwer durch automatisierte Tests zu finden sind.
+
+      \begin{figure}[p]
+        \center
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_0.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_1.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_2.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_3.png}
+          \caption{}
+        \end{subfigure}
+
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_4.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_5.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_6.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={4cm 1.2cm 4.5cm 1.5cm},clip,width=0.95\textwidth]{images/test_wave_7.png}
+          \caption{}
+        \end{subfigure}
+        \caption[Wellensimulation auf dem Testgebiet]{%
+          Die Abbildungen zeigen die Zeitevolution einer Simulation der Wellengleichung auf dem Gebiet \enquote{Test}.
+          Dieses Gebiet wurde in \cite{Alberty1998} beschrieben.
+          Es wurden dabei gemischte Randbedingungen gewählt.
+        }
+        \label{fig:test-wave}
+      \end{figure}
+
+      \begin{figure}[p]
+        \center
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_0.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_1.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_2.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_3.png}
+          \caption{}
+        \end{subfigure}
+
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_4.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_5.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_6.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={0.9cm 1.8cm 0.5cm 5cm},clip,width=0.95\textwidth]{images/ring_wave_7.png}
+          \caption{}
+        \end{subfigure}
+        \caption[Wellensimulation auf einem quadratischen Ring]{%
+          Die Abbildungen zeigen die Zeitevolution einer Simulation der Wellengleichung auf dem Gebiet \enquote{Ring}.
+          Es handelt sich dabei um einen quadratischen Ring mit Neumann-Randbedingungen.
+          Es lassen sich hier typische Effekte, wie Beugung und Interferenz, beobachten.
+        }
+        \label{fig:ring-wave}
+      \end{figure}
+
+      \begin{figure}[p]
+        \center
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_0.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_1.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_2.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_3.png}
+          \caption{}
+        \end{subfigure}
+
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_4.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_5.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_6.png}
+          \caption{}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\textwidth}
+          \center
+          \includegraphics[trim={2cm 1.5cm 1.2cm 1.0cm},clip,width=0.95\textwidth]{images/quad_wave_7.png}
+          \caption{}
+        \end{subfigure}
+        \caption[Wellensimulation auf einem quadratischen Gebiet]{%
+          Die Abbildungen zeigen die Zeitevolution einer Simulation der Wellengleichung auf dem Gebiet \enquote{Quad}.
+          Es handelt sich um ein quadratisches Berechnungsgebiet mit Dirichlet-Randbedingungen.
+        }
+        \label{fig:quad-wave}
+      \end{figure}
+
+      Die Verwendung von OpenGL ermöglicht die dreidimensionale Darstellung von Objekten, die durch Dreiecke im dreidimensionalen Raum diskretisiert wurden.
+      Die finiten Elemente des Berechnungsgebietes sind grundsätzlich im zweidimensionalen Raum definiert.
+      Deshalb soll eine dritte Koordinate den Wert der Wellenfunktion an der entsprechenden Stelle eines jeden Eckpunktes beschreiben.
+      Dies führt dazu, dass sich das angezeigte Berechnungsgebiet entsprechend der Welle verformt, sodass dessen Aussehen mit der einer Wasseroberfläche verglichen werden kann.
+      Um den Eindruck zu verstärken, wird für jeden Eckpunkt auf der Basis der benachbarten Dreiecke eine Normale berechnet, die das Gebiet wie eine differenzierbare Fläche erscheinen lässt.
+      Weiterhin wird den einzelnen Werten der Welle noch eine Farbe zugewiesen.
+      Damit fällt es dem Benutzer einfacher auch kleine Unterschiede wahrzunehmen.
+      Die Abbildungen \ref{fig:test-wave}, \ref{fig:quad-wave}, \ref{fig:ring-wave} und \ref{fig:circle-wave} zeigen die Visualisierung der berechneten Welle über dem entsprechenden Gebiet anhand ausgewählter Beispiele.
 
     % subsection visualisierung (end)
   % section implementierung (end)

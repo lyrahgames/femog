@@ -223,20 +223,19 @@
         \cite{Sanders2011}
       % subsubsection gpu_computing_mit_cuda (end)
 
+      \begin{figure}[t]
+        \center
+        \includegraphics[width=0.95\textwidth]{images/unified_gpu_architecture.png}
+        \caption[Grundlegende Architektur einer CUDA-fähigen GPU]{%
+          Die Abbildung zeigt die grundlegende vereinheitlichte Architektur einer CUDA-fähigen GPU anhand eines Schemas.
+          Es handelt sich dabei nur um Beispiele.
+          \cite[S.~9]{Kirk2010}
+        }
+        \label{fig:gpu-architecture}
+      \end{figure}
+
       \subsubsection{Architektur einer modernen GPU} % (fold)
       \label{ssub:architektur_einer_modernen_gpu}
-
-        \begin{figure}
-          \center
-          \includegraphics[width=0.95\textwidth]{images/unified_gpu_architecture.png}
-          \caption[Grundlegende Architektur einer CUDA-fähigen GPU]{%
-            Die Abbildung zeigt die grundlegende vereinheitlichte Architektur einer CUDA-fähigen GPU anhand eines Schemas.
-            Es handelt sich dabei nur um Beispiele.
-            \cite[S.~9]{Kirk2010}
-          }
-          \label{fig:gpu-architecture}
-        \end{figure}
-
         Vereinheitlichte GPU-Architekturen basieren auf einer parallelen Anordnung von vielen programmierbaren Prozessoren, die auch die typischen Berechnungen für visuelle Ausgaben vollführen.
         Im Vergleich zu einer mehrkernigen CPU ist die Architektur einer GPU darauf ausgerichtet, extrem viele parallele Threads effizient auf einer großen Anzahl von Prozessorkernen auszuführen.
         In einer GPU wird diese Effizienz erreicht, indem man einfachere Prozessorkerne als in der CPU verwendet.

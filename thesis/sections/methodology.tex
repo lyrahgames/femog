@@ -154,6 +154,10 @@
               - \integral{\domain}{}{\scalarProduct{\nabla φ_n}{\nabla ξ}}{λ}
             }
           \end{align*}
+          Bei der Implementierung der Wellengleichungen werden später der Übersicht halber immer natürliche Neumann- und Dirichlet-Randbedingungen mit $f=0$ gewählt werden, sodass sich die schwache Formulierung in diesem Fall wie folgt ergibt.
+          \[
+            \integral{\domain}{}{ϑ^\circ_{n+1}ξ}{λ} = \integral{\domain}{}{ϑ^\circ_{n}ξ}{λ} - \infinitesimal{t} \integral{\domain}{}{\scalarProduct{\nabla φ^\circ_n}{\nabla ξ}}{λ}
+          \]
         % paragraph wellengleichung (end)
       % paragraph schritt_1_konstruktion_der_schwachen_formulierung (end)
 
@@ -168,7 +172,7 @@
         Das weitere Vorgehen der nächsten Paragraphen wird am Beispiel des eindimensionalen Berechnungsgebiet aus Abbildung \ref{fig:domain-example} gezeigt.
         \cite{Logan2007,Alberty1998,Cheney2008,Quarteroni2000}
 
-        \begin{figure}[h]
+        \begin{figure}
           \center
           \includegraphics[width=0.5\textwidth]{images/domain_one_dimension_example.pdf}
           \caption[Diskretisierung eines eindimensionalen Berechnungsgebietes]{%
@@ -178,7 +182,7 @@
           \label{fig:domain-example}
         \end{figure}
 
-        \begin{figure}[h]
+        \begin{figure}[b]
           \begin{subfigure}[b]{0.5\textwidth}
             \center
             \includegraphics[width=0.6\textwidth]{images/domain_discretization_1.pdf}
@@ -225,14 +229,6 @@
         % Es seien $V$ die Menge der Eckpunkte und $E$ die Menge der Kanten.
       % paragraph schritt_2_diskretisierung_des_berechnungsgebietes (end)
 
-      \subsubsection{Wahl der Basisfunktionen}
-        Neben der Diskretisierung des Berechnungsgebietes $\boxBrackets{\domain}$ ist auch die Diskretisierung der Funktionenräume $\setSobolev^1(\domain)$ und $\setSobolev^1_\mathrm{D}(\domain)$ nötig.
-        Dies erreicht man durch die Wahl endlich vieler Basisfunktionen.
-        Im Idealfall sollten diese einen kleinen Träger aufweisen, um die spätere Berechnung effizienter zu gestalten.
-        Gerade für partielle Differentialgleichungen zweiter Ordnung ist die Wahl von stückweise linearen Basisfunktionen ausreichend, da sie, wie auch deren schwachen Lösungen, dem Raum $\setSobolev^1(\Omega)$ angehören.
-        Die genannten Basisfunktion werden aufgrund ihrer Form auch Hutfunktionen genannt.
-        \cite{Schweizer2013,Alberty1998,Logan2007,Cheney2008,Quarteroni2000}
-
         \begin{figure}
           \center
           \begin{subfigure}[b]{0.49\textwidth}
@@ -251,6 +247,27 @@
           }
           \label{fig:hat-function-example}
         \end{figure}
+
+        \begin{figure}
+          \center
+          \includegraphics[width=0.5\textwidth]{images/hat_function.pdf}
+          \caption[Zweidimensionale Hutfunktion]{%
+            Die Abbildung zeigt die typische Wahl einer Basisfunktion $η_i$ über dem $i$.~Vertex des diskretisierten Berechnungsgebietes $\domain$.
+            Aufgrund ihrer Form wird sie auch Hutfunktion genannt.
+            Sie ist stückweise linear und identisch zu Null auf nicht benachbarten Dreiecken.
+            Sie entspricht einer linearer Interpolation zwischen den Eckpunkten.
+          }
+          \label{fig:hat-function}
+        \end{figure}
+
+      \subsubsection{Wahl der Basisfunktionen}
+        Neben der Diskretisierung des Berechnungsgebietes $\boxBrackets{\domain}$ ist auch die Diskretisierung der Funktionenräume $\setSobolev^1(\domain)$ und $\setSobolev^1_\mathrm{D}(\domain)$ nötig.
+        Dies erreicht man durch die Wahl endlich vieler Basisfunktionen.
+        Im Idealfall sollten diese einen kleinen Träger aufweisen, um die spätere Berechnung effizienter zu gestalten.
+        Gerade für partielle Differentialgleichungen zweiter Ordnung ist die Wahl von stückweise linearen Basisfunktionen ausreichend, da sie, wie auch deren schwachen Lösungen, dem Raum $\setSobolev^1(\Omega)$ angehören.
+        Die genannten Basisfunktion werden aufgrund ihrer Form auch Hutfunktionen genannt.
+        \cite{Schweizer2013,Alberty1998,Logan2007,Cheney2008,Quarteroni2000}
+
 
         \paragraph{Eindimensionale Hutfunktionen}
         \hfill\\
@@ -288,17 +305,6 @@
         \]
         Die Bedeutung der Linearkombination für die Interpolation wird im rechten Bild von Abbildung \ref{fig:hat-function-example} gezeigt.
 
-        \begin{figure}[h]
-          \center
-          \includegraphics[width=0.5\textwidth]{images/hat_function.pdf}
-          \caption[Zweidimensionale Hutfunktion]{%
-            Die Abbildung zeigt die typische Wahl einer Basisfunktion $η_i$ über dem $i$.~Vertex des diskretisierten Berechnungsgebietes $\domain$.
-            Aufgrund ihrer Form wird sie auch Hutfunktion genannt.
-            Sie ist stückweise linear und identisch zu Null auf nicht benachbarten Dreiecken.
-            Sie entspricht einer linearer Interpolation zwischen den Eckpunkten.
-          }
-          \label{fig:hat-function}
-        \end{figure}
 
         \paragraph{Zweidimensionale Hutfunktionen auf dem Dreieck}
         \hfill\\
@@ -505,7 +511,8 @@
               -1 & 1
             \end{pmatrix}
           \]
-          Aus der Addition der einzelnen Finite-Elemente-Matrizen ergeben sich dann die kompletten System-Matrizen.
+          Aus der Addition der einzelnen Finite-Elemente-Matrizen ergeben sich dann die kompletten System-Matrizen, auch \enquote{Mass Matrix} und \enquote{Stiffness Matrix} genannt.
+          In den folgenden Matrizen wurden Einträge mit dem Wert Null nicht explizit notiert.
           \[
             \roundBrackets{ \integral{\domain}{}{η_i η_j}{λ} }_{i\in V^\circ,j\in V} = \frac{h}{6}
             \begin{pmatrix}
@@ -531,6 +538,9 @@
             \end{pmatrix}
           \]
           Diese setzt man nun in die Gesamtgleichung ein und erhält das folgende Gleichungssystem, welches nach $[v]$ aufgelöst werden soll.
+          Die \enquote{Stiffness Matrix} ist symmetrisch und positiv definit.
+          Das System besitzt damit eine eindeutige Lösung.
+          {\small
           \[
             \frac{1}{h}
             \begin{pmatrix}
@@ -562,6 +572,7 @@
               u^\mathrm{(D)}_0 \\ u^\mathrm{(D)} _4
             \end{pmatrix}
           \]
+          }
         % paragraph eindimensionales_beispiel (end)
 
         \paragraph{Konstruktion der Matrizen im Zweidimensionalen} % (fold)
@@ -712,19 +723,37 @@
         Für eine detailliertere Behandlung des CG-Verfahrens sei hier auf \cite{Nocedal2006} verwiesen.
         Dort wird auch die Möglichkeit des sogenannten Vorkonditionierens beschrieben, die die Konvergenzgeschwindigkeit des Verfahrens noch erhöht.
         \cite{Nocedal2006}
-        \begin{align*}
-          &r_0 \leftarrow Ax_0 - b \\
-          &p_0 \leftarrow -r_0 \\
-          &k \leftarrow 0 \\
-          &\text{\textbf{while} } r_k\neq 0 \\
-          &\qquad α_k \leftarrow \frac{\transpose{r_k}r_k}{\transpose{p_k}Ap_k} \\
-          &\qquad x_{k+1} \leftarrow x_k + α_kp_k \\
-          &\qquad r_{k+1} \leftarrow r_k + α_kAp_k \\
-          &\qquad β_{k+1} \leftarrow \frac{\transpose{r_{k+1}}r_{k+1}}{\transpose{r_k}r_k} \\
-          &\qquad p_{k+1} \leftarrow -r_{k+1} + β_{k+1}p_k \\
-          &\qquad k \leftarrow k+1 \\
-          &\text{\textbf{end}}
-        \end{align*}
+        \begin{center}
+          \begin{tcolorbox}[%
+            colframe=black,
+            colbacktitle=white,
+            coltitle=black,
+            attach boxed title to top center={yshift=-2mm},
+            enhanced,
+            titlerule=0.1pt,
+            boxrule=0.5pt,
+            arc=5pt,
+            breakable,
+            width=0.7\textwidth,
+            title=Algorithmus:\quad CG-Verfahren
+          ]
+            \begin{align*}
+              &\text{\textbf{\color{MidnightBlue}Given: }} A\in\setReal^{n\times n},x_0\in\setReal^n,b\in\setReal^n \\
+              &r_0 \leftarrow Ax_0 - b \\
+              &p_0 \leftarrow -r_0 \\
+              &k \leftarrow 0 \\
+              &\text{\textbf{\color{MidnightBlue}while} } r_k\neq 0 \\
+              &\qquad α_k \leftarrow \frac{\transpose{r_k}r_k}{\transpose{p_k}Ap_k} \\
+              &\qquad x_{k+1} \leftarrow x_k + α_kp_k \\
+              &\qquad r_{k+1} \leftarrow r_k + α_kAp_k \\
+              &\qquad β_{k+1} \leftarrow \frac{\transpose{r_{k+1}}r_{k+1}}{\transpose{r_k}r_k} \\
+              &\qquad p_{k+1} \leftarrow -r_{k+1} + β_{k+1}p_k \\
+              &\qquad k \leftarrow k+1 \\
+              &\text{\textbf{\color{MidnightBlue}end}}
+            \end{align*}
+          \end{tcolorbox}
+        \end{center}
+        In Abschnitt \ref{sub:time-step-computation} ist das hier beschriebene CG-Verfahren in der Sprache C++ auf CPU und auf der GPU unter Zuhilfenahme der Sprache CUDA, der Bibliothek \enquote{Eigen} und der Bibliothek \enquote{Thrust} implementiert worden \cite{cuda2018,Eigen2018}.
       % subsubsection lösung_dünnbesetzter_systeme (end)
     % subsection sparse_matrix_methoden (end)
   % section methoden (end)
